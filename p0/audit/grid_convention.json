@@ -1,0 +1,80 @@
+{
+  "part": "compare",
+  "tf_impl": "TecoGAN lib/ops.py:bicubic_four (TF 1.15)",
+  "tf_grid": "edge-origin with step 0.25: LR pixel i maps exactly onto HR 4i, so the first and last LR samples land on the HR border",
+  "tf_geometry": {
+    "origin_input_px": [
+      0.00020277527775406517,
+      -0.00040719857387029514
+    ],
+    "step_input_per_output": [
+      0.2499999954062164,
+      0.25000000311232073
+    ],
+    "max_linear_resid": [
+      0.0006631629081491619,
+      0.0013509926460186783
+    ]
+  },
+  "references": {
+    "cv2_inter_cubic": {
+      "displacement_lr_px": [
+        0.3758971951420508,
+        0.37309360381165857
+      ],
+      "displacement_hr_px": [
+        1.503588780568203,
+        1.4923744152466343
+      ],
+      "phase_corr_hr_px": [
+        -1.6084038174763577,
+        -1.416124482416123
+      ],
+      "phase_corr_response": 0.9575156730450229,
+      "reference_grid": "half-pixel-centred: sample i sits at (i+0.5)/4-0.5 in LR units (origin -0.375, step 0.25)"
+    },
+    "torch_align_corners_false": {
+      "displacement_lr_px": [
+        0.37589722211688575,
+        0.3730937703420326
+      ],
+      "displacement_hr_px": [
+        1.503588888467543,
+        1.4923750813681305
+      ],
+      "phase_corr_hr_px": [
+        -1.6084038174763577,
+        -1.416124482416123
+      ],
+      "phase_corr_response": 0.9575156730450229,
+      "reference_grid": "half-pixel-centred: sample i sits at (i+0.5)/4-0.5 in LR units (origin -0.375, step 0.25)"
+    },
+    "torch_align_corners_true": {
+      "displacement_lr_px": [
+        -0.0004390970460990063,
+        0.0007791737777709576
+      ],
+      "displacement_hr_px": [
+        -0.0017563881843960251,
+        0.0031166951110838306
+      ],
+      "phase_corr_hr_px": [
+        -0.8695174552818514,
+        -1.5088006659017736
+      ],
+      "phase_corr_response": 0.986941076171251,
+      "reference_grid": "corner grid: grid spans corner to corner (align_corners=True style)"
+    }
+  },
+  "sign_convention": {
+    "displacement": "positive = bicubic_four's IMAGE sits right/down of the reference (the same content appears at a larger HR index)",
+    "corrective_input_shift": "warping the LR input with +s moves the output content right by s, so the input shift that cancels a displacement d is exactly d"
+  },
+  "corrective_lr_shift_vs_cv2": {
+    "dx": 0.3758971951420508,
+    "dy": 0.37309360381165857,
+    "magnitude_lr_px": 0.5296201832642256,
+    "note": "warp the LR input by this much (cv2.warpAffine, +shift moves content right/down) to register bicubic_four onto the cv2/OpenCV half-pixel convention",
+    "matches_pre_p0_shift_0p375": true
+  }
+}

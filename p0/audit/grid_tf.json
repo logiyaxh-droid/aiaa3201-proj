@@ -1,0 +1,29 @@
+{
+  "part": "tf",
+  "grid": "edge-origin with step 0.25: LR pixel i maps exactly onto HR 4i, so the first and last LR samples land on the HR border",
+  "record": {
+    "impl": "TecoGAN lib/ops.py:bicubic_four (TF 1.15)",
+    "hr_hw": [
+      144,
+      288
+    ],
+    "value_range": [
+      -0.2274169921875,
+      1.2432861328125
+    ],
+    "horizontal": {
+      "origin_input_px": 0.00020277527775406517,
+      "step_input_per_output": 0.2499999954062164,
+      "max_linear_resid": 0.0006631629081491619,
+      "step_if_corner_grid": 0.24738675958188153,
+      "step_if_pixel_centre": 0.25
+    },
+    "vertical": {
+      "origin_input_px": -0.00040719857387029514,
+      "step_input_per_output": 0.25000000311232073,
+      "max_linear_resid": 0.0013509926460186783,
+      "step_if_corner_grid": 0.24475524475524477,
+      "step_if_pixel_centre": 0.25
+    }
+  }
+}

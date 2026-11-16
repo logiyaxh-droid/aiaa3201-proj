@@ -1,0 +1,41 @@
+{
+  "clip": "000",
+  "frames": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "device": "cuda",
+  "ssim": {
+    "max_abs_diff": 5.1958437552457326e-14,
+    "new_mean": 0.6969063148859048,
+    "skimage_mean": 0.6969063148858763,
+    "pass": true
+  },
+  "psnr": {
+    "max_abs_diff": 0.0,
+    "new_mean": 25.98537678049331,
+    "legacy_mean": 25.98537678049331,
+    "pass": true
+  },
+  "lpips": {
+    "new": 0.530942956606547,
+    "legacy_helper": 0.530942956606547,
+    "abs_diff": 0.0,
+    "per_frame_mean_of_pair": 0.530942956606547,
+    "pass": true
+  },
+  "evaluate_stack": {
+    "value": {
+      "psnr": 25.98537678049331,
+      "ssim": 0.6969063148859048,
+      "lpips": 0.530942956606547,
+      "n_frames": 6
+    },
+    "agrees": true
+  },
+  "all_pass": true
+}

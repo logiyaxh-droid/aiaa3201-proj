@@ -1,0 +1,80 @@
+{
+  "part": "ref",
+  "records": {
+    "cv2_inter_cubic": {
+      "impl": "cv2_inter_cubic",
+      "hr_hw": [
+        144,
+        288
+      ],
+      "value_range": [
+        -0.22382855415344238,
+        1.2245018482208252
+      ],
+      "horizontal": {
+        "origin_input_px": -0.3756944198642967,
+        "step_input_per_output": 0.2500039672642552,
+        "max_linear_resid": 0.0005857933945557781,
+        "step_if_corner_grid": 0.24738675958188153,
+        "step_if_pixel_centre": 0.25
+      },
+      "vertical": {
+        "origin_input_px": -0.37350080238552885,
+        "step_input_per_output": 0.24998391257176267,
+        "max_linear_resid": 0.001206895372624625,
+        "step_if_corner_grid": 0.24475524475524477,
+        "step_if_pixel_centre": 0.25
+      }
+    },
+    "torch_align_corners_false": {
+      "impl": "torch_align_corners_false",
+      "hr_hw": [
+        144,
+        288
+      ],
+      "value_range": [
+        -0.22382855415344238,
+        1.2245018482208252
+      ],
+      "horizontal": {
+        "origin_input_px": -0.37569444683913167,
+        "step_input_per_output": 0.2500039686616155,
+        "max_linear_resid": 0.00058578806177495,
+        "step_if_corner_grid": 0.24738675958188153,
+        "step_if_pixel_centre": 0.25
+      },
+      "vertical": {
+        "origin_input_px": -0.3735009689159029,
+        "step_input_per_output": 0.24998391638505876,
+        "max_linear_resid": 0.0012068960368561699,
+        "step_if_corner_grid": 0.24475524475524477,
+        "step_if_pixel_centre": 0.25
+      }
+    },
+    "torch_align_corners_true": {
+      "impl": "torch_align_corners_true",
+      "hr_hw": [
+        144,
+        288
+      ],
+      "value_range": [
+        -0.22820891439914703,
+        1.2434661388397217
+      ],
+      "horizontal": {
+        "origin_input_px": 0.0006418723238530715,
+        "step_input_per_output": 0.24738139268779047,
+        "max_linear_resid": 0.0006839621252366923,
+        "step_if_corner_grid": 0.24738675958188153,
+        "step_if_pixel_centre": 0.25
+      },
+      "vertical": {
+        "origin_input_px": -0.0011863723516412528,
+        "step_input_per_output": 0.24477415019756213,
+        "max_linear_resid": 0.0013881971288834949,
+        "step_if_corner_grid": 0.24475524475524477,
+        "step_if_pixel_centre": 0.25
+      }
+    }
+  }
+}

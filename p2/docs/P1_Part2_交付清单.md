@@ -45,17 +45,24 @@ PDF §5.2 原话：*Reproduce a classic multi-frame VSR pipeline and compare dis
 
 ### 2.1 总表（REDS val, 30 clip × 100 帧，全部实测）
 
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | tLPIPS ↓ |
-|---|---|---|---|---|
-| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 |
-| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 |
-| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 |
-| 5 帧平均 + 光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** |
-| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 |
-| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 |
-| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 |
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ | 正式 tLP ↓ |
+|---|---|---|---|---|---|
+| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 | clip 000: 0.0261 |
+| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 | 待补 |
+| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 | 待补 |
+| 5 帧平均 + 光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** | 待补 |
+| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 | 待补 |
+| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 | 待补 |
+| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 | 待补 |
 
 > 全部为 30 clip 终值。EDVR 与 TecoGAN 都是本次实测，指标代码与 Part 1 逐行一致。
+>
+> **⚠️ P0 更正：原表的 `tLPIPS` 列定义有误。** 它是 `LPIPS(warp(上一帧), 当前帧)`
+> 的 **stride=2** 自一致性指标（无 GT），已改名 **Flow-warp LPIPS**，原值保留不变。
+> 它不是 TecoGAN 的参考式 tLP，不能与论文的 tLP 比较，也不足以支撑「谁时域最稳」。
+> 正式 tLP（`|d_SR(t) − d_GT(t)|`，全部相邻对）已实现并验证（`p0/audit/tlp_check.json`），
+> 但全量 30 clip 尚未重跑，表中只有 clip 000 的对照：
+> Bicubic **0.0261**、TecoGAN(+0.375, 12 帧样例) **0.0047**。
 
 ### 2.2 四个能直接写进报告的结论
 
@@ -65,28 +72,28 @@ PDF §5.2 原话：*Reproduce a classic multi-frame VSR pipeline and compare dis
 **② TecoGAN 的 PSNR 明显低于 EDVR（−5.06 dB），但这正是预期行为。**
 GAN 会脑补纹理，脑补内容和 GT 对不上，PSNR 必然掉。PDF 那句 "perceptual gains can come with lower PSNR or invented details" 被数据证实了。
 
-**③ 但有个反直觉的地方，值得单独写一段：TecoGAN 在 LPIPS 上也没有赢 EDVR，甚至没赢 bicubic 的优势幅度。**
-按常识 GAN 应该在感知指标上占优，实测 **TecoGAN LPIPS 0.3337 vs EDVR 0.2039** —— EDVR 反而好得多。原因有几层，都可以展开：
+**③ 但有个反直觉的地方，值得单独写一段：TecoGAN 在感知指标上赢不过 EDVR，甚至也赢不过 EDSR。**
+按常识 GAN 应该在感知指标上占优，实测 **TecoGAN LPIPS 0.3337**，而 EDVR 0.2039、EDSR 0.3087 都更好；TecoGAN 只比 bicubic（0.4835）/lanczos（0.4861）好。原因有几层，都可以展开：
 
 - EDVR 的输出确实更接近 GT，而 GT 是真实拍摄的清晰帧；LPIPS 用的 ImageNet 预训练 AlexNet，它"喜欢"的锐利纹理恰好就是真实纹理，不是 GAN 幻想出来的那种。
-- TecoGAN 在**合成 bicubic 退化**上有 domain gap：它是为真实退化视频训的，而 REDS 是干净的 bicubic 下采样。
+- TecoGAN 在**合成 bicubic 退化**上有退化失配：它的官方模型用 **Gaussian 下采样**（`tf_data_gaussDownby4`, sigma=1.5）合成 LR 训练，而 REDS 是干净的 bicubic 下采样。注意这是「退化类型不同」，**不是**「为真实退化训练」——原句写错了，且这一解释目前只是假设，尚未做控制变量实验（清单任务 12）。
 - TecoGAN 的 PSNR（25.84）已经**低于 bicubic**（26.40，−0.56 dB）。这说明在这个设定下它连"保真"都没守住，感知上的收益不足以补偿 —— 这就是为什么 **wild video 上的对比是 Part 2 剩下的关键一步**（见 §5）。
 
 **这条比"GAN 感知更好"更有价值**，因为它说明 "accuracy vs perception" 的教科书结论**依赖测试数据的退化类型**。建议报告里作为 Part 2 的主要讨论点。
 
-**④ 时域一致性上，Part 1 的光流对齐仍然是最强的。**
-flowtavg5 的 tLPIPS 0.0236 至今无人超越（EDVR 0.0647、TecoGAN 0.0800）。这不是 bug —— 全分辨率光流 warp + 加权平均本身就是极强的时域平滑器，代价是空间细节（PSNR 只有 25.8）。这是个干净的"三方法各占一个角"的图。
+**④ 时域一致性上，Part 1 的光流对齐在旧指标下数值最低 —— 但该指标不足以定论。**
+flowtavg5 的 Flow-warp LPIPS 0.0236 在旧指标下最低（EDVR 0.0647、TecoGAN 0.0800）。可能的原因是 warp + 加权平均本身就是很强的时域平滑器，代价是空间细节（PSNR 只有 25.8）；但 Flow-warp LPIPS 只有输出、没有 GT，**平滑的输出天然占便宜**，所以这只能算待验证的观察，不能当作「时域最稳」。要用正式 tLP 复核。（clip 000 的对照里 TecoGAN +0.375 的正式 tLP 是 0.0047，比 bicubic 的 0.0261 更低。）
 
-> 口径已交叉验证：用本次的 LPIPS 权重重算 clip 000 的 bicubic Y-channel PSNR 得 **25.617**，与 Part 1 存档值 25.617 逐位一致，说明两批数字可以直接并列。重算耗时约 1 分钟/clip（含光流）。
+> 口径已交叉验证：用共用实现重算 clip 000 的 bicubic Y-channel PSNR 得 **25.617**，与 Part 1 存档值 25.617 逐位一致（`p0/audit/selfcheck_metrics.json`：SSIM 差 5.2e-14、PSNR 差 0、LPIPS 差 0），说明两批空间指标可以直接并列。
 
 ### 2.3 建议的图
 
 | 图 | 内容 | 状态 |
 |---|---|---|
-| 图 1 | **PSNR vs tLPIPS 散点图**，7 个方法，一眼看出"没有方法同时赢两轴" | ✅ `figures/scatter_psnr_tlpips.png` |
+| 图 1 | **PSNR vs Flow-warp LPIPS 散点图**，7 个方法，一眼看出"没有方法同时赢两轴"（时域轴待换正式 tLP 后重画） | ✅ `figures/scatter_psnr_tlpips.png` |
 | 图 2 | **放大 patch**：GT \| Bicubic \| EDVR \| TecoGAN（7 个 clip 是 4 联，其余 3 联） | ✅ `figures/*_patch.png`（30 个 clip 全出） |
 | 图 3 | PSNR 逐 clip 柱状图（EDSR vs EDVR，30 组，证明不是均值假象） | ✅ `figures/perclip_psnr_edsr_vs_edvr.png` |
-| 图 4 | tLPIPS 逐 clip 折线（EDSR / EDVR / flow-align 三线） | ✅ `figures/perclip_tlpips.png` |
+| 图 4 | Flow-warp LPIPS 逐 clip 折线（EDSR / EDVR / flow-align 三线） | ✅ `figures/perclip_tlpips.png` |
 | 图 5 | 连续 3–5 帧闪烁对比 | 帧已落盘，需要时再拼 |
 
 ---
@@ -171,10 +178,10 @@ bash /tmp/p2_teco.sh                                     # TecoGAN 推理（~90 
 | `/tmp/p2/metrics_edvr.json` | EDVR 逐 clip 指标 + 均值 |
 | `/tmp/p2/metrics_tecogan.json` | TecoGAN 逐 clip 指标 + 均值 |
 | `/tmp/p2/part2_table.json` | 总表 + deltas |
-| `/tmp/p2/out/videos/*_compare.mp4` | **对比视频**（30 个）。7 个 clip 是 4 联 GT\|Bicubic\|EDVR\|TecoGAN（2560×360），其余 3 联（1920×360），10 fps |
+| `p2/videos/*_compare.mp4` | **对比视频**（部分 clip）。4 联 GT\|Bicubic\|EDVR\|TecoGAN，**固定 10 fps** —— 与源 24 fps 不一致，按清单任务 16 应改为源 FPS |
 | `/tmp/p2/out/figures/*_patch.png` | 放大 patch 图，30 个 clip |
-| `/tmp/p2/out/figures/scatter_psnr_tlpips.png` | PSNR–tLPIPS 散点图 |
-| `/tmp/p2/out/figures/perclip_*.png` | 逐 clip PSNR 柱状图 / tLPIPS 折线图 |
+| `p2/figures/scatter_psnr_tlpips.png` | PSNR–Flow-warp LPIPS 散点图（文件名保留） |
+| `p2/figures/perclip_*.png` | 逐 clip PSNR 柱状图 / Flow-warp LPIPS 折线图 |
 
 > PDF §6.2 要求 *"submit the processed video files for all Mandatory Datasets"* —— 上面的 `*_compare.mp4` 就是这份交付物。
 > 本地备份在 `p1_results/p2/`（指标 JSON + 全部脚本 + 三张图 + 一条示例视频）。
@@ -187,8 +194,8 @@ bash /tmp/p2_teco.sh                                     # TecoGAN 推理（~90 
 
 | 优先级 | 事项 | 说明 |
 |---|---|---|
-| **P0** | wild video 上的 Part 2 结果 | PDF §6.1 Mandatory。真实退化下 TecoGAN 才可能反超 EDVR —— 这是**最能出彩**的一点，也顺便补齐 Part 1 缺的那个 P0 |
-| P1 | Vimeo-90K 上跑 EDVR | 有 `EDVR_Vimeo90K_SR_L` 权重。但 Vimeo 每个 clip 只有 im4 有 GT，**算不了 tLPIPS** |
+| **P0** | wild video 上的 Part 2 结果 | PDF §6.1 Mandatory。真实拍摄的低光/低清视频上 TecoGAN 是否反超 EDVR 是待检验问题（不要预设结论）—— 这是**最能出彩**的一点，也顺便补齐 Part 1 缺的那个 P0 |
+| P1 | Vimeo-90K 上跑 EDVR | 有 `EDVR_Vimeo90K_SR_L` 权重。但 Vimeo 每个 clip 只有 im4 有 GT，**算不了参考式 tLP**，按要求写 N/A 并说明原因 |
 | P1 | 4 联视频拼成一个长片 | 30 个 mp4 逐个交也可以，拼成一条更方便评审 |
 | P1 | 把 4 联视频补齐到 30 个 | 目前 7 个 clip（000/002/009/010/019/022/026）有 EDVR 帧，其余是 3 联。补 EDVR 帧约 30 s/clip，但要多 4 G |
 | P2 | 报告 Part 2 章节（约 2 页） | 1 总表 + 散点图 + patch 图 + 对齐问题的说明 |
@@ -200,3 +207,4 @@ bash /tmp/p2_teco.sh                                     # TecoGAN 推理（~90 
 **Part 2 已经全部跑完：EDVR-L ×4 拿到 PSNR 30.90 / SSIM 0.879 / LPIPS 0.204，比 Part 1 的 EDSR 高 2.62 dB，30/30 clip 全胜；TecoGAN（CPU 推理 + 修正 1.5 px 对齐后）PSNR 25.84，感知指标不但没赢 EDVR，连 bicubic 的 PSNR 都没守住 —— 这个"反教科书"的发现，加上对齐 bug 的排查过程，正好是 Part 2 报告最有分量的两部分。**
 
 硬盘不是问题：满的是 `/data/disk1`（只读共享数据 + home），真正干活的 `/` 全程还有 20 G 以上余量。
+

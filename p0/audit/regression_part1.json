@@ -1,0 +1,31 @@
+{
+  "full_clip_regression": [
+    {
+      "clip": "000",
+      "n": 100,
+      "psnr_new": 25.61704565628519,
+      "psnr_legacy": 25.61704565628519,
+      "psnr_diff": 0.0,
+      "ssim_new": 0.709608837383583,
+      "ssim_legacy": 0.709608837383583,
+      "ssim_diff": 0.0,
+      "lpips_new": 0.5133517557382583,
+      "lpips_legacy": 0.5133517578244209,
+      "lpips_diff": -2.086162576020456e-09
+    },
+    {
+      "clip": "027",
+      "n": 100,
+      "psnr_new": 25.106756394599923,
+      "psnr_legacy": 25.106756394599923,
+      "psnr_diff": 0.0,
+      "ssim_new": 0.7335563960990734,
+      "ssim_legacy": 0.7335563960990734,
+      "ssim_diff": 0.0,
+      "lpips_new": 0.4975152415037155,
+      "lpips_legacy": 0.49751523971557615,
+      "lpips_diff": 1.788139358804841e-09
+    }
+  ],
+  "note": "evalkit vs legacy Part-1 JSON on the same bicubic predictions, all 100 frames"
+}

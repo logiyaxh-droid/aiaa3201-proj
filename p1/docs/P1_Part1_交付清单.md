@@ -29,16 +29,30 @@
 | 3 | 多帧加权平均 | 跑出来，并**如实报告它对 PSNR 和时域一致性的影响**（实测：两个都变差，见 §1②） |
 | 4 | + Unsharp Mask | 高频边缘增强，PSNR 略有回升 |
 
-**Part 1 的真正考点不是分数，是让你亲手做出这个矛盾**：EDSR 赢在空间细节但完全不管时间轴（实测 tLPIPS 反而最差）；朴素多帧平均想改善时域一致性，但在有运动时**适得其反**。这个矛盾正是 Part 2（EDVR 的 PCD 对齐 + TSA 融合）要解决的东西 —— 而且我在 §3 用光流对齐证明了：**是"缺对齐"而不是"融合"本身的问题**。
+**Part 1 的真正考点不是分数，是让你亲手做出这个矛盾**：EDSR 赢在空间细节但完全不管时间轴（旧指标下 tLPIPS 最差）；朴素多帧平均想改善时域一致性，但在有运动时**适得其反**。这个矛盾正是 Part 2（EDVR 的 PCD 对齐 + TSA 融合）要解决的东西 —— 而且我在 §3 用光流对齐证明了：**是"缺对齐"而不是"融合"本身的问题**。
+
+> **⚠️ P0 更正：下表 `tLPIPS` 列的指标定义是错的，数值本身有效。**
+> 这一列实际是 `LPIPS(warp(上一帧输出), 当前帧输出)` 的 **stride=2** 自一致性指标（无 GT），
+> 不是 TecoGAN 的参考式 tLP。文中所有「tLPIPS 变好/变差」的**相对比较仍然成立**
+> （同一指标下的排序不受影响），但**不能**把它当成 TecoGAN 的 tLP 与论文数字比较，
+> 也不能单凭它的低值断言「某方法最稳定」。列名已改为 **Flow-warp LPIPS**。
+> 正式 tLP 的实现与验证见 `p0/`（`evalkit/temporal.py`、`audit/tlp_check.json`），
+> 全量 30 clip 的正式 tLP 尚未重跑。
 
 ---
 
 ## 1. 实测结果（REDS val，30 clip × 100 帧）
 
 LR = `val_sharp_bicubic`（320×180），GT = `val_sharp`（1280×720）。
-PSNR/SSIM 在 **Y 通道**上算（REDS/EDVR 的惯例，与论文可比）；LPIPS 用 AlexNet v0.1。
+PSNR/SSIM 在 **Y 通道**上算（REDS/EDVR 的惯例，与论文可比；但见下条）；
+LPIPS 用 AlexNet v0.1。
 
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | tLPIPS ↓ |
+> 口径说明：PSNR/SSIM 用的是 `cv2.COLOR_RGB2YCrCb` 的 Y 与 7×7 均值窗 SSIM，
+> 与 BasicSR（RGB 域、crop scale 边界）和论文（Y 域、MATLAB 口径）都**不完全相同**。
+> 因此这些数字适合**内部横向比较**，不应直接当作「与论文数字可比」。
+> 已用 skimage 逐位对齐验证（最大差 5.2e-14），换口径需要全部方法一起重评。
+
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ |
 |---|---|---|---|---|
 | Bicubic | 26.403 | 0.73838 | 0.4835 | 0.0519 |
 | Lanczos | 26.546 | 0.74411 | 0.4861 | 0.0507 |
@@ -58,24 +72,24 @@ PSNR/SSIM 在 **Y 通道**上算（REDS/EDVR 的惯例，与论文可比）；LP
 **① EDSR 稳定赢插值，30/30 个 clip 全赢。**
 EDSR 相对 bicubic 的增益 **最小 +0.88 dB，中位数 +1.82 dB，最大 +4.37 dB**，无一例外。这验证了 PDF 的 Expected Result。
 
-**② 朴素多帧平均把 PSNR 打掉了 4.55 dB，tLPIPS 也变差了（0.0519 → 0.0893，恶化 72%），30 个 clip 里只有 6 个变好。**
+**② 朴素多帧平均把 PSNR 打掉了 4.55 dB，Flow-warp LPIPS 也变差了（0.0519 → 0.0893，恶化 72%），30 个 clip 里只有 6 个变好。**
 这是本 Part 最反直觉、也最值得写的发现：**"多帧平均能改善时域一致性"这个朴素直觉，在真实运动下是错的。** 原因是逐帧 bicubic 后直接平均，所有运动物体被叠加成重影，而重影本身在帧间并不稳定，temporal LPIPS 反而增大。这正是 Part 2 必须引入**显式对齐**（PCD）的动机。
 
-**③ 加上光流对齐后，同样的 5 帧融合从 21.85 dB 跳到 25.83 dB（+3.98 dB），tLPIPS 从 0.0893 降到 0.0236（-73.6%），30/30 个 clip 全部改善。**
+**③ 加上光流对齐后，同样的 5 帧融合从 21.85 dB 跳到 25.83 dB（+3.98 dB），Flow-warp LPIPS 从 0.0893 降到 0.0236（-73.6%），30/30 个 clip 全部改善。**
 这就是 Part 1 → Part 2 的完整叙事链：**融合本身没错，错在没有对齐。**（逐 clip 增益：最小 +0.74 dB，中位数 +4.49 dB，最大 +6.95 dB。）
 
 ### EDSR 是"逐帧独立"的直接证据
 
-EDSR 的 PSNR 最高（28.28 dB），但 tLPIPS 是**最差**的一档（0.0811，比 bicubic 差 56%），且 **30/30 个 clip 全部更差**。因为每帧独立推理，相邻帧的高频细节估计并不一致，产生 flicker。这就是 PDF 那句 "providing no explicit temporal consistency" 的定量证据 —— **不是没测出来，是测出来了而且很明显**。
+EDSR 的 PSNR 最高（28.28 dB），但 Flow-warp LPIPS 是**最差**的一档（0.0811，比 bicubic 差 56%），且 **30/30 个 clip 全部更差**。因为每帧独立推理，相邻帧的高频细节估计并不一致，产生 flicker。这就是 PDF 那句 "providing no explicit temporal consistency" 的定量证据 —— **不是没测出来，是测出来了而且很明显**。
 
-值得注意的对照：flow-aligned 5 帧平均的 PSNR（25.83）低于 EDSR（28.28），但 tLPIPS（0.0236）只有 EDSR 的 **29%**。这构成一个干净的二维权衡图：横轴 PSNR、纵轴 tLPIPS，四个方法分别落在四个象限附近。
+值得注意的对照：flow-aligned 5 帧平均的 PSNR（25.83）低于 EDSR（28.28），但 Flow-warp LPIPS（0.0236）只有 EDSR 的 **29%**。这构成一个干净的二维权衡图：横轴 PSNR、纵轴 Flow-warp LPIPS，四个方法分别落在四个象限附近。
 
 ---
 
 ## 2. Vimeo-90K 测试集（可选加分项，已跑完）
 
 `vimeo90k_test`：94 个序列、7824 个 clip，LR 112×64，GT 448×256。
-**注意：每个 clip 只有 `im4` 有 GT**（`target/<seq>/<clip>/im4.png`），所以只能评中心帧，**不能算 tLPIPS**。
+**注意：每个 clip 只有 `im4` 有 GT**（`target/<seq>/<clip>/im4.png`），所以只能评中心帧，**不能算参考式 tLP**（无连续 GT；Flow-warp LPIPS 仍可算但无意义）。
 
 | 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ |
 |---|---|---|---|
@@ -91,7 +105,7 @@ EDSR 相对 bicubic **+3.35 dB**，比 REDS 上的 +1.88 dB 大得多 —— 因
 
 ## 3. 我额外做的消融（建议保留）
 
-PDF 的 "Advanced Idea" 只提了 Unsharp Masking。实测 USM 的效果是**分裂的**：bicubic+USM 的 PSNR +0.24 dB、LPIPS 从 0.4835 改善到 0.4398（提升 9%），但 tLPIPS 从 0.0519 恶化到 0.0642（差 24%）。**它让单帧更好看、让时间轴更抖。** 这个反差本身就是很好的讨论材料。
+PDF 的 "Advanced Idea" 只提了 Unsharp Masking。实测 USM 的效果是**分裂的**：bicubic+USM 的 PSNR +0.24 dB、LPIPS 从 0.4835 改善到 0.4398（提升 9%），但 Flow-warp LPIPS 从 0.0519 恶化到 0.0642（差 24%）。**它让单帧更好看、让时间轴更抖。** 这个反差本身就是很好的讨论材料。
 
 但真正值得做的是**把"融合"和"对齐"拆开**：
 
@@ -115,10 +129,10 @@ warped = cv2.remap(S, gx + f[...,0], gy + f[...,1], cv2.INTER_LINEAR)
 
 另外光流在 **1/4 分辨率**上估计效果更好且快 58 倍：全分辨率 70.3% 误差下降 / 1000 ms 每对；1/4 分辨率 86.6% / 17 ms 每对。
 
-**第二个坑：tLPIPS 的数值会因为光流实现差异而大幅不同。**
-我第一版用错方向时，bicubic 的 tLPIPS 是 0.3089；方向修正后是 0.0519。**相差 6 倍。** 所以：
+**第二个坑：warp 方向错了，指标会差 6 倍。**
+我第一版用错方向时，bicubic 的 Flow-warp LPIPS 是 0.3089；方向修正后是 0.0519。**相差 6 倍。** 所以：
 - 报告里必须写清楚光流算法（Farneback，pyramid 3 levels，window 15，iterations 3）和估计分辨率（1/4）；
-- 明确写"本表的 tLPIPS 是自实现，数值不可与其他论文直接比较"，只用于**内部横向对比**。这句话能救你，避免审稿式的追问。
+- 明确写"本列是自实现的 Flow-warp LPIPS（自一致性指标），不是 TecoGAN 的参考式 tLP，数值不可与其他论文直接比较"，只用于**内部横向对比**。这句话能救你，避免审稿式的追问。
 
 ---
 
@@ -127,9 +141,9 @@ warped = cv2.remap(S, gx + f[...,0], gy + f[...,1], cv2.INTER_LINEAR)
 | 文件 | 内容 |
 |---|---|
 | `p1_results/metrics_part1_final.json` | **最终结果**：10 个方法 × 30 clip 的逐 clip 指标 + 平均值 |
-| `p1_results/metrics_part1.json` | 首轮结果（无光流对齐，tLPIPS 方向有误）——仅作过程留档，**不要引用其中 tLPIPS** |
+| `p1_results/metrics_part1.json` | 首轮结果（无光流对齐，warp 方向有误）——仅作过程留档，**不要引用其中时域数值** |
 | `p1_results/metrics_vimeo.json` | Vimeo-90K 7824 clip 结果 |
-| `p1_figures/fig_tradeoff.png` | **主图**：PSNR vs tLPIPS 二维权衡散点（10 个方法），带对齐增益箭头 |
+| `p1_figures/fig_tradeoff.png` | **主图**：PSNR vs Flow-warp LPIPS 二维权衡散点（10 个方法），带对齐增益箭头 |
 | `p1_figures/fig_perclip.png` | 逐 clip 柱状图：朴素平均塌陷 vs 光流对齐复原（30/30） |
 | `p1_figures/fig_000_brick.png` | 砖墙纹样放大对比（6 方法并排）——**最强的定性图** |
 | `p1_figures/fig_000_sign.png` | 招牌文字区放大对比 |
@@ -138,7 +152,7 @@ warped = cv2.remap(S, gx + f[...,0], gy + f[...,1], cv2.INTER_LINEAR)
 
 代码在服务器 `/tmp/p1_part1_final.py`（主评测，含光流对齐）、`/tmp/p1_vimeo.py`（Vimeo）、`/tmp/flow_gt.py`（光流方向标定）。
 
-> ⚠️ 定性图是首轮导出的样本（那一轮 tLPIPS 光流方向有 bug，但 **PSNR/LPIPS/图像内容不受影响**，图片本身完全有效）。如果要给 flow-aligned 方法也出放大图，需重跑一次样本导出。
+> ⚠️ 定性图是首轮导出的样本（那一轮 warp 方向有 bug，但 **PSNR/LPIPS/图像内容不受影响**，图片本身完全有效）。如果要给 flow-aligned 方法也出放大图，需重跑一次样本导出。
 
 ---
 
@@ -191,4 +205,5 @@ cd /tmp && /tmp/srenv/bin/python /tmp/p1_vimeo.py 94           # Vimeo 7824 clip
 |---|---|---|
 | EDSR 小规模微调 | 做"官方权重 vs 微调"消融，体现训练侧理解 | 半天（`train_sample_sharp` 切 48×48 patch，BasicSR EDSR 训练脚本，几千 iter） |
 | FID | PDF 提到但未强制 | 建议**跳过**：30 clip 样本量对 FID 不稳定，报告里说明理由即可 |
-| 在 Vimeo 上跑 tLPIPS | — | **做不了**：每个 clip 只有 `im4` 有 GT，无法算帧间指标 |
+| 在 Vimeo 上跑参考式 tLP | — | **做不了**：每个 clip 只有 `im4` 有 GT，无连续帧对，按要求写 N/A |
+

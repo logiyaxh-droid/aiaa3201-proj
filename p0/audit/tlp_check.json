@@ -1,0 +1,89 @@
+{
+  "clip": "000",
+  "frames": 100,
+  "n_pairs_full": 99,
+  "A_gt_as_pred": {
+    "value": 0.0,
+    "n_pairs": 99,
+    "pass": true
+  },
+  "B_no_consecutive": {
+    "value": null,
+    "n_pairs": 0,
+    "reason": "no consecutive frame pair inside the clip",
+    "pass": true
+  },
+  "C_crosscheck": {
+    "vectorised": 0.026102377986065066,
+    "naive": 0.026102371739618706,
+    "n_pairs_vectorised": 99,
+    "n_pairs_naive": 99,
+    "abs_diff": 6.246446360158586e-09,
+    "tolerance": 1e-06,
+    "pass": true
+  },
+  "C_reference_tlp_bicubic": {
+    "value": 0.026102377986065066,
+    "n_pairs": 99,
+    "per_pair_coverage": "all adjacent pairs"
+  },
+  "D_options": {
+    "x100_ratio": 99.99999999999999,
+    "x100_ok": true,
+    "cutfr2": {
+      "value": 0.02628457867785504,
+      "n_pairs": 95,
+      "dropped_pairs": 4
+    },
+    "crop32": {
+      "value": 0.02618813431925244,
+      "n_pairs": 99,
+      "input_hw": [
+        720,
+        1280
+      ],
+      "cropped_hw": [
+        704,
+        1248
+      ],
+      "offset_xy": [
+        16,
+        8
+      ]
+    }
+  },
+  "E_flow_warp": {
+    "stride1_n_pairs": 99,
+    "stride2_n_pairs": 50,
+    "stride1_value": 0.05769326248102718,
+    "stride2_value": 0.05685468271374702,
+    "pred_dir": "out/pred/bicubic/000",
+    "pred_stride1": 0.05769326248102718,
+    "pred_stride2": 0.05685468271374702,
+    "regression": {
+      "old_json_value": 0.056854682564735415,
+      "new_stride2_value": 0.05685468271374702,
+      "abs_diff": 1.490116086078075e-10,
+      "tolerance": 0.001,
+      "pass": true,
+      "note": "old JSON 'tlpips' == stride-2 flow-warp LPIPS over the same frames, so legacy numbers reproduce but are NOT reference tLP"
+    }
+  },
+  "F_gap": {
+    "ids": [
+      0,
+      1,
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      "..."
+    ],
+    "n_pairs": 97,
+    "expected": 97,
+    "pass": true
+  },
+  "all_pass": true
+}
