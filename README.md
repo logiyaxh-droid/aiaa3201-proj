@@ -36,7 +36,6 @@ p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重�
   scripts/           核查与推理脚本（tLP 验证、网格测量、带校验的 TecoGAN 推理）
   audit/             全部审计结果 JSON
   data_manifest.md   权重 SHA256、训练数据、REDS 划分重叠核查
-local-env/           本机复现环境（Windows + RTX 5070 无 nvcc 的解法）
 ```
 
 ## Part 1 · 手工基线
@@ -102,20 +101,6 @@ python p2/scripts/p2_demo_2x2.py --inset 002 011 013 015 016 018  # 带放大 lo
 
 > 2026-11-16 版修掉了 013 的渲染崩溃（`loupe` 裁出空区域）、改成按**解析出的 frame id** 配对帧
 > 而不是按排序位置配对、缺失方法渲染成占位块而不是崩掉，并把 ffmpeg 的 stderr 收上来报错。
-
-## 本机复现（`local-env/`）
-
-本机没有 CUDA toolkit 也没有 MSVC，BasicSR 依赖的 `deform_conv_ext` 无法编译。
-解法是用 `torchvision.ops.deform_conv2d` 转发，**并逐像素对齐服务器结果**验证等价性：
-
-```
-max abs diff   : 1.035e-03
-> 1/255 的像素 : 0 / 2764800
-PSNR(server, local) = 85.37 dB
-clip 000 全片段 PSNR: 本地 30.486 vs 服务器 30.486  (+0.000 dB)
-```
-
-差异纯属浮点累加顺序。细节见 [`local-env/README.md`](local-env/README.md)。
 
 ## 指标口径
 
