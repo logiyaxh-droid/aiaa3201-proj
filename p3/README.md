@@ -5,8 +5,13 @@
 
 ## 为什么选这个方向
 
-Part 2 暴露的矛盾：**EDVR 赢失真指标，TecoGAN 赢感知与时域指标**。
-Part 3 要正视这个矛盾——先回答"模型在哪里拿不准"，再做区域路由。
+Part 2 暴露的是**取舍**而非矛盾：EDVR 在 PSNR/SSIM/LPIPS 上全面领先
+（LPIPS 0.2039 对 TecoGAN 0.3337，即 TecoGAN 在感知指标上也并没有赢），
+而时域稳定性在旧指标下无法判定。Part 3 要正视这个取舍——先回答
+"模型在哪里拿不准"，再做区域路由。
+
+> 早期草稿写的是「EDVR 赢失真指标、TecoGAN 赢感知与时域指标，这是矛盾」，
+> 与实测不符，已在 P0 更正；数值未变，只改了结论表述。
 
 PDF 给了三个方向，A（生成式 VSR）和 B（时域一致增强）都要 HuggingFace 权重，
 而服务器 `huggingface.co` 不通；C 只用 BasicSR 系模型 + 自算不确定性，**确定做得出来**。
@@ -34,8 +39,7 @@ figures/
   fig5_region_profile.png       区域剖面
 docs/
   P3_report_draft.md            报告草稿
-frames/
-  实验用帧（3 clip × 100 帧，各分支输出 + GT + 注意力图）
+frames/                         实验用帧（不入库，见「数据」一节；按需生成）
 ```
 
 ## 不确定性估计量
@@ -52,5 +56,22 @@ frames/
 
 ## 数据
 
-`frames/` 已包含复算所需的全部帧（约 1.6 GB，3 clip × 100 帧），
-明细见 [`frames/README.md`](frames/README.md)。无需再准备数据即可重跑 `scripts/` 出图。
+`frames/`（3 clip × 100 帧、5 个分支、约 1.6 GB）**不入库**：这些是 720p 原始帧，
+属于可再生的推理产物，放进 git 会让仓库膨胀到 1.6 GB 以上且无法回退。
+需要复算时按下面重新生成即可。
+
+```bash
+# 目录约定：p3/frames/{val_sharp,bvsrpp_frame,edvr_frame,gen,attn}/<clip>/<frame>.png
+# val_sharp/  从课程共享盘复制（只读）
+cp -r /data/disk1/shared/aiaa3201/project1_video_sr/val_sharp p3/frames/val_sharp
+
+# 三个分支的输出各自用对应推理脚本生成
+p3/scripts/p3_bvsrpp_frames.py     # bvsrpp_frame/
+p3/scripts/p3_attn_dump.py         # attn/（含 000_attn.npz + 000_heat.png）
+# edvr_frame/ 与 gen/ 的推理脚本在 Part 2 / Part 3 的服务器 scratch 里
+```
+
+脚本里的路径是相对的：`make_figures.py` / `make_region_profile.py` 默认取
+脚本上一级的 `frames/`，找不到时回退到同级的 `data/`，所以放哪都不用改代码。
+仓库里已有的 `figures/` 5 张图与 `metrics/*.json` 就是在这些帧上跑出来的结果，
+可直接核对；`frames/` 缺失时脚本会报错退出，不会静默生成空图。

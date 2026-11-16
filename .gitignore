@@ -40,3 +40,11 @@ desktop.ini
 # 出图脚本的输出目录（图本身已归档在 p3/figures/）
 p3/scripts/figures/
 
+# Part 3 的实验用帧：3 clip × 100 帧 × 5 个分支，约 1.6 GB 的 720p PNG，
+# 都是可再生的推理产物。复算方式见 p3/README.md「数据」一节。
+p3/frames/
+
+# 演示视频按需生成的大件（目前 p2/demo/*.mp4 是入库的交付物，不在此列）
+*.mov
+*.avi
+

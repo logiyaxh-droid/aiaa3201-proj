@@ -26,7 +26,7 @@ p2/                  Part 2 — SOTA 复现：EDVR + TecoGAN
   metrics/           两方法的逐 clip 指标、汇总表、选片排序（visibility_rank）
   figures/           patch 级细节对比（30 clip）
   videos/            对比视频（4 clip）
-  demo/              演示素材的说明与选片结论（视频本体不入库，见下）
+  demo/              演示视频（6 clip × 普通/inset，1920×1080 / 24 fps）与静态预览
   docs/              交付清单
 p3/                  Part 3 — 探索：像素级不确定性 + 区域路由
   scripts/           不确定性估计、区域剖面、出图
@@ -83,15 +83,18 @@ TecoGAN 0.3337，即 TecoGAN 在感知指标上并没有赢），而时域稳定
 
 ## 演示视频（`p2/demo/`）
 
-PDF §6.2 要求提交处理后的视频。演示片的合成脚本与选片依据在仓库里，
-**视频本体不入库**（11 个 1080p 片段共约 140 MB，远超常规把二进制挡在 git 外的门槛）：
+PDF §6.2 要求提交处理后的视频，成品在 `p2/demo/`（11 个片段约 140 MB）：
 
 | 内容 | 位置 |
 |---|---|
-| 合成脚本（2×2 网格 1920×1080 / 24 fps，可选 2× 放大 loupe） | `p2/scripts/p2_demo_2x2.py` |
-| 选片依据：按“GT 细节量 × bicubic 破坏程度 × EDVR 复原率”排序 30 clip | `p2/scripts/mk_vis_rank.py` → `p2/metrics/visibility_rank.json` |
-| 入选 clip | `002 / 011 / 013 / 015 / 016 / 018`（另有 `contact_sheet*.png`、`picks_sheet.png`） |
-| 视频本体 | 服务器 `/tmp/p2/demo/`，需要时按下方命令重新生成 |
+| 成品视频（2×2 网格：GT｜Bicubic｜EDVR｜TecoGAN，1920×1080 / 24 fps） | `p2/demo/00X_demo2x2.mp4` |
+| 带 2× 放大 loupe 的版本 | `p2/demo/00X_demo2x2_inset.mp4` |
+| 静态预览（6 clip 一览） | `p2/demo/picks_sheet.png` |
+| 合成脚本 | `p2/scripts/p2_demo_2x2.py` |
+| 选片依据：按「GT 细节量 × bicubic 破坏程度 × EDVR 复原率」排序 30 clip | `p2/scripts/mk_vis_rank.py` → `p2/metrics/visibility_rank.json` |
+
+入选 clip：`002 / 011 / 013 / 015 / 016 / 018`。`013` 目前只有 inset 版——普通版在
+2026-11-16 那次渲染里因裁剪窗口越界崩掉，问题已修，重跑一遍即可补上。
 
 ```bash
 # 需要 GT + bicubic + EDVR 帧 + TecoGAN 帧都已落盘
