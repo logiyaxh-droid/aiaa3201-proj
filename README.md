@@ -26,6 +26,9 @@ p2/                  Part 2 — SOTA 复现：EDVR + TecoGAN
   figures/           patch 级细节对比（30 clip）
   videos/            对比视频（4 clip）
   demo/              演示视频（6 clip × 普通/inset，1920×1080 / 24 fps）与静态预览
+    wild/            自拍素材的演示视频（5 片段 × 普通/inset，同格式）
+  wild_source/      5 段手机原始视频（对应 PDF §6.1 Wild Video Mandatory）
+  WILD.md           自拍素材的完整评测说明、口径与结论（12 方法 × 20 片段）
 p3/                  Part 3 — 探索：像素级不确定性 + 区域路由
   scripts/           不确定性估计、区域剖面、出图
   metrics/           不确定性 / 路由 / 融合 / TTA 的实验结果
