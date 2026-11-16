@@ -20,14 +20,12 @@ p1/                  Part 1 — 手工基线：插值 / EDSR / 多帧平均
   scripts/           评测脚本（主评测、Vimeo-90K、光流标定）
   metrics/           10 方法 × 30 clip 的 PSNR / SSIM / LPIPS / Flow-warp LPIPS
   figures/           定量对比图与细节放大图
-  docs/              技术拆解与交付清单
 p2/                  Part 2 — SOTA 复现：EDVR + TecoGAN
   scripts/           EDVR 推理、TecoGAN 指标、出图、表格生成、2×2 演示视频合成
   metrics/           两方法的逐 clip 指标、汇总表、选片排序（visibility_rank）
   figures/           patch 级细节对比（30 clip）
   videos/            对比视频（4 clip）
   demo/              演示视频（6 clip × 普通/inset，1920×1080 / 24 fps）与静态预览
-  docs/              交付清单
 p3/                  Part 3 — 探索：像素级不确定性 + 区域路由
   scripts/           不确定性估计、区域剖面、出图
   metrics/           不确定性 / 路由 / 融合 / TTA 的实验结果
