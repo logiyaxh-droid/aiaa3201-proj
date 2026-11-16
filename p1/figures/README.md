@@ -1,6 +1,6 @@
 # 图注
 
-`part1/figures/` — Part 1 定量对比
+`p1/figures/` — Part 1 定量对比
 
 | 文件 | 内容 |
 |---|---|
@@ -11,7 +11,7 @@
 | `fig_027_detail.png` | clip 027 局部细节放大 |
 | `000_*.png`、`027_*.png` | 单方法成对切片：`bicubic` / `bicubic_unsharp` / `lanczos` / `edsr` / `tavg3` / `tavg5` / `tavg5_unsharp` / `gt` |
 
-`part2/figures/` — Part 2 细节对比
+`p2/figures/` — Part 2 细节对比
 
 | 文件 | 内容 |
 |---|---|
@@ -20,9 +20,10 @@
 | `perclip_tlpips.png` | 逐 clip tLPIPS |
 | `scatter_psnr_tlpips.png` | PSNR–tLPIPS 关系 |
 
-`part2/videos/` — 对比视频
+`p2/videos/` — 对比视频
 
 `000_compare.mp4`、`002_compare.mp4`、`009_compare.mp4`、`026_compare.mp4`：
 四个 clip 的并排对比片段，`000_final.jpg` 为 clip 000 的成片单帧。
 
 > 图中数值均由 `metrics/` 下的 json 直接生成，未人工调整。
+
