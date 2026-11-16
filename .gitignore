@@ -36,3 +36,7 @@ desktop.ini
 *_rsa
 *_ed25519
 !.gitignore
+
+# 出图脚本的输出目录（图本身已归档在 p3/figures/）
+p3/scripts/figures/
+

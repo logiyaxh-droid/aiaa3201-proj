@@ -23,7 +23,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "data")
+# 帧放在本脚本上一级的 frames/ 里；本地开发时也可能用同级的 data/
+_HERE = os.path.dirname(ROOT)
+DATA = os.path.join(_HERE, "frames")
+if not os.path.isdir(DATA):
+    DATA = os.path.join(ROOT, "data")
 OUT = os.path.join(ROOT, "figures")
 os.makedirs(OUT, exist_ok=True)
 

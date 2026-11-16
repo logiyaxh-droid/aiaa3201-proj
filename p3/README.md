@@ -1,4 +1,4 @@
-# P1 · Part 3 — 探索：像素级不确定性 + 区域路由
+# Part 3 — 探索：像素级不确定性 + 区域路由
 
 > Direction C（Uncertainty-Aware）。PDF 要求"计算像素级不确定性，
 > 确定区域交给回归模型、不确定纹理交给生成模型"。
@@ -34,6 +34,8 @@ figures/
   fig5_region_profile.png       区域剖面
 docs/
   P3_report_draft.md            报告草稿
+frames/
+  实验用帧（3 clip × 100 帧，各分支输出 + GT + 注意力图）
 ```
 
 ## 不确定性估计量
@@ -48,8 +50,7 @@ docs/
 **结论**：`U2_disagree` 与 `U4_lap` 的 Spearman 在 0.40–0.51，注意力导出的 `U3_attn`
 接近 0（-0.04）——**注意力图不能当不确定性用**，这是个负面结果，报告里照实写。
 
-## 数据依赖
+## 数据
 
-`scripts/` 里两个脚本默认从 `data/` 读帧（`data/val_sharp/<clip>`、
-`data/bvsrpp_frame/<clip>` 等）。这些帧由课程共享盘的红色验证集生成，
-**不入库**——按 `metrics/` 里的 json 复现实验时，需先按 `p1/README.md` 准备好数据。
+`frames/` 已包含复算所需的全部帧（约 1.6 GB，3 clip × 100 帧），
+明细见 [`frames/README.md`](frames/README.md)。无需再准备数据即可重跑 `scripts/` 出图。

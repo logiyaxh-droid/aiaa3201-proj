@@ -32,7 +32,11 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(ROOT, "data")
+# 帧放在本脚本上一级的 frames/ 里；本地开发时也可能用同级的 data/
+_HERE = os.path.dirname(ROOT)
+DATA = os.path.join(_HERE, "frames")
+if not os.path.isdir(DATA):
+    DATA = os.path.join(ROOT, "data")
 OUT = os.path.join(ROOT, "figures")
 os.makedirs(OUT, exist_ok=True)
 
@@ -220,6 +224,9 @@ def fig_capture(res):
 # ---------------------------------------------------------------- fig 4
 def fig_tta():
     p = os.path.join(DATA, "tta.json")
+    if not os.path.exists(p):
+        # 仓库里指标放在 ../metrics，数据目录只放帧
+        p = os.path.join(_HERE, "metrics", "tta.json")
     if not os.path.exists(p):
         print("skip fig4: tta.json missing")
         return
