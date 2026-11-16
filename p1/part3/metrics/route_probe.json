@@ -1,0 +1,158 @@
+{
+  "010": {
+    "frames": 100,
+    "psnr_bvsrpp": 34.31,
+    "psnr_edvr": 33.936,
+    "spearman_disagree_err": 0.4097,
+    "oracle_upper_bound": 35.408,
+    "router": [
+      {
+        "q": 0.99,
+        "psnr": 34.1221,
+        "routed": 0.009
+      },
+      {
+        "q": 0.95,
+        "psnr": 34.0104,
+        "routed": 0.0424
+      },
+      {
+        "q": 0.9,
+        "psnr": 33.9686,
+        "routed": 0.0845
+      },
+      {
+        "q": 0.8,
+        "psnr": 33.9362,
+        "routed": 0.1705
+      },
+      {
+        "q": 0.7,
+        "psnr": 33.9356,
+        "routed": 0.1722
+      },
+      {
+        "q": 0.5,
+        "psnr": 33.9182,
+        "routed": 0.4469
+      }
+    ]
+  },
+  "019": {
+    "frames": 100,
+    "psnr_bvsrpp": 29.955,
+    "psnr_edvr": 29.284,
+    "spearman_disagree_err": 0.393,
+    "oracle_upper_bound": 30.947,
+    "router": [
+      {
+        "q": 0.99,
+        "psnr": 29.7664,
+        "routed": 0.0089
+      },
+      {
+        "q": 0.95,
+        "psnr": 29.552,
+        "routed": 0.0442
+      },
+      {
+        "q": 0.9,
+        "psnr": 29.4507,
+        "routed": 0.0845
+      },
+      {
+        "q": 0.8,
+        "psnr": 29.3522,
+        "routed": 0.1795
+      },
+      {
+        "q": 0.7,
+        "psnr": 29.3159,
+        "routed": 0.2655
+      },
+      {
+        "q": 0.5,
+        "psnr": 29.293,
+        "routed": 0.402
+      }
+    ]
+  },
+  "022": {
+    "frames": 100,
+    "psnr_bvsrpp": 29.787,
+    "psnr_edvr": 28.989,
+    "spearman_disagree_err": 0.4109,
+    "oracle_upper_bound": 30.851,
+    "router": [
+      {
+        "q": 0.99,
+        "psnr": 29.5091,
+        "routed": 0.0092
+      },
+      {
+        "q": 0.95,
+        "psnr": 29.254,
+        "routed": 0.0454
+      },
+      {
+        "q": 0.9,
+        "psnr": 29.135,
+        "routed": 0.0889
+      },
+      {
+        "q": 0.8,
+        "psnr": 29.0299,
+        "routed": 0.1752
+      },
+      {
+        "q": 0.7,
+        "psnr": 28.9949,
+        "routed": 0.2433
+      },
+      {
+        "q": 0.5,
+        "psnr": 28.9543,
+        "routed": 0.427
+      }
+    ]
+  },
+  "026": {
+    "frames": 100,
+    "psnr_bvsrpp": 35.829,
+    "psnr_edvr": 35.124,
+    "spearman_disagree_err": 0.4701,
+    "oracle_upper_bound": 36.672,
+    "router": [
+      {
+        "q": 0.99,
+        "psnr": 35.4598,
+        "routed": 0.0083
+      },
+      {
+        "q": 0.95,
+        "psnr": 35.2536,
+        "routed": 0.0406
+      },
+      {
+        "q": 0.9,
+        "psnr": 35.158,
+        "routed": 0.0763
+      },
+      {
+        "q": 0.8,
+        "psnr": 35.0778,
+        "routed": 0.1416
+      },
+      {
+        "q": 0.7,
+        "psnr": 35.0274,
+        "routed": 0.2146
+      },
+      {
+        "q": 0.5,
+        "psnr": 35.0033,
+        "routed": 0.4059
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "000": {
+    "clip": "000",
+    "frames": 100,
+    "sec": 555.2,
+    "psnr_single": 31.407,
+    "psnr_tta": 31.522,
+    "lpips_single": 0.1645,
+    "lpips_tta": 0.1663,
+    "spearman_tta": 0.3612,
+    "spread_mean": 1.155
+  },
+  "002": {
+    "clip": "002",
+    "frames": 100,
+    "sec": 318.9,
+    "psnr_single": 34.128,
+    "psnr_tta": 34.263,
+    "lpips_single": 0.0736,
+    "lpips_tta": 0.0743,
+    "spearman_tta": 0.4573,
+    "spread_mean": 0.83
+  },
+  "009": {
+    "clip": "009",
+    "frames": 100,
+    "sec": 245.3,
+    "psnr_single": 34.015,
+    "psnr_tta": 34.089,
+    "lpips_single": 0.1394,
+    "lpips_tta": 0.1404,
+    "spearman_tta": 0.3603,
+    "spread_mean": 0.693
+  }
+}

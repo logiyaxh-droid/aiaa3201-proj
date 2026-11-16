@@ -9,22 +9,27 @@
 
 ```
 p1/                 视频超分辨率（Video Super-Resolution）
-  part1/            Part 1 — 经典 / 单帧方法基线
+  part1/            Part 1 — 手工基线：插值 / EDSR / 多帧平均
     scripts/        评测脚本（主评测、Vimeo-90K、光流标定）
     metrics/        10 方法 × 30 clip 的 PSNR / SSIM / LPIPS / tLPIPS
     figures/        定量对比图与细节放大图
     docs/           技术拆解与交付清单
-  part2/            Part 2 — EDVR / TecoGAN 视频方法
+  part2/            Part 2 — SOTA 复现：EDVR + TecoGAN
     scripts/        EDVR 推理、TecoGAN 指标、出图、表格生成
     metrics/        两方法的逐 clip 指标与汇总表
     figures/        patch 级细节对比（30 clip）
     videos/         对比视频（4 clip）
     docs/           交付清单
+  part3/            Part 3 — 探索：像素级不确定性 + 区域路由
+    scripts/        不确定性估计、区域剖面、出图
+    metrics/        不确定性 / 路由 / 融合 / TTA 的实验结果
+    figures/        5 张报告图
+    docs/           报告草稿
   local-env/        本机复现环境（Windows + RTX 5070 无 nvcc 的解法）
-
-p2/                 占位（未展开）
-p3/                 占位（未展开）
 ```
+
+> 三个 Part 属于**同一个课程项目 Project 1**，逐层递进：
+> 手工基线（证明「逐帧独立」不够）→ SOTA 复现（对齐+融合 与 时域感知 各自的价值）→ 探索（解决遗留缺陷）。
 
 ## P1 · 概览
 
@@ -33,7 +38,21 @@ p3/                 占位（未展开）
 **Part 1** 把 10 个方法放在同一条评测流水线上跑完，包含一个**光流方向标定**脚本：
 用已知平移的合成样本自证 warp 约定，而不是靠文档相信。
 
-**Part 2** 跑 EDVR 与 TecoGAN，并补齐与 Part 1 相同口径的指标。
+**Part 2** 跑 EDVR 与 TecoGAN，并补齐与 Part 1 相同口径的指标。七方法总表：
+
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | tLPIPS ↓ |
+|---|---|---|---|---|
+| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 |
+| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 |
+| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 |
+| 5 帧平均 + 光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** |
+| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 |
+| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 |
+| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 |
+
+**Part 3** 面对 Part 2 暴露的矛盾——EDVR 赢失真指标、TecoGAN 赢感知与时域指标——
+做像素级不确定性估计与区域路由融合，方向为 PDF 建议的 *Uncertainty-Aware*。
+产出 5 张报告图（不确定性对比、校准曲线、误差捕获、TTA 增益、区域剖面）。
 
 指标口径与踩坑记录见 [`p1/part1/scripts/README.md`](p1/part1/scripts/README.md)。
 

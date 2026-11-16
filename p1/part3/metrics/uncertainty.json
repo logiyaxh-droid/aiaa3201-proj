@@ -1,0 +1,101 @@
+{
+  "000": {
+    "U2_disagree": {
+      "spearman": 0.4037,
+      "err_per_decile": [
+        2.26,
+        2.26,
+        2.26,
+        2.797,
+        3.378,
+        3.743,
+        4.519,
+        4.996,
+        6.285,
+        8.79
+      ],
+      "error_capture_top10": 0.2428,
+      "selective_psnr": 32.842
+    },
+    "U3_attn": {
+      "spearman": -0.0385,
+      "err_per_decile": [
+        4.352,
+        4.129,
+        4.151,
+        4.09,
+        3.953,
+        3.977,
+        3.988,
+        3.844,
+        4.007,
+        5.484
+      ],
+      "error_capture_top10": 0.1307,
+      "selective_psnr": 31.79
+    },
+    "U4_lap": {
+      "spearman": 0.3993,
+      "err_per_decile": [
+        2.11,
+        2.309,
+        2.407,
+        2.822,
+        3.351,
+        4.001,
+        4.787,
+        5.726,
+        6.933,
+        7.588
+      ],
+      "error_capture_top10": 0.1815,
+      "selective_psnr": 32.168
+    },
+    "_meta": {
+      "clip": "000",
+      "frames": 100,
+      "note": "U1 (TTA spread) needs the flipped pass; see p3_tta.py -- run that first and it will fill in here"
+    }
+  },
+  "002": {
+    "U2_disagree": {
+      "spearman": 0.5064,
+      "err_per_decile": [
+        1.19,
+        1.19,
+        1.19,
+        1.19,
+        1.604,
+        2.426,
+        2.426,
+        2.837,
+        4.484,
+        6.974
+      ],
+      "error_capture_top10": 0.3396,
+      "selective_psnr": 36.525
+    },
+    "U4_lap": {
+      "spearman": 0.5134,
+      "err_per_decile": [
+        0.846,
+        1.018,
+        1.201,
+        1.195,
+        1.269,
+        1.786,
+        3.125,
+        4.369,
+        5.423,
+        6.099
+      ],
+      "error_capture_top10": 0.2309,
+      "selective_psnr": 35.274
+    },
+    "_meta": {
+      "clip": "002",
+      "frames": 100,
+      "note": "U1 (TTA spread) needs the flipped pass; see p3_tta.py -- run that first and it will fill in here"
+    }
+  }
+}

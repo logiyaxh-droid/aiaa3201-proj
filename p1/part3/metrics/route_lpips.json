@@ -1,0 +1,58 @@
+{
+  "000": [
+    {
+      "method": "basicvsr++",
+      "psnr": 31.418,
+      "lpips": 0.1645,
+      "tlpips": 0.0727
+    },
+    {
+      "method": "realesrgan",
+      "psnr": 23.506,
+      "lpips": 0.2927,
+      "tlpips": 0.0923
+    },
+    {
+      "method": "route_q0.99",
+      "psnr": 27.803,
+      "lpips": 0.1681,
+      "tlpips": 0.087,
+      "routed": 0.01
+    },
+    {
+      "method": "route_q0.97",
+      "psnr": 26.125,
+      "lpips": 0.1772,
+      "tlpips": 0.0937,
+      "routed": 0.03
+    },
+    {
+      "method": "route_q0.95",
+      "psnr": 25.392,
+      "lpips": 0.183,
+      "tlpips": 0.0974,
+      "routed": 0.05
+    },
+    {
+      "method": "route_q0.90",
+      "psnr": 24.575,
+      "lpips": 0.1924,
+      "tlpips": 0.1022,
+      "routed": 0.1
+    },
+    {
+      "method": "route_q0.80",
+      "psnr": 24.006,
+      "lpips": 0.2069,
+      "tlpips": 0.1073,
+      "routed": 0.2
+    },
+    {
+      "method": "route_q0.60",
+      "psnr": 23.676,
+      "lpips": 0.2283,
+      "tlpips": 0.1108,
+      "routed": 0.4
+    }
+  ]
+}
