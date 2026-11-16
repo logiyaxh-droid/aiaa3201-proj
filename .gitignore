@@ -1,0 +1,38 @@
+# ---- 环境 / 依赖 ----
+env/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+_basicsr_local.pth
+
+# ---- 权重与缓存（体积大，不入库）----
+ckpt/
+*.pth
+*.pt
+*.safetensors
+*.ckpt
+ms_cache/
+*.cache/
+.cache/
+
+# ---- 数据（课程只读共享盘提供，不入库）----
+data/
+*.tgz
+*.zip
+
+# ---- 系统 / 编辑器 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# ---- 密钥与本地配置 ----
+.env
+*.key
+*_rsa
+*_ed25519
+!.gitignore
