@@ -104,7 +104,7 @@ EDSR 的 d_SR（0.2266）最接近 d_GT（0.2304），所以 tLP 最低；而 ta
 
 运动分组、速度/显存基准、对齐诊断、TecoGAN 退化失配对照、EDVR 邻帧利用验证、
 Vimeo 上的 Part 2，以及光流变体的局部图与连续帧证据。完整结论见
-[`p0/tasks/REPORT.md`](p0/tasks/REPORT.md)，这里只列会改变既有说法的四条：
+[`p0/tasks/`](p0/tasks/)（索引见 README，完整结论见 REPORT.md），这里只列会改变既有说法的四条：
 
 | 结论 | 证据 |
 |---|---|
@@ -258,3 +258,4 @@ cd ~/p0 && export TORCH_HOME=/tmp/torch_home
 - **Vimeo-90K** — Xue et al., *Video Enhancement with Task-Oriented Flow*
 
 论文原文不随仓库分发，请从各自官方渠道获取。
+
