@@ -1,0 +1,62 @@
+{
+ "bicubic": {
+  "value": 41.41191565536434,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "lanczos": {
+  "value": 36.328908380438634,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "bicubic_unsharp": {
+  "value": 35.624440697720445,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "edsr": {
+  "value": 16.562425028895007,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "tavg3": {
+  "value": 65.2557407140564,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "tavg5": {
+  "value": 97.14547867110042,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "tavg5_unsharp": {
+  "value": 92.15427494540893,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "flowtavg3": {
+  "value": 46.116818171811076,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "flowtavg5": {
+  "value": 48.67383572867698,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "flowtavg5_unsharp": {
+  "value": 43.62215479014833,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "edvr": {
+  "value": 6.313015677767794,
+  "n_frames": 3000,
+  "dims": 2048
+ },
+ "tecogan": {
+  "value": 40.64972373441242,
+  "n_frames": 3000,
+  "dims": 2048
+ }
+}

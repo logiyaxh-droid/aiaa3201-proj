@@ -37,7 +37,12 @@ p3/                  Part 3 — 探索：像素级不确定性 + 区域路由
 p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重核查 / TecoGAN 完整性
   evalkit/           共用评测包（指标、时域、数据配对、配置、溯源）
   scripts/           核查与推理脚本（tLP 验证、网格测量、带校验的 TecoGAN 推理）
+                     以及全量评测：full_eval.py / fid_full.py / aggregate_full.py / figures_full.py
   audit/             全部审计结果 JSON
+  full/              全量 30 clip × 12 方法的结果（tLP / FID / 空间指标 / 图）
+    metrics/         逐 clip JSON + run_config.json（口径与权重哈希）
+    summary/         汇总表 table.md / table.json / deltas.json / fid.json
+    figures/         4 张报告图
   data_manifest.md   权重 SHA256、训练数据、REDS 划分重叠核查
 ```
 
@@ -55,31 +60,44 @@ p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重�
 EDVR 与 TecoGAN，与 Part 1 用完全相同的指标代码，因此可以并表
 （PSNR/SSIM/LPIPS 口径已与旧实现逐项对齐，见 `p0/audit/selfcheck_metrics.json`）：
 
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ | 正式 tLP ↓ |
-|---|---|---|---|---|---|
-| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 | clip 000: 0.0261 |
-| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 | 待补 |
-| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 | 待补 |
-| 5 帧平均 + 光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** | 待补 |
-| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 | 待补 |
-| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 | 待补 |
-| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 | 待补 |
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ | 正式 tLP ↓ | FID ↓ |
+|---|---|---|---|---|---|---|
+| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 | 0.0270 | 41.41 |
+| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 | 0.0281 | 36.33 |
+| Bicubic + USM | 26.642 | 0.7517 | 0.4398 | 0.0642 | 0.0159 | 35.62 |
+| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 | **0.0072** | 16.56 |
+| 3 帧平均（无对齐） | 23.203 | 0.6374 | 0.5595 | 0.1017 | 0.0895 | 65.26 |
+| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 | 0.1351 | 97.15 |
+| 5 帧平均 + USM | 21.960 | 0.5983 | 0.5590 | 0.1006 | 0.1274 | 92.15 |
+| 3 帧光流对齐 | 26.132 | 0.7286 | 0.4993 | 0.0281 | 0.0387 | 46.12 |
+| 5 帧光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** | 0.0437 | 48.67 |
+| 5 帧光流对齐 + USM | 26.164 | 0.7364 | 0.4692 | 0.0276 | 0.0349 | 43.62 |
+| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 | 0.0123 | **6.31** |
+| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 | 0.0106 | 40.65 |
+
+全量实测：**30 clip × 100 帧 × 12 方法**，tLP 覆盖全部 99 个相邻帧对/clip，
+FID 用全部 3000 帧。逐 clip 数字在 `p0/full/metrics/`，汇总与图在 `p0/full/`。
 
 `Flow-warp LPIPS` 列就是旧表里叫 `tLPIPS` 的那个数字，定义与数值都没变，只是改了名。
-正式 tLP 目前只有 clip 000 的对照（Bicubic 0.0261 vs TecoGAN+0.375 0.0047），
-全量 30 clip 需要一次完整重跑，尚未进行。
+
+**两个时域指标排序相反，这不是笔误。** 正式 tLP 比的是"输出抖动 vs 真值抖动"：
+EDSR 的 d_SR（0.2266）最接近 d_GT（0.2304），所以 tLP 最低；而 tavg5 把帧抖没了
+（d_SR 只有 0.0954），离真值的抖动最远，tLP 反而最高。**"输出更平滑"不等于"更接近真值的时域行为"**，
+所以只能两个指标并列报告，不能单凭任一个说"谁最稳"。
 
 ## Part 3 · 探索
 
-面对 Part 2 暴露的取舍——EDVR 在 PSNR/SSIM/**LPIPS** 上全面最好（LPIPS 0.2039 对
-TecoGAN 0.3337，即 TecoGAN 在感知指标上并没有赢），而时域稳定性在原指标下无法判定——
+面对 Part 2 暴露的取舍——EDVR 在 PSNR/SSIM/**LPIPS**/**FID** 上全面最好
+（FID 6.31 对 TecoGAN 40.65），但按正式 tLP 它比 EDSR 略差（0.0123 对 0.0072），
+即**没有任何方法同时赢下所有轴**——
 做像素级不确定性估计与区域路由融合，方向为 PDF 建议的 *Uncertainty-Aware*。
 产出 5 张报告图（不确定性对比、校准曲线、误差捕获、TTA 增益、区域剖面）。
 
 > 早期草稿写的“TecoGAN 赢感知与时域指标”与现有数据不符：LPIPS 上 EDVR（0.2039）与 EDSR（0.3087）
-> 都好于 TecoGAN（0.3337），TecoGAN 只优于 bicubic/lanczos；
-> 时域上旧指标是 stride=2 的 Flow-warp LPIPS（见「指标口径」），不足以支撑该结论，
-> 已在 P0 中删除。Part 3 的动机表述据此改成“取舍”而非“矛盾”。
+> 都好于 TecoGAN（0.3337），TecoGAN 只优于 bicubic/lanczos；FID 上 TecoGAN（40.65）
+> 也只比 bicubic（41.41）好一点。全量 tLP 出来后 TecoGAN 排第 2（0.0106），
+> 但那是"输出抖动接近真值抖动"的结果，与感知质量是两件事。
+> Part 3 的动机据此写成“取舍”而非“矛盾”。
 
 ## 演示视频（`p2/demo/`）
 
@@ -105,6 +123,52 @@ python p2/scripts/p2_demo_2x2.py --inset 002 011 013 015 016 018  # 带放大 lo
 > 2026-11-16 版修掉了 013 的渲染崩溃（`loupe` 裁出空区域）、改成按**解析出的 frame id** 配对帧
 > 而不是按排序位置配对、缺失方法渲染成占位块而不是崩掉，并把 ffmpeg 的 stderr 收上来报错。
 
+## 全量评测（`p0/full/`）
+
+`p0/scripts/full_eval.py` 把 **12 个方法 × 30 clip × 100 帧**在同一条流式流水线上跑完：
+推理 → 空间指标 → 正式 tLP → 旧 Flow-warp 诊断 → InceptionV3 特征，然后立刻丢帧。
+Part 1 的 7 个生成类方法（EDSR、3/5 帧平均、光流对齐）本轮是**重新推理**的，
+因为 2026-11-11 那次是边算边扔，磁盘上只剩 2 个 clip 的样本图。
+
+```bash
+cd ~/p0 && export TORCH_HOME=/tmp/torch_home
+
+/tmp/srenv/bin/python scripts/full_eval.py --out ~/p0/out/full          # 全量，可断点续跑
+/tmp/srenv/bin/python scripts/full_eval.py --out ~/p0/out/full \
+    --clips 000 --methods bicubic --verify-clip 000                      # 冒烟 + 与 evalkit 对账
+/tmp/srenv/bin/python scripts/fid_full.py ~/p0/out/full                  # FID（复用缓存特征）
+/tmp/srenv/bin/python scripts/aggregate_full.py ~/p0/out/full            # 汇总表 + deltas
+/tmp/srenv/bin/python scripts/figures_full.py  ~/p0/out/full             # 4 张图
+```
+
+产出：
+
+| 文件 | 内容 |
+|---|---|
+| `p0/full/metrics/<clip>.json` | 每个 clip 的 12 个方法逐项指标（含 tLP 的 d_SR / d_GT 分解） |
+| `p0/full/metrics/run_config.json` | 全部指标口径、权重路径、方法清单 |
+| `p0/full/summary/table.md` | 上面那张主表 |
+| `p0/full/summary/deltas.json` | 清单要求的 9 组配对对照 + 逐 clip 胜负计数 |
+| `p0/full/summary/fid.json` | 12 个方法的 FID 与帧数 |
+| `p0/full/figures/` | PSNR–tLP、PSNR–FID 散点，逐 clip tLP，逐 clip 配对增益 |
+
+**逐 clip 胜负**（脚本自动统计，不是只报均值）：
+
+- EDSR vs Bicubic 在 PSNR / tLP / LPIPS 上都是 **30/30** 全胜；
+- flowtavg5 vs tavg5 在 PSNR / tLP / LPIPS 上都是 **30/30** 全胜（PSNR 中位 +4.49 dB）；
+- EDVR vs EDSR 在 PSNR / LPIPS 上 **30/30** 全胜，**但 tLP 只有 4/30**，均值反而差 +0.005；
+- TecoGAN vs Bicubic 在 PSNR 上 **0/30**（全部更差），在 tLP / LPIPS 上 **30/30** 全胜。
+
+耗时（共享 A6000，机器 load 10–14）：单 clip 全 12 方法 4.3–17.0 min，
+无争用时约 7.5 min ⇒ 30 clip 约 3.7 h，实测 5.8 h；FID 约 100 s/方法。
+
+> 两个已定位的性能陷阱（都写进代码注释）：`torch.backends.cudnn.benchmark=True` 会让
+> `evalkit.ssim_gpu` 的首次 float64 7×7 conv 花 **126 s**（cuDNN 算法搜索），关掉后 0.4 s
+> 且结果逐位相同；`naive_avg` 旧的 padding 写法会把 100 帧复制成 **5.5 GB** float32，
+> 改成逐 tap 累加后峰值约 1.5 GB，输出逐位一致（`p0/scripts/check_naive_avg.py`）。
+> FID 的两个协方差都是 PSD，用 eigh 求平方根约 1 s，替代 `scipy.linalg.sqrtm`
+> 在那儿要跑 25 min 以上（差 1.4e-14，`fid_full.py --check` 可复核）。
+
 ## 指标口径
 
 指标口径与踩坑记录见 [`p1/scripts/README.md`](p1/scripts/README.md)。
@@ -115,8 +179,12 @@ python p2/scripts/p2_demo_2x2.py --inset 002 011 013 015 016 018  # 带放大 lo
 > 已在 P0 改名为 `Flow-warp LPIPS` 并保留原值不覆盖。
 > 正式 tLP 是 `|LPIPS(SR[t-1],SR[t]) − LPIPS(GT[t-1],GT[t])|` 在所有相邻对上取均值，
 > 需 GT、无连续 GT 时为 N/A。两者排序可以相反：clip 000 上（同片段、100 帧）Bicubic 正式 tLP = 0.0261、旧指标 0.0569。
-> TecoGAN 的正式 tLP 目前只有 12 帧样例（0.0047），与全量 0.0800 期间不可直接比。
+> 全量 30 clip 的正式 tLP 已完成（见上表），口径为 `cutfr=0`、`crop32=False`、`x100=False`，
+> 覆盖每个 clip 的全部 99 个相邻帧对；所有方法的 tLP 用同一个 LPIPS 实例。
 > 因此**不要**用旧列做跨方法稳定性比较，也不要用它与论文数字对比。
+
+**FID 的限制**：3000 帧来自 30 个连续片段的 100 帧，视频帧高度相关，
+名义样本量远大于独立场景数；不通过重复帧凑样本，也不与其它实现的 FID 混用。
 
 ## 数据集与权重
 

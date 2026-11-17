@@ -1,0 +1,80 @@
+{
+  "conventions": {
+    "spatial": {
+      "psnr": {
+        "color": "Y of cv2.COLOR_RGB2YCrCb",
+        "data_range": 255.0,
+        "prediction_precision": "uint8 (clipped + rounded)",
+        "reduction": "per-frame PSNR, then mean over frames",
+        "border_crop": "none"
+      },
+      "ssim": {
+        "color": "Y of cv2.COLOR_RGB2YCrCb",
+        "win_size": 7,
+        "gaussian_weights": false,
+        "use_sample_covariance": true,
+        "data_range": 255.0,
+        "border_crop": "none",
+        "reference_impl": "skimage.metrics.structural_similarity"
+      },
+      "lpips": {
+        "package": "lpips 0.1.4",
+        "net": "alex",
+        "linears": "default (v0.1)",
+        "input": "RGB, [-1,1]",
+        "reduction": "mean over frames"
+      }
+    },
+    "tLP": {
+      "formula": "tLP(t) = |LPIPS(SR[t-1],SR[t]) - LPIPS(GT[t-1],GT[t])|, mean over pairs",
+      "source": "TecoGAN metrics.py (thunil/TecoGAN), re-implemented",
+      "requires_gt": true,
+      "no_gt_value": "N/A (null), never 0",
+      "pairs": "consecutive frames inside one clip only; never across clips or gaps"
+    },
+    "tLP_options": {
+      "x100": false,
+      "cutfr": 0,
+      "crop32": false,
+      "pairs": "all consecutive ids inside one clip"
+    },
+    "flow_warp_lpips": {
+      "stride": 2,
+      "flow_scale": 4,
+      "flow": "cv2.calcOpticalFlowFarneback(prev_gray, cur_gray), pyr=0.5/3/15/3/5/1.2, 1/4-res, remap(cur, +f)",
+      "note": "legacy 'tLPIPS' definition, diagnostic only"
+    },
+    "fid": {
+      "impl": "pytorch-fid 0.3.0",
+      "weights": "pt_inception-2015-12-05-6726825d",
+      "dims": 2048,
+      "resize": "bilinear 299 align_corners=False",
+      "normalize": "2x-1",
+      "frames": "all 30 clips x 100 frames = 3000"
+    }
+  },
+  "data": {
+    "gt": "/data/disk1/shared/aiaa3201/project1_video_sr/val_sharp",
+    "lr": "/data/disk1/shared/aiaa3201/project1_video_sr/val_sharp_bicubic",
+    "tecogan_frames": "/tmp/p2/tecogan",
+    "edvr_frame_cache": "/tmp/p2/edvr_frame"
+  },
+  "weights": {
+    "edsr": "/data/disk1/shared/aiaa3201/checkpoints/EDSR_baseline_x4/EDSR_Mx4_f64b16_DIV2K_official-0c287733.pth",
+    "edvr": "/data/disk1/shared/aiaa3201/checkpoints/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth"
+  },
+  "methods": [
+    "bicubic",
+    "lanczos",
+    "bicubic_unsharp",
+    "edsr",
+    "tavg3",
+    "tavg5",
+    "tavg5_unsharp",
+    "flowtavg3",
+    "flowtavg5",
+    "flowtavg5_unsharp",
+    "edvr",
+    "tecogan"
+  ]
+}
