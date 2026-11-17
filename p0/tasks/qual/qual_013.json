@@ -1,0 +1,39 @@
+{
+ "clip": "013",
+ "frame_id": 40,
+ "rois": {
+  "text": [
+   980,
+   300
+  ],
+  "texture": [
+   520,
+   60
+  ],
+  "motion": [
+   380,
+   560
+  ]
+ },
+ "roi_size": [
+  160,
+  90
+ ],
+ "zoom": 4,
+ "fps": 24,
+ "consecutive": 4,
+ "methods_part1": [
+  "GT",
+  "Bicubic",
+  "EDSR",
+  "tavg5",
+  "flowtavg5",
+  "flowtavg5+USM"
+ ],
+ "methods_part2": [
+  "edvr",
+  "tecogan"
+ ],
+ "roi_source": "manual override: text=980,300 texture=520,60 motion=380,560",
+ "roi_rule": "scripted: text = max mean|Laplacian| on the GT frame; texture = max local variance avoiding the text window; motion = max smoothed |flow| avoiding the text window. NOTE the heuristic finds 'busiest detail', not semantic text; where the clip has no signage the label is the window rule, not a claim about content."
+}

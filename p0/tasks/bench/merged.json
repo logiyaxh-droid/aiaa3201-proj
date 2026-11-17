@@ -1,0 +1,778 @@
+{
+ "runs": [
+  "speed.json",
+  "speed_clean.json",
+  "speed_final.json"
+ ],
+ "quoted_statistic": "min over all repeats of all runs",
+ "why": "shared GPU; three identical runs disagreed by up to 6x on CPU methods and 3x on EDSR, so min (one clean execution) is quoted and the per-run medians are kept as the error bar",
+ "methods": {
+  "bicubic": {
+   "min_s": 0.22780122514814138,
+   "ms_per_frame": 2.278012251481414,
+   "fps": 438.9792018676327,
+   "per_run_median_s": [
+    0.2924703252501786,
+    0.25472931284457445,
+    0.26871108589693904
+   ],
+   "run_spread_ratio": 1.1481612460856916,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 0.22780122514814138,
+     "median_s": 0.2924703252501786,
+     "max_s": 0.39990362897515297,
+     "ms_per_frame": 2.9247032525017858,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 0.23658424708992243,
+     "median_s": 0.25472931284457445,
+     "max_s": 0.29266707319766283,
+     "ms_per_frame": 2.5472931284457445,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 0.2539230058901012,
+     "median_s": 0.26871108589693904,
+     "max_s": 0.33741309866309166,
+     "ms_per_frame": 2.539230058901012,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "bicubic_unsharp": {
+   "min_s": 2.077032857108861,
+   "ms_per_frame": 20.770328571088612,
+   "fps": 48.14560330990412,
+   "per_run_median_s": [
+    2.1307982383295894,
+    2.144744659308344,
+    2.402131254784763
+   ],
+   "run_spread_ratio": 1.1273386712896296,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 2.121977861970663,
+     "median_s": 2.1307982383295894,
+     "max_s": 2.1380397672764957,
+     "ms_per_frame": 21.307982383295894,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 2.077032857108861,
+     "median_s": 2.144744659308344,
+     "max_s": 2.2597377570346,
+     "ms_per_frame": 21.44744659308344,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 2.154030177742243,
+     "median_s": 2.402131254784763,
+     "max_s": 3.9240030949003994,
+     "ms_per_frame": 21.540301777422428,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "edsr": {
+   "min_s": 8.554406135808676,
+   "ms_per_frame": 85.54406135808676,
+   "fps": 11.689882197830284,
+   "per_run_median_s": [
+    35.68431916926056,
+    14.651772550772876,
+    8.761912195943296
+   ],
+   "run_spread_ratio": 4.072663406257615,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": 2047.5048828125,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 33.614437269978225,
+     "median_s": 35.68431916926056,
+     "max_s": 55.18370538111776,
+     "ms_per_frame": 356.8431916926056,
+     "peak_allocated_MiB": 2047.5048828125
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 9.1997776851058,
+     "median_s": 14.651772550772876,
+     "max_s": 26.39320297492668,
+     "ms_per_frame": 146.51772550772876,
+     "peak_allocated_MiB": 2047.5048828125
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 8.554406135808676,
+     "median_s": 8.761912195943296,
+     "max_s": 8.948413483332843,
+     "ms_per_frame": 85.54406135808676,
+     "peak_allocated_MiB": 2047.5048828125
+    }
+   ]
+  },
+  "edsr_bs1": {
+   "min_s": 5.870454257819802,
+   "ms_per_frame": 58.704542578198016,
+   "fps": 17.034456893483828,
+   "per_run_median_s": [
+    8.236481663072482,
+    9.58789527718909,
+    6.148473972920328
+   ],
+   "run_spread_ratio": 1.559394301645738,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": 1617.99853515625,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 8.164962653070688,
+     "median_s": 8.236481663072482,
+     "max_s": 8.308000673074275,
+     "ms_per_frame": 82.36481663072482,
+     "peak_allocated_MiB": 1617.99853515625
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 9.383848678320646,
+     "median_s": 9.58789527718909,
+     "max_s": 9.791941876057535,
+     "ms_per_frame": 95.87895277189091,
+     "peak_allocated_MiB": 1617.99853515625
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 5.870454257819802,
+     "median_s": 6.148473972920328,
+     "max_s": 6.163218724541366,
+     "ms_per_frame": 61.484739729203284,
+     "peak_allocated_MiB": 1617.99853515625
+    }
+   ]
+  },
+  "edsr_bs2": {
+   "min_s": 6.693548231385648,
+   "ms_per_frame": 66.93548231385648,
+   "fps": 14.939759383686214,
+   "per_run_median_s": [
+    7.466231649974361,
+    13.036960656521842,
+    6.876922443043441
+   ],
+   "run_spread_ratio": 1.8957550800518006,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": 2127.51123046875,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 6.715230944100767,
+     "median_s": 7.466231649974361,
+     "max_s": 8.217232355847955,
+     "ms_per_frame": 74.66231649974361,
+     "peak_allocated_MiB": 2127.51123046875
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 12.781361177098006,
+     "median_s": 13.036960656521842,
+     "max_s": 13.292560135945678,
+     "ms_per_frame": 130.36960656521842,
+     "peak_allocated_MiB": 2127.51123046875
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 6.693548231385648,
+     "median_s": 6.876922443043441,
+     "max_s": 7.051402102224529,
+     "ms_per_frame": 68.7692244304344,
+     "peak_allocated_MiB": 2127.51123046875
+    }
+   ]
+  },
+  "edsr_bs4": {
+   "min_s": 6.829864839091897,
+   "ms_per_frame": 68.29864839091897,
+   "fps": 14.641578179941854,
+   "per_run_median_s": [
+    7.438642784720287,
+    14.713261541444808,
+    7.025109530892223
+   ],
+   "run_spread_ratio": 2.094381799564078,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": 3104.65576171875,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 7.063737040385604,
+     "median_s": 7.438642784720287,
+     "max_s": 7.8135485290549695,
+     "ms_per_frame": 74.38642784720287,
+     "peak_allocated_MiB": 3104.65576171875
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 14.003185892943293,
+     "median_s": 14.713261541444808,
+     "max_s": 15.423337189946324,
+     "ms_per_frame": 147.13261541444808,
+     "peak_allocated_MiB": 3104.65576171875
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 6.829864839091897,
+     "median_s": 7.025109530892223,
+     "max_s": 7.1795136467553675,
+     "ms_per_frame": 70.25109530892223,
+     "peak_allocated_MiB": 3104.65576171875
+    }
+   ]
+  },
+  "edsr_bs8": {
+   "min_s": 6.4487740052863955,
+   "ms_per_frame": 64.48774005286396,
+   "fps": 15.506823454818667,
+   "per_run_median_s": [
+    12.244448946323246,
+    14.7846190079581,
+    6.873670694883913
+   ],
+   "run_spread_ratio": 2.150905922648043,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": 5019.79248046875,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 8.622394216712564,
+     "median_s": 12.244448946323246,
+     "max_s": 15.866503675933927,
+     "ms_per_frame": 122.44448946323246,
+     "peak_allocated_MiB": 5019.79248046875
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 13.98974337382242,
+     "median_s": 14.7846190079581,
+     "max_s": 15.579494642093778,
+     "ms_per_frame": 147.846190079581,
+     "peak_allocated_MiB": 5019.79248046875
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 6.4487740052863955,
+     "median_s": 6.873670694883913,
+     "max_s": 6.882954483386129,
+     "ms_per_frame": 68.73670694883913,
+     "peak_allocated_MiB": 5019.79248046875
+    }
+   ]
+  },
+  "edsr_with_write": {
+   "min_s": 17.436955159064382,
+   "ms_per_frame": 174.36955159064382,
+   "fps": 5.734946215539027,
+   "per_run_median_s": [
+    34.88199645606801,
+    17.509676387067884,
+    17.687236820114776
+   ],
+   "run_spread_ratio": 1.9921554051010786,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 34.88199645606801,
+     "median_s": 34.88199645606801,
+     "max_s": 34.88199645606801,
+     "ms_per_frame": null,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 17.509676387067884,
+     "median_s": 17.509676387067884,
+     "max_s": 17.509676387067884,
+     "ms_per_frame": null,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 17.436955159064382,
+     "median_s": 17.687236820114776,
+     "max_s": 17.93751848116517,
+     "ms_per_frame": 174.36955159064382,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "edvr": {
+   "min_s": 54.85975687298924,
+   "ms_per_frame": 548.5975687298924,
+   "fps": 1.8228298064010564,
+   "per_run_median_s": [
+    75.68559457268566,
+    79.79583797394298,
+    55.16140490863472
+   ],
+   "run_spread_ratio": 1.4465882097475746,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": 1211.42578125,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 67.64655005699024,
+     "median_s": 75.68559457268566,
+     "max_s": 83.72463908838108,
+     "ms_per_frame": 756.8559457268566,
+     "peak_allocated_MiB": 1211.42578125
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 70.17044852580875,
+     "median_s": 79.79583797394298,
+     "max_s": 89.42122742207721,
+     "ms_per_frame": 797.9583797394298,
+     "peak_allocated_MiB": 1211.42578125
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 54.85975687298924,
+     "median_s": 55.16140490863472,
+     "max_s": 64.92504213843495,
+     "ms_per_frame": 548.5975687298924,
+     "peak_allocated_MiB": 1211.42578125
+    }
+   ]
+  },
+  "flow_full_recompute": {
+   "min_s": 41.9426686023362,
+   "ms_per_frame": 419.426686023362,
+   "fps": 2.3842069027155324,
+   "per_run_median_s": [
+    87.368830868043,
+    74.0090546538122,
+    44.03644975274801
+   ],
+   "run_spread_ratio": 1.984011684833674,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 78.92584422975779,
+     "median_s": 87.368830868043,
+     "max_s": 158.22097098408267,
+     "ms_per_frame": 873.68830868043,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 51.940704873763025,
+     "median_s": 74.0090546538122,
+     "max_s": 155.21518330695108,
+     "ms_per_frame": 740.090546538122,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 41.9426686023362,
+     "median_s": 44.03644975274801,
+     "max_s": 44.367872283328325,
+     "ms_per_frame": 419.426686023362,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "flowtavg3": {
+   "min_s": 5.589457920752466,
+   "ms_per_frame": 55.89457920752466,
+   "fps": 17.89082258383614,
+   "per_run_median_s": [
+    111.92019293829799,
+    6.107667807955295,
+    108.77164279622957
+   ],
+   "run_spread_ratio": 18.32453834383738,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 44.03554763505235,
+     "median_s": 111.92019293829799,
+     "max_s": 165.53786345105618,
+     "ms_per_frame": 1119.2019293829799,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 5.589457920752466,
+     "median_s": 6.107667807955295,
+     "max_s": 6.38885971205309,
+     "ms_per_frame": 61.07667807955295,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 48.396452985703945,
+     "median_s": 108.77164279622957,
+     "max_s": 137.92078856704757,
+     "ms_per_frame": 483.96452985703945,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "flowtavg5": {
+   "min_s": 9.810851409099996,
+   "ms_per_frame": 98.10851409099996,
+   "fps": 10.192795286578859,
+   "per_run_median_s": [
+    126.85957824904472,
+    10.136796919628978,
+    107.38675905903801
+   ],
+   "run_spread_ratio": 12.514759766311661,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 14.366110034286976,
+     "median_s": 126.85957824904472,
+     "max_s": 182.09337447909638,
+     "ms_per_frame": 1268.5957824904472,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 9.810851409099996,
+     "median_s": 10.136796919628978,
+     "max_s": 10.426130871288478,
+     "ms_per_frame": 101.36796919628978,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 56.72759560775012,
+     "median_s": 107.38675905903801,
+     "max_s": 123.61396022001281,
+     "ms_per_frame": 567.2759560775012,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "flowtavg5_unsharp": {
+   "min_s": 10.206642060074955,
+   "ms_per_frame": 102.06642060074955,
+   "fps": 9.797541582374803,
+   "per_run_median_s": [
+    41.58145624259487,
+    10.875739126931876,
+    42.74016075767577
+   ],
+   "run_spread_ratio": 3.9298626289993654,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 10.599181288853288,
+     "median_s": 41.58145624259487,
+     "max_s": 139.99315575091168,
+     "ms_per_frame": 415.8145624259487,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 10.206642060074955,
+     "median_s": 10.875739126931876,
+     "max_s": 19.049935180228204,
+     "ms_per_frame": 108.75739126931876,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 42.41100647114217,
+     "median_s": 42.74016075767577,
+     "max_s": 52.29030111990869,
+     "ms_per_frame": 424.1100647114217,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "lanczos": {
+   "min_s": 0.7366920206695795,
+   "ms_per_frame": 7.366920206695795,
+   "fps": 135.74193447773465,
+   "per_run_median_s": [
+    0.7730493848212063,
+    0.950591023080051,
+    0.8147578500211239
+   ],
+   "run_spread_ratio": 1.229664031489925,
+   "unstable_between_runs": false,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 0.7366920206695795,
+     "median_s": 0.7730493848212063,
+     "max_s": 1.0362025629729033,
+     "ms_per_frame": 7.730493848212063,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 0.9163571037352085,
+     "median_s": 0.950591023080051,
+     "max_s": 0.9632658907212317,
+     "ms_per_frame": 9.50591023080051,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 0.7705191462300718,
+     "median_s": 0.8147578500211239,
+     "max_s": 0.8726267432793975,
+     "ms_per_frame": 7.705191462300718,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "tavg3": {
+   "min_s": 3.6148612089455128,
+   "ms_per_frame": 36.14861208945513,
+   "fps": 27.663579379627382,
+   "per_run_median_s": [
+    3.8033105288632214,
+    3.651562464889139,
+    29.393651915248483
+   ],
+   "run_spread_ratio": 8.049609502200004,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 3.769333779811859,
+     "median_s": 3.8033105288632214,
+     "max_s": 29.911882100161165,
+     "ms_per_frame": 38.033105288632214,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 3.6148612089455128,
+     "median_s": 3.651562464889139,
+     "max_s": 3.75053752027452,
+     "ms_per_frame": 36.51562464889139,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 22.36366576096043,
+     "median_s": 29.393651915248483,
+     "max_s": 37.35636078985408,
+     "ms_per_frame": 223.6366576096043,
+     "peak_allocated_MiB": null
+    }
+   ]
+  },
+  "tavg5": {
+   "min_s": 4.141834275331348,
+   "ms_per_frame": 41.41834275331348,
+   "fps": 24.143892138707063,
+   "per_run_median_s": [
+    11.473088178783655,
+    4.2594122481532395,
+    58.9517564708367
+   ],
+   "run_spread_ratio": 13.84035003805901,
+   "unstable_between_runs": true,
+   "peak_allocated_MiB": null,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 6.108022136148065,
+     "median_s": 11.473088178783655,
+     "max_s": 38.294095766264945,
+     "ms_per_frame": 114.73088178783655,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 4.141834275331348,
+     "median_s": 4.2594122481532395,
+     "max_s": 4.743011944927275,
+     "ms_per_frame": 42.594122481532395,
+     "peak_allocated_MiB": null
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 37.43123494228348,
+     "median_s": 58.9517564708367,
+     "max_s": 80.49259731080383,
+     "ms_per_frame": 374.3123494228348,
+     "peak_allocated_MiB": null
+    }
+   ]
+  }
+ },
+ "components": {
+  "flow_farneback_all_pairs": {
+   "min_s": 9.944708781782538,
+   "per_run_median_s": [
+    13.766700473148376,
+    18.007774296216667,
+    13.17559029860422
+   ],
+   "run_spread_ratio": 1.3667527517248583,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 13.424004203174263,
+     "median_s": 13.766700473148376
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 14.447151043917984,
+     "median_s": 18.007774296216667
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 9.944708781782538,
+     "median_s": 13.17559029860422
+    }
+   ]
+  },
+  "read_gt_png": {
+   "min_s": 3.031497364398092,
+   "per_run_median_s": [
+    3.967580801807344,
+    3.0330326058901846,
+    4.029659270774573
+   ],
+   "run_spread_ratio": 1.3285908179651376,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 3.9325536070391536,
+     "median_s": 3.967580801807344
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 3.031497364398092,
+     "median_s": 3.0330326058901846
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 3.976063549052924,
+     "median_s": 4.029659270774573
+    }
+   ]
+  },
+  "read_lr_png": {
+   "min_s": 0.2329469989053905,
+   "per_run_median_s": [
+    0.2734771682880819,
+    0.2587527590803802,
+    0.2887614141218364
+   ],
+   "run_spread_ratio": 1.1159742417746903,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 0.2659955914132297,
+     "median_s": 0.2734771682880819
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 0.25711119500920177,
+     "median_s": 0.2587527590803802
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 0.2329469989053905,
+     "median_s": 0.2887614141218364
+    }
+   ]
+  },
+  "warp_blend_all_frames": {
+   "min_s": 4.414873170200735,
+   "per_run_median_s": [
+    77.66598277166486,
+    4.611612366978079,
+    34.084612221922725
+   ],
+   "run_spread_ratio": 16.841394417232475,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 7.153096770867705,
+     "median_s": 77.66598277166486
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 4.414873170200735,
+     "median_s": 4.611612366978079
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 20.33251971192658,
+     "median_s": 34.084612221922725
+    }
+   ]
+  },
+  "write_hr_png": {
+   "min_s": 4.647218089085072,
+   "per_run_median_s": [
+    6.351221765391529,
+    4.647218089085072,
+    6.53211483405903
+   ],
+   "run_spread_ratio": 1.4055967912074145,
+   "per_run": [
+    {
+     "run": "speed.json",
+     "min_s": 6.351221765391529,
+     "median_s": 6.351221765391529
+    },
+    {
+     "run": "speed_clean.json",
+     "min_s": 4.647218089085072,
+     "median_s": 4.647218089085072
+    },
+    {
+     "run": "speed_final.json",
+     "min_s": 6.472323494032025,
+     "median_s": 6.53211483405903
+    }
+   ]
+  }
+ },
+ "frames": 100,
+ "lr_hw": [
+  180,
+  320
+ ],
+ "hr_hw": [
+  720,
+  1280
+ ],
+ "device": "NVIDIA RTX A6000 (shared)",
+ "precision": "fp32 (torch default)"
+}

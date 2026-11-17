@@ -44,6 +44,7 @@ p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重�
     summary/         汇总表 table.md / table.json / deltas.json / fid.json
     figures/         4 张报告图
   data_manifest.md   权重 SHA256、训练数据、REDS 划分重叠核查
+  tasks/             剩余清单任务：Vimeo Part 2 / 运动分组 / 速度基准 / 对齐诊断 / 退化失配 / 邻帧利用
 ```
 
 ## Part 1 · 手工基线
@@ -98,6 +99,27 @@ EDSR 的 d_SR（0.2266）最接近 d_GT（0.2304），所以 tLP 最低；而 ta
 > 也只比 bicubic（41.41）好一点。全量 tLP 出来后 TecoGAN 排第 2（0.0106），
 > 但那是"输出抖动接近真值抖动"的结果，与感知质量是两件事。
 > Part 3 的动机据此写成“取舍”而非“矛盾”。
+
+## 剩余清单任务（`p0/tasks/`）
+
+运动分组、速度/显存基准、对齐诊断、TecoGAN 退化失配对照、EDVR 邻帧利用验证、
+Vimeo 上的 Part 2，以及光流变体的局部图与连续帧证据。完整结论见
+[`p0/tasks/REPORT.md`](p0/tasks/REPORT.md)，这里只列会改变既有说法的四条：
+
+| 结论 | 证据 |
+|---|---|
+| **运动越大朴素平均越糟**（ρ=−0.756），光流对齐的收益随之增大（ρ=+0.738） | 固定三分位分组，`tasks/motion/` |
+| **但 EDVR 相对 EDSR 的收益与运动强度无关**（ρ=−0.012, p=0.95） | 同上；PCD 是学习式对齐，不靠"纠正大运动"得利 |
+| **EDVR 确实在用邻帧**：中心帧重复五次后 PSNR 掉 2.76 dB（6/6 全负） | `tasks/edvr_neighbor/`；改变了输入分布，不等于 PCD/TSA 的单独贡献 |
+| **前后向一致性 mask 四项指标全改善**（PSNR +0.07、tLP −7.5%） | `tasks/align/`；初版符号写错导致 mask 从不触发，已修 |
+
+速度基准在共享 GPU 上跨 run 差到 6 倍，报告引用的是**跨三次运行的最小值**并附
+`run_spread_ratio`；`p0/scripts/bench_merge.py` 负责合并。相对关系稳定：
+bicubic 比 EDSR 快约 38 倍，EDSR 比 EDVR 快约 6.4 倍。
+
+> 局部图用 clip 013（街景，含真实招牌文字）。脚本的自动选窗只找"最密细节"，
+> 不是语义文字；004/011 选出的 "text" 窗其实是树叶，所以最终图改用 `--roi` 手工固定，
+> 坐标记录在 `tasks/qual/qual_013.json`。
 
 ## 演示视频（`p2/demo/`）
 
@@ -214,6 +236,17 @@ cd ~/p0 && export TORCH_HOME=/tmp/torch_home
 
 > 两点旧描述已更正：EDSR 用的是 **DIV2K** 权重而不是 REDS 权重；
 > TecoGAN 官方是 **Gaussian 下采样**合成 LR，不是“真实退化训练”。
+
+> **两套 EDVR 权重的架构不同**（本仓库新增的核查）：REDS 版 `num_frame=5`
+> （`fusion.feat_fusion.weight` 输入 640 = 5×128），Vimeo 版 `num_frame=7`
+> （896 = 7×128，因为 Vimeo septuplet 是 7 帧）。把 Vimeo 权重塞进 5 帧模型会直接
+> size mismatch。两套权重在 Vimeo 测试集上差 **11.7 dB**（24.49 vs 36.20，见
+> [`p0/tasks/REPORT.md`](p0/tasks/REPORT.md)），所以不同权重的结果必须分两行报，
+> 不能混进同一个均值。
+
+> **"退化失配"作为 TecoGAN 落后的解释已被实验否定。** 把 LR 换成 TecoGAN 自己的
+> Gaussian σ=1.5 核后，TecoGAN 只涨 3.02 dB，而 EDVR 涨 7.50 dB —— 失配并不是它的
+> 主因（`p0/tasks/degradation/degradation.json`）。瓶颈是 ×4 大倍率下的重建能力。
 
 ## 引用与致谢
 

@@ -1,0 +1,330 @@
+{
+ "clips": [
+  "013",
+  "016",
+  "007",
+  "006",
+  "012",
+  "003"
+ ],
+ "why": {
+  "013": "lowest motion (0.10 px)",
+  "016": "lowest motion (0.11 px)",
+  "007": "highest motion (1.08 px)",
+  "006": "highest motion (1.13 px)",
+  "012": "worst flow-alignment failure",
+  "003": "worst flow-alignment failure"
+ },
+ "caveat": "condition B (centre repeated 5x) changes the input distribution; it measures the value of neighbour information as used by this weight, NOT the isolated contribution of PCD or of TSA",
+ "window_policy": "first/last frames clamp to the clip boundary (replicate), same as the full-run script",
+ "per_clip": {
+  "013": {
+   "motion_px": 0.09828421473503113,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 29.23462575453829,
+      "ssim": 0.8859250066830928,
+      "lpips": 0.1594557525217533,
+      "n_frames": 100,
+      "tlp": 0.006355203951549048,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 29.242897253161328,
+      "ssim": 0.885885214853109,
+      "lpips": 0.15976652037352324,
+      "n_frames": 96,
+      "tlp": 0.006269194303374541,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 26.39943394038568,
+      "ssim": 0.7962687380000507,
+      "lpips": 0.25714146450161934,
+      "n_frames": 100,
+      "tlp": 0.005990432895193196,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 26.397811078136325,
+      "ssim": 0.7959533155826849,
+      "lpips": 0.25764289777725935,
+      "n_frames": 96,
+      "tlp": 0.00576475117551653,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "low",
+   "delta_repeat_minus_normal": {
+    "psnr": -2.8351918141526085,
+    "ssim": -0.0896562686830421,
+    "lpips": 0.09768571197986603,
+    "tlp": -0.0003647710563558521
+   }
+  },
+  "016": {
+   "motion_px": 0.1091299057006836,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 26.366037390532984,
+      "ssim": 0.8172374227372835,
+      "lpips": 0.3169675582647324,
+      "n_frames": 100,
+      "tlp": 0.020285413120732163,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 26.384593566723776,
+      "ssim": 0.8178974454969961,
+      "lpips": 0.3165689604356885,
+      "n_frames": 96,
+      "tlp": 0.020456615404078834,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 24.05849193539505,
+      "ssim": 0.7036999092614867,
+      "lpips": 0.44410881102085115,
+      "n_frames": 100,
+      "tlp": 0.0035770961431541826,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 24.060601366664063,
+      "ssim": 0.703741639928625,
+      "lpips": 0.44433258784313995,
+      "n_frames": 96,
+      "tlp": 0.003597521389785566,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "low",
+   "delta_repeat_minus_normal": {
+    "psnr": -2.3075454551379337,
+    "ssim": -0.11353751347579677,
+    "lpips": 0.12714125275611876,
+    "tlp": -0.01670831697757798
+   }
+  },
+  "007": {
+   "motion_px": 1.0808584690093994,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 31.0842641046021,
+      "ssim": 0.9025794148881018,
+      "lpips": 0.17005005195736886,
+      "n_frames": 100,
+      "tlp": 0.006636716575935633,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 31.12745288409287,
+      "ssim": 0.9032813461213415,
+      "lpips": 0.1697764042764902,
+      "n_frames": 96,
+      "tlp": 0.006779562250563973,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 28.50348764514143,
+      "ssim": 0.8411018109989286,
+      "lpips": 0.24826649829745293,
+      "n_frames": 100,
+      "tlp": 0.004416973452375393,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 28.520029709624925,
+      "ssim": 0.8414141074990296,
+      "lpips": 0.24848569355284175,
+      "n_frames": 96,
+      "tlp": 0.004420282966212222,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "high",
+   "delta_repeat_minus_normal": {
+    "psnr": -2.580776459460669,
+    "ssim": -0.06147760388917323,
+    "lpips": 0.07821644634008407,
+    "tlp": -0.0022197431235602407
+   }
+  },
+  "006": {
+   "motion_px": 1.134333848953247,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 32.16713061610779,
+      "ssim": 0.896762162593769,
+      "lpips": 0.17767563924193383,
+      "n_frames": 100,
+      "tlp": 0.011612807108898355,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 32.23540706500854,
+      "ssim": 0.8974744205422519,
+      "lpips": 0.17774210932354131,
+      "n_frames": 96,
+      "tlp": 0.011566859483718873,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 29.80780276784659,
+      "ssim": 0.8382013483078391,
+      "lpips": 0.24873866900801658,
+      "n_frames": 100,
+      "tlp": 0.007746870921115682,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 29.862138848671645,
+      "ssim": 0.8389054190419903,
+      "lpips": 0.24894986969108382,
+      "n_frames": 96,
+      "tlp": 0.007677959533114182,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "high",
+   "delta_repeat_minus_normal": {
+    "psnr": -2.359327848261202,
+    "ssim": -0.05856081428592985,
+    "lpips": 0.07106302976608275,
+    "tlp": -0.0038659361877826726
+   }
+  },
+  "012": {
+   "motion_px": 1.0034334659576416,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 31.20197362525134,
+      "ssim": 0.8973720924377925,
+      "lpips": 0.17493777394294738,
+      "n_frames": 100,
+      "tlp": 0.005517572917119421,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 31.253868466474785,
+      "ssim": 0.8979417116902004,
+      "lpips": 0.17485635944952568,
+      "n_frames": 96,
+      "tlp": 0.005588774147786592,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 28.480770086453536,
+      "ssim": 0.8348375479850537,
+      "lpips": 0.24242869168519973,
+      "n_frames": 100,
+      "tlp": 0.006873085492789143,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 28.50782820565355,
+      "ssim": 0.8351213764621083,
+      "lpips": 0.2426288891583681,
+      "n_frames": 96,
+      "tlp": 0.00681334702592147,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "high",
+   "delta_repeat_minus_normal": {
+    "psnr": -2.7212035387978055,
+    "ssim": -0.06253454445273876,
+    "lpips": 0.06749091774225235,
+    "tlp": 0.0013555125756697217
+   }
+  },
+  "003": {
+   "motion_px": 0.9203588962554932,
+   "conditions": {
+    "normal": {
+     "all_frames": {
+      "psnr": 35.18797522769222,
+      "ssim": 0.9574682766867636,
+      "lpips": 0.07921553265303373,
+      "n_frames": 100,
+      "tlp": 0.003251359769792268,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 35.228730850912655,
+      "ssim": 0.9577541315031649,
+      "lpips": 0.07910272490698844,
+      "n_frames": 96,
+      "tlp": 0.003220659651254353,
+      "tlp_pairs": 95
+     }
+    },
+    "repeat_center": {
+     "all_frames": {
+      "psnr": 31.42066168664306,
+      "ssim": 0.9213116835315615,
+      "lpips": 0.116386047154665,
+      "n_frames": 100,
+      "tlp": 0.005978121299936314,
+      "tlp_pairs": 99
+     },
+     "drop_first_last_2": {
+      "psnr": 31.425491510149698,
+      "ssim": 0.9214575628525119,
+      "lpips": 0.11614403043252726,
+      "n_frames": 96,
+      "tlp": 0.006151068524310463,
+      "tlp_pairs": 95
+     }
+    }
+   },
+   "motion_group": "mid",
+   "delta_repeat_minus_normal": {
+    "psnr": -3.767313541049159,
+    "ssim": -0.036156593155202144,
+    "lpips": 0.037170514501631266,
+    "tlp": 0.002726761530144046
+   }
+  }
+ },
+ "mean": {
+  "normal": {
+   "psnr": 30.87366778645412,
+   "ssim": 0.8928907293378007,
+   "lpips": 0.17971705143029493,
+   "tlp": 0.008943178907337814
+  },
+  "repeat_center": {
+   "psnr": 28.111774676977557,
+   "ssim": 0.8225701730141535,
+   "lpips": 0.2595116969446341,
+   "tlp": 0.0057637633674273185
+  },
+  "delta": {
+   "psnr": -2.7618931094765635,
+   "ssim": -0.0703205563236472,
+   "lpips": 0.07979464551433918,
+   "tlp": -0.0031794155399104953
+  }
+ }
+}

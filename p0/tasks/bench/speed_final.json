@@ -1,0 +1,249 @@
+{
+ "clip": "000",
+ "frames": 100,
+ "lr_hw": [
+  180,
+  320
+ ],
+ "hr_hw": [
+  720,
+  1280
+ ],
+ "reps": 5,
+ "device": "NVIDIA RTX A6000 (shared)",
+ "precision": "fp32 (torch default)",
+ "note": "GPU is SHARED. Quote min_s (least contaminated); median/max and spread_ratio show how noisy the machine was. The same EDSR batch-4 workload measured 7.4 s and 14.7 s ten minutes apart.",
+ "quoted_statistic": "min_s",
+ "methods": {
+  "bicubic": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 0.2539230058901012,
+   "median_s": 0.26871108589693904,
+   "max_s": 0.33741309866309166,
+   "reps": 5,
+   "spread_ratio": 1.3288008208642792,
+   "ms_per_frame": 2.539230058901012,
+   "fps": 393.820164697012
+  },
+  "lanczos": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 0.7705191462300718,
+   "median_s": 0.8147578500211239,
+   "max_s": 0.8726267432793975,
+   "reps": 5,
+   "spread_ratio": 1.1325179232065923,
+   "ms_per_frame": 7.705191462300718,
+   "fps": 129.78262836072432
+  },
+  "bicubic_unsharp": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 2.154030177742243,
+   "median_s": 2.402131254784763,
+   "max_s": 3.9240030949003994,
+   "reps": 5,
+   "spread_ratio": 1.8217029340848707,
+   "ms_per_frame": 21.540301777422428,
+   "fps": 46.424604925830465
+  },
+  "tavg3": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 22.36366576096043,
+   "median_s": 29.393651915248483,
+   "max_s": 37.35636078985408,
+   "reps": 5,
+   "spread_ratio": 1.6704041810115917,
+   "ms_per_frame": 223.6366576096043,
+   "fps": 4.471538837544556
+  },
+  "tavg5": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 37.43123494228348,
+   "median_s": 58.9517564708367,
+   "max_s": 80.49259731080383,
+   "reps": 5,
+   "spread_ratio": 2.150412548101022,
+   "ms_per_frame": 374.3123494228348,
+   "fps": 2.6715656096891665
+  },
+  "flowtavg3": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 48.396452985703945,
+   "median_s": 108.77164279622957,
+   "max_s": 137.92078856704757,
+   "reps": 5,
+   "spread_ratio": 2.8498119192286393,
+   "ms_per_frame": 483.96452985703945,
+   "fps": 2.0662671297324096
+  },
+  "flowtavg5": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 56.72759560775012,
+   "median_s": 107.38675905903801,
+   "max_s": 123.61396022001281,
+   "reps": 5,
+   "spread_ratio": 2.179079844574352,
+   "ms_per_frame": 567.2759560775012,
+   "fps": 1.762810479250032
+  },
+  "flowtavg5_unsharp": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 42.41100647114217,
+   "median_s": 42.74016075767577,
+   "max_s": 52.29030111990869,
+   "reps": 5,
+   "spread_ratio": 1.2329417637256195,
+   "ms_per_frame": 424.1100647114217,
+   "fps": 2.357878492415483
+  },
+  "flow_full_recompute": {
+   "scope": "compute",
+   "device": "cpu",
+   "min_s": 41.9426686023362,
+   "median_s": 44.03644975274801,
+   "max_s": 44.367872283328325,
+   "reps": 5,
+   "spread_ratio": 1.0578218735671254,
+   "ms_per_frame": 419.426686023362,
+   "fps": 2.3842069027155324
+  },
+  "edsr": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 4,
+   "min_s": 8.554406135808676,
+   "median_s": 8.761912195943296,
+   "max_s": 8.948413483332843,
+   "reps": 5,
+   "spread_ratio": 1.0460589947763708,
+   "ms_per_frame": 85.54406135808676,
+   "fps": 11.689882197830284,
+   "peak_allocated_MiB": 2047.5048828125,
+   "peak_reserved_MiB": 3514.0
+  },
+  "edsr_with_write": {
+   "scope": "compute+write",
+   "device": "cuda",
+   "min_s": 17.436955159064382,
+   "median_s": 17.687236820114776,
+   "max_s": 17.93751848116517,
+   "reps": 2,
+   "spread_ratio": 1.0287070372971956,
+   "ms_per_frame": 174.36955159064382,
+   "fps": 5.734946215539027
+  },
+  "edvr": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 1,
+   "window": 5,
+   "min_s": 54.85975687298924,
+   "median_s": 55.16140490863472,
+   "max_s": 64.92504213843495,
+   "reps": 4,
+   "spread_ratio": 1.183473019917838,
+   "ms_per_frame": 548.5975687298924,
+   "fps": 1.8228298064010564,
+   "peak_allocated_MiB": 1211.42578125,
+   "peak_reserved_MiB": 1946.0
+  },
+  "edsr_bs1": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 1,
+   "min_s": 5.870454257819802,
+   "median_s": 6.148473972920328,
+   "max_s": 6.163218724541366,
+   "reps": 3,
+   "spread_ratio": 1.0498708368831227,
+   "peak_allocated_MiB": 1617.99853515625,
+   "peak_reserved_MiB": 1892.0,
+   "ms_per_frame": 61.484739729203284
+  },
+  "edsr_bs2": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 2,
+   "min_s": 6.693548231385648,
+   "median_s": 6.876922443043441,
+   "max_s": 7.051402102224529,
+   "reps": 3,
+   "spread_ratio": 1.053462507248536,
+   "peak_allocated_MiB": 2127.51123046875,
+   "peak_reserved_MiB": 2352.0,
+   "ms_per_frame": 68.7692244304344
+  },
+  "edsr_bs4": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 4,
+   "min_s": 6.829864839091897,
+   "median_s": 7.025109530892223,
+   "max_s": 7.1795136467553675,
+   "reps": 3,
+   "spread_ratio": 1.0511941035292816,
+   "peak_allocated_MiB": 3104.65576171875,
+   "peak_reserved_MiB": 4590.0,
+   "ms_per_frame": 70.25109530892223
+  },
+  "edsr_bs8": {
+   "scope": "compute",
+   "device": "cuda",
+   "batch": 8,
+   "min_s": 6.4487740052863955,
+   "median_s": 6.873670694883913,
+   "max_s": 6.882954483386129,
+   "reps": 3,
+   "spread_ratio": 1.0673276002142134,
+   "peak_allocated_MiB": 5019.79248046875,
+   "peak_reserved_MiB": 7568.0,
+   "ms_per_frame": 68.73670694883913
+  }
+ },
+ "components": {
+  "read_lr_png": {
+   "min_s": 0.2329469989053905,
+   "median_s": 0.2887614141218364,
+   "max_s": 0.3908646497875452,
+   "reps": 5,
+   "spread_ratio": 1.6779123647190306
+  },
+  "read_gt_png": {
+   "min_s": 3.976063549052924,
+   "median_s": 4.029659270774573,
+   "max_s": 4.0888724979013205,
+   "reps": 5,
+   "spread_ratio": 1.0283720185697904
+  },
+  "write_hr_png": {
+   "min_s": 6.472323494032025,
+   "median_s": 6.53211483405903,
+   "max_s": 6.591906174086034,
+   "reps": 2,
+   "spread_ratio": 1.0184760048171686
+  },
+  "flow_farneback_all_pairs": {
+   "min_s": 9.944708781782538,
+   "median_s": 13.17559029860422,
+   "max_s": 48.32608975516632,
+   "reps": 5,
+   "spread_ratio": 4.85947761926359
+  },
+  "flow_farneback_per_pair_ms": 49.72354390891269,
+  "warp_blend_all_frames": {
+   "min_s": 20.33251971192658,
+   "median_s": 34.084612221922725,
+   "max_s": 38.698383926879615,
+   "reps": 5,
+   "spread_ratio": 1.9032753674981093
+  },
+  "warp_blend_per_frame_ms": 203.3251971192658
+ }
+}
