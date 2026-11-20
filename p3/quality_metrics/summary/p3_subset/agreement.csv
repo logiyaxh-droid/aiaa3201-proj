@@ -1,0 +1,16 @@
+clip,metric_a,metric_b,n,spearman
+000,dists,musiq,5,-1.0000
+000,dists,dover_technical,5,-1.0000
+000,musiq,dover_technical,5,1.0000
+000,dists,dover_aesthetic,5,-1.0000
+000,musiq,dover_aesthetic,5,1.0000
+002,dists,musiq,5,-1.0000
+002,dists,dover_technical,5,-1.0000
+002,musiq,dover_technical,5,1.0000
+002,dists,dover_aesthetic,5,-1.0000
+002,musiq,dover_aesthetic,5,1.0000
+009,dists,musiq,5,-1.0000
+009,dists,dover_technical,5,-0.9000
+009,musiq,dover_technical,5,0.9000
+009,dists,dover_aesthetic,5,-1.0000
+009,musiq,dover_aesthetic,5,1.0000

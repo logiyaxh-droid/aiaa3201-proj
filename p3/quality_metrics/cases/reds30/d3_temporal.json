@@ -1,0 +1,67 @@
+{
+ "criterion": "lowest DOVER technical",
+ "n": 6,
+ "rows": [
+  {
+   "clip": "016",
+   "method": "tavg5",
+   "dover_technical": -0.19245336949825287,
+   "dover_aesthetic": -0.014245130121707916,
+   "tlp_p0": 0.065963872134535,
+   "flow_warp_lpips_p0": 0.02778610821813345,
+   "psnr_p0": 22.18608856201172,
+   "lpips_p0": 0.6845349580049515
+  },
+  {
+   "clip": "016",
+   "method": "tavg5_unsharp",
+   "dover_technical": -0.19144199788570404,
+   "dover_aesthetic": -0.007189251948148012,
+   "tlp_p0": 0.057357870418616015,
+   "flow_warp_lpips_p0": 0.03932706754654646,
+   "psnr_p0": 22.390439987182617,
+   "lpips_p0": 0.6353182631731034
+  },
+  {
+   "clip": "016",
+   "method": "tavg3",
+   "dover_technical": -0.19119490683078766,
+   "dover_aesthetic": -0.0145309679210186,
+   "tlp_p0": 0.056645080390753166,
+   "flow_warp_lpips_p0": 0.03185797568410635,
+   "psnr_p0": 22.541746139526367,
+   "lpips_p0": 0.6679702651500702
+  },
+  {
+   "clip": "016",
+   "method": "bicubic",
+   "dover_technical": -0.1904044896364212,
+   "dover_aesthetic": -0.012291781604290009,
+   "tlp_p0": 0.043477803054783076,
+   "flow_warp_lpips_p0": 0.03677022956311703,
+   "psnr_p0": 22.928783416748047,
+   "lpips_p0": 0.6464874309301376
+  },
+  {
+   "clip": "016",
+   "method": "bicubic_unsharp",
+   "dover_technical": -0.1892264187335968,
+   "dover_aesthetic": -0.002617357298731804,
+   "tlp_p0": 0.029825091173853537,
+   "flow_warp_lpips_p0": 0.053648474887013436,
+   "psnr_p0": 23.141199111938477,
+   "lpips_p0": 0.5989359730482101
+  },
+  {
+   "clip": "016",
+   "method": "flowtavg3",
+   "dover_technical": -0.18761812150478363,
+   "dover_aesthetic": -0.011701737530529499,
+   "tlp_p0": 0.05777545032477138,
+   "flow_warp_lpips_p0": 0.012794215250760316,
+   "psnr_p0": 22.94097328186035,
+   "lpips_p0": 0.6631678831577301
+  }
+ ],
+ "caveat": "DOVER is one value per clip and cannot say which frame flickers; the per-pair tLP column is what locates frames."
+}

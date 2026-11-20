@@ -51,3 +51,9 @@ p3/frames/
 
 # 本地提交信息草稿
 commit_msg.txt
+
+# P3 感知质量指标：权重与第三方源码不入库（体积大、可再下载，方法见 p3/quality_metrics/README.md）
+p3/quality_metrics/weights/
+p3/quality_metrics/vendor/
+# P3 微调检查点：每个 237 MB，共 4.5 GB，属可复算产物
+p3/quality_metrics/fine_tune/runs/

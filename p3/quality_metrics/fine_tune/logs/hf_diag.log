@@ -1,0 +1,7 @@
+baseline       000 textured hf_ratio 0.539 corr 0.533 | flat hf_ratio 0.435 corr 0.375 | all mae 5.955
+pixel_only     000 textured hf_ratio 0.515 corr 0.522 | flat hf_ratio 0.422 corr 0.369 | all mae 6.033
+dists010       000 textured hf_ratio 0.658 corr 0.459 | flat hf_ratio 0.710 corr 0.277 | all mae 6.390
+baseline       002 textured hf_ratio 0.589 corr 0.591 | flat hf_ratio 0.647 corr 0.518 | all mae 4.166
+pixel_only     002 textured hf_ratio 0.591 corr 0.584 | flat hf_ratio 0.644 corr 0.509 | all mae 4.223
+dists010       002 textured hf_ratio 0.748 corr 0.523 | flat hf_ratio 0.919 corr 0.440 | all mae 4.524
+wrote /data/disk1/home/ghe270/p3/quality_metrics/fine_tune/results/hf_diagnostic.json

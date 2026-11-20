@@ -1,0 +1,9 @@
+baseline,method,d_dists,d_musiq,d_dover_technical,d_dover_aesthetic
+bicubic,bicubic_unsharp,-0.017784,1.545854,-0.000785,0.009489
+bicubic,edsr,-0.068939,27.297978,0.069593,0.033944
+bicubic,edvr,-0.106301,31.585263,0.082616,0.045858
+bicubic,tecogan,-0.040522,10.939992,0.032730,0.012456
+edvr,bicubic,0.106301,-31.585263,-0.082616,-0.045858
+edvr,bicubic_unsharp,0.088518,-30.039409,-0.083401,-0.036369
+edvr,edsr,0.037362,-4.287284,-0.013023,-0.011914
+edvr,tecogan,0.065780,-20.645270,-0.049886,-0.033402

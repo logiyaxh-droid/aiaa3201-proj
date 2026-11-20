@@ -1,0 +1,285 @@
+{
+ "clips": {
+  "000": {
+   "lanczos": {
+    "source": "computed",
+    "psnr": 25.752953578623746,
+    "old_psnr": 25.75295639038086,
+    "d_psnr": 2.8117571133634556e-06,
+    "lpips": 0.515735708475113,
+    "old_lpips": 0.515735708475113,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "bicubic_unsharp": {
+    "source": "computed",
+    "psnr": 25.856950146321363,
+    "old_psnr": 25.856948852539062,
+    "d_psnr": 1.2937823008485339e-06,
+    "lpips": 0.4718849220871925,
+    "old_lpips": 0.4718849220871925,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "edsr": {
+    "source": "computed",
+    "psnr": 27.537597981343524,
+    "old_psnr": 27.537595748901367,
+    "d_psnr": 2.2324421564690056e-06,
+    "lpips": 0.32505474746227264,
+    "old_lpips": 0.32505474746227264,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg3": {
+    "source": "computed",
+    "psnr": 21.73738848835861,
+    "old_psnr": 21.737388610839844,
+    "d_psnr": 1.2248123226754615e-07,
+    "lpips": 0.6037899798154831,
+    "old_lpips": 0.6037899798154831,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5": {
+    "source": "computed",
+    "psnr": 20.244824877049908,
+    "old_psnr": 20.24482536315918,
+    "d_psnr": 4.861092719465887e-07,
+    "lpips": 0.6563874870538712,
+    "old_lpips": 0.6563874870538712,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5_unsharp": {
+    "source": "computed",
+    "psnr": 20.32541612346627,
+    "old_psnr": 20.325416564941406,
+    "d_psnr": 4.414751373360559e-07,
+    "lpips": 0.6153821054100991,
+    "old_lpips": 0.6153821054100991,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg3": {
+    "source": "computed",
+    "psnr": 25.319046514335486,
+    "old_psnr": 25.319047927856445,
+    "d_psnr": 1.413520958948311e-06,
+    "lpips": 0.5267322432994842,
+    "old_lpips": 0.5267322432994842,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5": {
+    "source": "computed",
+    "psnr": 24.928782184701518,
+    "old_psnr": 24.928783416748047,
+    "d_psnr": 1.2320465287984916e-06,
+    "lpips": 0.5368592309951782,
+    "old_lpips": 0.5368592309951782,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5_unsharp": {
+    "source": "computed",
+    "psnr": 25.25128525374029,
+    "old_psnr": 25.251283645629883,
+    "d_psnr": 1.6081104057263929e-06,
+    "lpips": 0.4976194030046463,
+    "old_lpips": 0.4976194030046463,
+    "d_lpips": 0.0,
+    "pass": true
+   }
+  },
+  "002": {
+   "lanczos": {
+    "source": "computed",
+    "psnr": 26.802213200359134,
+    "old_psnr": 26.802213668823242,
+    "d_psnr": 4.6846410839407326e-07,
+    "lpips": 0.38733260840177536,
+    "old_lpips": 0.38733260840177536,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "bicubic_unsharp": {
+    "source": "computed",
+    "psnr": 26.904283842084304,
+    "old_psnr": 26.904285430908203,
+    "d_psnr": 1.5888238991124126e-06,
+    "lpips": 0.34492935091257093,
+    "old_lpips": 0.34492935091257093,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "edsr": {
+    "source": "computed",
+    "psnr": 29.692053271827493,
+    "old_psnr": 29.692054748535156,
+    "d_psnr": 1.4767076628174891e-06,
+    "lpips": 0.15421078056097032,
+    "old_lpips": 0.15421078056097032,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg3": {
+    "source": "computed",
+    "psnr": 21.62463391601243,
+    "old_psnr": 21.624631881713867,
+    "d_psnr": 2.0342985642685107e-06,
+    "lpips": 0.5146354129910469,
+    "old_lpips": 0.5146354129910469,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5": {
+    "source": "computed",
+    "psnr": 19.881847775771405,
+    "old_psnr": 19.881847381591797,
+    "d_psnr": 3.941796080653148e-07,
+    "lpips": 0.5832065671682358,
+    "old_lpips": 0.5832065671682358,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5_unsharp": {
+    "source": "computed",
+    "psnr": 19.970393388181762,
+    "old_psnr": 19.970394134521484,
+    "d_psnr": 7.463397224682922e-07,
+    "lpips": 0.5392752388119697,
+    "old_lpips": 0.5392752388119697,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg3": {
+    "source": "computed",
+    "psnr": 26.19248839001213,
+    "old_psnr": 26.192487716674805,
+    "d_psnr": 6.733373254519393e-07,
+    "lpips": 0.4092913040518761,
+    "old_lpips": 0.4092913040518761,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5": {
+    "source": "computed",
+    "psnr": 25.733627010104602,
+    "old_psnr": 25.733627319335938,
+    "d_psnr": 3.09231335648974e-07,
+    "lpips": 0.4245141306519508,
+    "old_lpips": 0.4245141306519508,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5_unsharp": {
+    "source": "computed",
+    "psnr": 26.157638275217472,
+    "old_psnr": 26.157634735107422,
+    "d_psnr": 3.540110050437306e-06,
+    "lpips": 0.38203066200017927,
+    "old_lpips": 0.38203066200017927,
+    "d_lpips": 0.0,
+    "pass": true
+   }
+  },
+  "009": {
+   "lanczos": {
+    "source": "computed",
+    "psnr": 28.018949366073272,
+    "old_psnr": 28.018953323364258,
+    "d_psnr": 3.957290985567852e-06,
+    "lpips": 0.47240692883729934,
+    "old_lpips": 0.47240692883729934,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "bicubic_unsharp": {
+    "source": "computed",
+    "psnr": 28.102622983355122,
+    "old_psnr": 28.102624893188477,
+    "d_psnr": 1.9098333545741752e-06,
+    "lpips": 0.4311468958854675,
+    "old_lpips": 0.4311468958854675,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "edsr": {
+    "source": "computed",
+    "psnr": 29.863417937255516,
+    "old_psnr": 29.863418579101562,
+    "d_psnr": 6.418460465340559e-07,
+    "lpips": 0.2874866282939911,
+    "old_lpips": 0.2874866282939911,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg3": {
+    "source": "computed",
+    "psnr": 27.12425104707737,
+    "old_psnr": 27.124248504638672,
+    "d_psnr": 2.5424386969064017e-06,
+    "lpips": 0.4857156938314438,
+    "old_lpips": 0.4857156938314438,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5": {
+    "source": "computed",
+    "psnr": 26.64379724098209,
+    "old_psnr": 26.643800735473633,
+    "d_psnr": 3.494491544131506e-06,
+    "lpips": 0.49770476669073105,
+    "old_lpips": 0.49770476669073105,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "tavg5_unsharp": {
+    "source": "computed",
+    "psnr": 26.832350043086937,
+    "old_psnr": 26.832347869873047,
+    "d_psnr": 2.1732138897334607e-06,
+    "lpips": 0.4534345415234566,
+    "old_lpips": 0.4534345415234566,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg3": {
+    "source": "computed",
+    "psnr": 27.90633111328238,
+    "old_psnr": 27.906328201293945,
+    "d_psnr": 2.9119884352724057e-06,
+    "lpips": 0.47526418894529343,
+    "old_lpips": 0.47526418894529343,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5": {
+    "source": "computed",
+    "psnr": 27.899600418702104,
+    "old_psnr": 27.899599075317383,
+    "d_psnr": 1.3433847207977578e-06,
+    "lpips": 0.4783479306101799,
+    "old_lpips": 0.4783479306101799,
+    "d_lpips": 0.0,
+    "pass": true
+   },
+   "flowtavg5_unsharp": {
+    "source": "computed",
+    "psnr": 28.256038258727287,
+    "old_psnr": 28.256040573120117,
+    "d_psnr": 2.314392830271572e-06,
+    "lpips": 0.4456940633058548,
+    "old_lpips": 0.4456940633058548,
+    "d_lpips": 0.0,
+    "pass": true
+   }
+  }
+ },
+ "tolerance": {
+  "psnr": 0.001,
+  "lpips": 1e-06
+ },
+ "pass": true
+}

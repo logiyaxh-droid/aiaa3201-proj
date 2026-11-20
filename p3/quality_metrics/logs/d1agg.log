@@ -1,0 +1,14 @@
+loaded 1.7s rows=200000
+saved npz 3.3s
+001  bicubic  mae  7.974 hf_pred  2.811 hf_gt 16.686 ratio 0.168 graddiff 53.444 flow  41.97
+001  edsr     mae  6.289 hf_pred  5.883 hf_gt 16.686 ratio 0.353 graddiff 43.518 flow  41.97
+001  edvr     mae  4.012 hf_pred 10.343 hf_gt 16.686 ratio 0.620 graddiff 28.073 flow  41.97
+001  tecogan  mae  8.530 hf_pred  5.333 hf_gt 16.597 ratio 0.321 graddiff 56.157 flow  41.33
+016  bicubic  mae 12.149 hf_pred  3.916 hf_gt 27.557 ratio 0.142 graddiff 84.492 flow   8.22
+016  edsr     mae 10.647 hf_pred  7.237 hf_gt 27.557 ratio 0.263 graddiff 76.494 flow   8.22
+016  edvr     mae  8.141 hf_pred 12.028 hf_gt 27.557 ratio 0.436 graddiff 59.027 flow   8.22
+016  tecogan  mae 13.305 hf_pred  7.269 hf_gt 27.557 ratio 0.264 graddiff 92.337 flow   8.22
+029  bicubic  mae  3.298 hf_pred  1.922 hf_gt  6.008 ratio 0.320 graddiff 21.650 flow  58.95
+029  edsr     mae  2.261 hf_pred  3.266 hf_gt  6.008 ratio 0.544 graddiff 15.533 flow  58.95
+029  edvr     mae  1.677 hf_pred  3.906 hf_gt  6.008 ratio 0.650 graddiff 11.547 flow  58.95
+029  tecogan  mae  3.708 hf_pred  3.138 hf_gt  6.008 ratio 0.522 graddiff 23.149 flow  58.95

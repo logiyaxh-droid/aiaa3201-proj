@@ -1,0 +1,109 @@
+[14:46:24] scope=p3_subset clips=3 methods=5 metrics=['dists', 'musiq', 'dover'] device=cuda
+Loading pretrained model DISTS from /data/disk1/home/ghe270/p3/quality_metrics/weights/DISTS_weights-f5e65c96.pth
+[14:46:39] dists: 3/3 clips to do
+[14:46:39] [dists 1/3] clip 000 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:46:58]     bicubic              dists 0.1780  (13s)  [cache]
+[14:47:15]     bicubic_unsharp      dists 0.1625  (17s)  [computed]
+[14:47:28]     edsr                 dists 0.1158  (13s)  [computed]
+[14:47:36]     edvr                 dists 0.0752  (8s)  [cache]
+[14:47:45]     tecogan              dists 0.1417  (9s)  [cache]
+[14:47:45]   clip 000 done in 1.1 min
+[14:47:45] [dists 2/3] clip 002 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:47:56]     bicubic              dists 0.1639  (5s)  [computed]
+[14:48:03]     bicubic_unsharp      dists 0.1446  (8s)  [computed]
+[14:48:17]     edsr                 dists 0.0891  (13s)  [computed]
+[14:48:25]     edvr                 dists 0.0627  (8s)  [cache]
+[14:48:34]     tecogan              dists 0.1207  (9s)  [cache]
+[14:48:34]   clip 002 done in 0.8 min
+[14:48:34] [dists 3/3] clip 009 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:48:46]     bicubic              dists 0.2061  (5s)  [computed]
+[14:48:53]     bicubic_unsharp      dists 0.1876  (7s)  [computed]
+[14:49:04]     edsr                 dists 0.1362  (11s)  [computed]
+[14:49:13]     edvr                 dists 0.0912  (9s)  [cache]
+[14:49:22]     tecogan              dists 0.1640  (9s)  [cache]
+[14:49:22]   clip 009 done in 0.8 min
+[14:49:22] dists finished in 2.8 min
+[14:49:22]   summary dists: 3 clips, ok=15 missing=0 error=0
+[14:49:22]     bicubic              n=  3  mean=0.1827
+[14:49:22]     bicubic_unsharp      n=  3  mean=0.1649
+[14:49:22]     edsr                 n=  3  mean=0.1137
+[14:49:22]     edvr                 n=  3  mean=0.0763
+[14:49:22]     tecogan              n=  3  mean=0.1421
+Loading pretrained model MUSIQ from /data/disk1/home/ghe270/p3/quality_metrics/weights/musiq_koniq_ckpt-e95806b9.pth
+[14:49:25] musiq: 3/3 clips to do
+[14:49:25] [musiq 1/3] clip 000 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:49:38]     bicubic              musiq 28.5602  (9s)  [cache]
+[14:49:59]     bicubic_unsharp      musiq 29.7420  (20s)  [computed]
+[14:50:11]     edsr                 musiq 57.7368  (12s)  [computed]
+[14:50:19]     edvr                 musiq 64.5267  (8s)  [cache]
+[14:50:27]     tecogan              musiq 40.3012  (8s)  [cache]
+[14:50:27]   clip 000 done in 1.0 min
+[14:50:27] [musiq 2/3] clip 002 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:50:37]     bicubic              musiq 26.1541  (6s)  [computed]
+[14:50:45]     bicubic_unsharp      musiq 27.9357  (8s)  [computed]
+[14:50:58]     edsr                 musiq 58.4494  (13s)  [computed]
+[14:51:07]     edvr                 musiq 62.5264  (9s)  [cache]
+[14:51:15]     tecogan              musiq 38.2943  (8s)  [cache]
+[14:51:15]   clip 002 done in 0.8 min
+[14:51:15] [musiq 3/3] clip 009 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:51:25]     bicubic              musiq 38.7694  (6s)  [computed]
+[14:51:35]     bicubic_unsharp      musiq 40.4436  (10s)  [computed]
+[14:51:48]     edsr                 musiq 59.1915  (13s)  [computed]
+[14:51:56]     edvr                 musiq 61.1864  (8s)  [cache]
+[14:52:04]     tecogan              musiq 47.7082  (8s)  [cache]
+[14:52:04]   clip 009 done in 0.8 min
+[14:52:05] musiq finished in 2.7 min
+[14:52:05]   summary musiq: 3 clips, ok=15 missing=0 error=0
+[14:52:05]     bicubic              n=  3  mean=31.1612
+[14:52:05]     bicubic_unsharp      n=  3  mean=32.7071
+[14:52:05]     edsr                 n=  3  mean=58.4592
+[14:52:05]     edvr                 n=  3  mean=62.7465
+[14:52:05]     tecogan              n=  3  mean=42.1012
+/data/disk2/home/ghe270/p3/quality_metrics/venv/lib/python3.10/site-packages/timm/models/layers/__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+/data/disk2/home/ghe270/p3/quality_metrics/venv/lib/python3.10/site-packages/timm/models/registry.py:4: FutureWarning: Importing from timm.models.registry is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+divided
+/tmp/srenv/lib/python3.10/site-packages/torch/functional.py:539: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /pytorch/aten/src/ATen/native/TensorShape.cpp:3637.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+None False
+Setting backbone: technical_backbone
+divided
+Using Imagenet 22K pretrain False
+Setting backbone: aesthetic_backbone
+Setting head: technical_head
+Setting head: aesthetic_head
+[14:52:17] dover: 3/3 clips to do
+[14:52:17] [dover 1/3] clip 000 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+/tmp/srenv/lib/python3.10/site-packages/torch/_dynamo/eval_frame.py:745: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+/tmp/srenv/lib/python3.10/site-packages/torch/utils/checkpoint.py:87: UserWarning: None of the inputs have requires_grad=True. Gradients will be None
+  warnings.warn(
+[14:52:40]     bicubic              dover -0.1287  (18s)  [cache]
+[14:53:09]     bicubic_unsharp      dover -0.1249  (29s)  [computed]
+[14:53:30]     edsr                 dover -0.0831  (21s)  [computed]
+[14:53:49]     edvr                 dover -0.0762  (18s)  [cache]
+[14:54:02]     tecogan              dover -0.1165  (13s)  [cache]
+[14:54:02]   clip 000 done in 1.7 min
+[14:54:02] [dover 2/3] clip 002 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:54:18]     bicubic              dover -0.1417  (12s)  [computed]
+[14:54:30]     bicubic_unsharp      dover -0.1397  (12s)  [computed]
+[14:54:53]     edsr                 dover -0.0797  (22s)  [computed]
+[14:55:10]     edvr                 dover -0.0615  (17s)  [cache]
+[14:55:27]     tecogan              dover -0.1199  (17s)  [cache]
+[14:55:27]   clip 002 done in 1.4 min
+[14:55:27] [dover 3/3] clip 009 -> ['bicubic', 'bicubic_unsharp', 'edsr', 'edvr', 'tecogan']
+[14:55:43]     bicubic              dover -0.1592  (12s)  [computed]
+[14:55:55]     bicubic_unsharp      dover -0.1674  (12s)  [computed]
+[14:56:15]     edsr                 dover -0.0581  (20s)  [computed]
+[14:56:28]     edvr                 dover -0.0442  (13s)  [cache]
+[14:56:42]     tecogan              dover -0.0952  (14s)  [cache]
+[14:56:42]   clip 009 done in 1.3 min
+[14:56:42] dover finished in 4.6 min
+[14:56:42]   summary dover: 3 clips, ok=15 missing=0 error=0
+[14:56:42]     bicubic              n=  3  mean=-0.1432
+[14:56:42]     bicubic_unsharp      n=  3  mean=-0.1440
+[14:56:42]     edsr                 n=  3  mean=-0.0736
+[14:56:42]     edvr                 n=  3  mean=-0.0606
+[14:56:42]     tecogan              n=  3  mean=-0.1105
+[14:56:42] all metrics done

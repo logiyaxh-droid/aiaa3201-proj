@@ -1,0 +1,9 @@
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+/tmp/srenv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/tmp/srenv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Loading model from: /tmp/srenv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Loading pretrained model DISTS from /data/disk1/home/ghe270/p3/quality_metrics/weights/DISTS_weights-f5e65c96.pth
+pilot_control clip 000 PSNR 30.2594 LPIPS 0.21557 DISTS 0.07750 tLP 0.01465 (137.8s)
+mean: {"psnr": 30.259435847037274, "lpips": 0.21556848242878915, "dists": 0.07749594807624817, "tlp": 0.014647500081495806}

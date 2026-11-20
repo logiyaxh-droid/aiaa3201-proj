@@ -1,0 +1,60 @@
+{
+ "data": {
+  "lr_shape": [
+   5,
+   3,
+   32,
+   32
+  ],
+  "gt_shape": [
+   3,
+   128,
+   128
+  ],
+  "clip": "000",
+  "ids": [
+   41,
+   42,
+   43,
+   44,
+   45
+  ],
+  "crop_ratio": 4.0,
+  "pass": true
+ },
+ "charbonnier": {
+  "abs_diff": 0.0,
+  "pass": true
+ },
+ "dists_backward": {
+  "value": 0.17031800746917725,
+  "input_grad_finite": true,
+  "input_grad_abs_sum": 10.738890647888184,
+  "metric_parameters_changed": false,
+  "pass": true
+ },
+ "generator_step": {
+  "pred_shape": [
+   1,
+   3,
+   128,
+   128
+  ],
+  "loss": 0.01632983796298504,
+  "gradients_finite": true,
+  "conv_last_updated": true,
+  "pass": true
+ },
+ "gan_step": {
+  "d_loss": 0.6955392360687256,
+  "g_loss": 0.6931573152542114,
+  "real_logits_shape": [
+   1,
+   1,
+   128,
+   128
+  ],
+  "pass": true
+ },
+ "pass": true
+}

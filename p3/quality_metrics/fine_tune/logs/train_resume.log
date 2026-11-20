@@ -1,0 +1,3 @@
+Loading pretrained model DISTS from /data/disk1/home/ghe270/p3/quality_metrics/weights/DISTS_weights-f5e65c96.pth
+resumed at step 3
+{"step": 3, "batch_size": 1, "pixel": 0.025454029440879822, "lpips": 0.0, "dists": 0.10214436054229736, "adv_g": 0.0, "adv_d": 0.0, "total": 0.03566846624016762, "grad_norm": 0.23078802227973938, "seconds": 1.5732510089874268, "max_vram_gib": 1.1158933639526367, "pred_range": [-0.0015265047550201416, 1.025558590888977], "example": {"clip": "001", "frame_ids": [83]}}

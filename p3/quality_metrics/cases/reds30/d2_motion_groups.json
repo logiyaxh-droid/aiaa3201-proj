@@ -1,0 +1,287 @@
+{
+ "motion_source": "recomputed from GT",
+ "terciles": {
+  "q1": 9.091993840535482,
+  "q2": 15.36378126144409
+ },
+ "group_sizes": {
+  "low": 10,
+  "mid": 10,
+  "high": 10
+ },
+ "per_method_group": {
+  "bicubic": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.1991940570473671,
+    "musiq": 27.71192360496521,
+    "dover_technical": -0.14867298901081086
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.193857802093029,
+    "musiq": 27.20951397514343,
+    "dover_technical": -0.14723408967256546
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.18584775364398956,
+    "musiq": 27.48754214286804,
+    "dover_technical": -0.14355315417051315
+   }
+  },
+  "bicubic_unsharp": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.18220279175043103,
+    "musiq": 29.515340440750123,
+    "dover_technical": -0.14835827946662902
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.1749172343611717,
+    "musiq": 29.38618719482422,
+    "dover_technical": -0.1481033056974411
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.16661466705799102,
+    "musiq": 29.10546653556824,
+    "dover_technical": -0.142603600025177
+   }
+  },
+  "edsr": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.13873377597332,
+    "musiq": 54.00418873977661,
+    "dover_technical": -0.07741704173386096
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.1275566002726555,
+    "musiq": 54.3301689414978,
+    "dover_technical": -0.09387968629598617
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.1167338926792145,
+    "musiq": 54.55105178833007,
+    "dover_technical": -0.09407077357172966
+   }
+  },
+  "edvr": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.09580317229032516,
+    "musiq": 60.63094674301148,
+    "dover_technical": -0.059815258160233496
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.08486233741044999,
+    "musiq": 60.500279144287106,
+    "dover_technical": -0.08328291475772857
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.08026132756471634,
+    "musiq": 60.07895423126221,
+    "dover_technical": -0.08460281491279602
+   }
+  },
+  "flowtavg3": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.20383421331644064,
+    "musiq": 27.586426088333127,
+    "dover_technical": -0.1455681636929512
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.20014024806022643,
+    "musiq": 26.96381078338623,
+    "dover_technical": -0.14433510601520538
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.19264287722110746,
+    "musiq": 27.524181201934816,
+    "dover_technical": -0.1421484537422657
+   }
+  },
+  "flowtavg5": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.20740838265419007,
+    "musiq": 27.55586353111267,
+    "dover_technical": -0.1443565383553505
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.2046949250102043,
+    "musiq": 26.83711681365967,
+    "dover_technical": -0.14383586198091508
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.19845915406942366,
+    "musiq": 27.539751523971557,
+    "dover_technical": -0.14199031814932822
+   }
+  },
+  "flowtavg5_unsharp": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.1899894282221794,
+    "musiq": 28.868580131530756,
+    "dover_technical": -0.1411842919886112
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.18539875555038454,
+    "musiq": 28.359475475311278,
+    "dover_technical": -0.14167570918798447
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.17775252759456636,
+    "musiq": 28.576590702056887,
+    "dover_technical": -0.13861840069293976
+   }
+  },
+  "lanczos": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.19838875567913056,
+    "musiq": 28.2995836429596,
+    "dover_technical": -0.14559542387723923
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.19288713455200196,
+    "musiq": 27.900048500061036,
+    "dover_technical": -0.1444278582930565
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.18444085496664048,
+    "musiq": 28.11196441459656,
+    "dover_technical": -0.14065634086728096
+   }
+  },
+  "tavg3": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.23801483982801436,
+    "musiq": 24.172017848968505,
+    "dover_technical": -0.1535528153181076
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.26038355761766435,
+    "musiq": 23.00990580940246,
+    "dover_technical": -0.1564883768558502
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.2559171568751335,
+    "musiq": 22.947648693084716,
+    "dover_technical": -0.15265582501888275
+   }
+  },
+  "tavg5": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.26619455927610397,
+    "musiq": 23.065014417648314,
+    "dover_technical": -0.15757118463516234
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.3037080218791962,
+    "musiq": 21.675498400688173,
+    "dover_technical": -0.161496102809906
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.30282204008102415,
+    "musiq": 21.22374199295044,
+    "dover_technical": -0.15770672708749772
+   }
+  },
+  "tavg5_unsharp": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.2464972878694534,
+    "musiq": 23.46118885612488,
+    "dover_technical": -0.15596304684877396
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.2848645551800728,
+    "musiq": 21.921465763092037,
+    "dover_technical": -0.15934320390224457
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.28335264313220976,
+    "musiq": 21.612086990356445,
+    "dover_technical": -0.15528155118227005
+   }
+  },
+  "tecogan": {
+   "low": {
+    "n_clips": 10,
+    "dists": 0.161699955701828,
+    "musiq": 39.319538307189944,
+    "dover_technical": -0.11291982829570771
+   },
+   "mid": {
+    "n_clips": 10,
+    "dists": 0.15180915617942808,
+    "musiq": 40.58718841362,
+    "dover_technical": -0.12296953871846199
+   },
+   "high": {
+    "n_clips": 10,
+    "dists": 0.1411412290930748,
+    "musiq": 39.022081354141235,
+    "dover_technical": -0.1231207713484764
+   }
+  }
+ },
+ "clip_groups": {
+  "000": "high",
+  "001": "mid",
+  "002": "high",
+  "003": "mid",
+  "004": "low",
+  "005": "low",
+  "006": "low",
+  "007": "high",
+  "008": "mid",
+  "009": "low",
+  "010": "high",
+  "011": "mid",
+  "012": "high",
+  "013": "low",
+  "014": "high",
+  "015": "mid",
+  "016": "low",
+  "017": "low",
+  "018": "low",
+  "019": "low",
+  "020": "mid",
+  "021": "low",
+  "022": "high",
+  "023": "high",
+  "024": "mid",
+  "025": "mid",
+  "026": "high",
+  "027": "mid",
+  "028": "mid",
+  "029": "high"
+ },
+ "caveat": "three diagnostics clips cannot support a between-group claim; group sizes are reported so the reader can judge."
+}

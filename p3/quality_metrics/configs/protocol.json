@@ -1,0 +1,78 @@
+{
+  "_note": "P3 quality-metrics protocol, frozen before any measurement. Mirrors p3/docs/P3_perceptual_quality_roadmap.md sections 2-4.",
+  "data": {
+    "gt_root": "/data/disk1/shared/aiaa3201/project1_video_sr/val_sharp",
+    "lr_root": "/data/disk1/shared/aiaa3201/project1_video_sr/val_sharp_bicubic",
+    "lr_scale": 4,
+    "frame_pattern": "0000*.png",
+    "clips_main": "all 30 dirs under gt_root",
+    "clips_diagnostic": [
+      "000",
+      "002",
+      "009"
+    ],
+    "frames_per_clip": 100
+  },
+  "methods_main": [
+    "bicubic",
+    "lanczos",
+    "bicubic_unsharp",
+    "edsr",
+    "tavg3",
+    "tavg5",
+    "tavg5_unsharp",
+    "flowtavg3",
+    "flowtavg5",
+    "flowtavg5_unsharp",
+    "edvr",
+    "tecogan"
+  ],
+  "methods_stage_a": [
+    "bicubic",
+    "edsr",
+    "edvr",
+    "tecogan"
+  ],
+  "dists": {
+    "impl": "pyiqa 0.1.13 archs.dists_arch.DISTS, cross-checked vs official DISTS_pytorch",
+    "lower_better": true,
+    "input": "RGB uint8 -> float [0,1], NO resize, full frame, no crop",
+    "per_frame": true,
+    "official_crosscheck": "DISTS_pytorch/weights.pt from dingkeyan93/DISTS (alpha/beta), abs tolerance 1e-5 vs pyiqa DISTS"
+  },
+  "musiq": {
+    "impl": "pyiqa 0.1.13 archs.musiq_arch.MUSIQ",
+    "weights": "koniq10k (primary); paq2piq and spaq are sensitivity-only",
+    "lower_better": false,
+    "input": "RGB uint8 -> float [0,1], library's own multi-scale preprocessing, full frame",
+    "per_frame": true,
+    "gt_reference": "GT frames scored too, reported separately as domain reference"
+  },
+  "dover": {
+    "impl": "official VQAssessment/DOVER master, DOVER (full) not DOVER-Mobile",
+    "weights": "DOVER.pth from the official release / teowu/DOVER HF mirror",
+    "lower_better": false,
+    "input": "the whole 100-frame clip, dover.yml defaults: clip_len 32, frame_interval 2, num_clips 3 (technical) / 1 (aesthetic), fixed sampling seed",
+    "outputs": [
+      "technical",
+      "aesthetic",
+      "fused (kept separately, never substituted)"
+    ],
+    "one_value_per_clip": true
+  },
+  "aggregation": {
+    "per_frame_saved": true,
+    "per_clip_stats": [
+      "mean",
+      "median",
+      "std"
+    ],
+    "main_table": "mean over 30 clip-level values (NOT the 3000-frame pooled mean)",
+    "report_clip_std": true
+  },
+  "runtime": {
+    "device": "cuda",
+    "torch_home": "/tmp/torch_home",
+    "note": "shared A6000; benchmark numbers are the MIN of clean runs, spread reported"
+  }
+}

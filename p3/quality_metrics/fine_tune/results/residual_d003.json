@@ -1,0 +1,151 @@
+{
+ "candidate": "d003",
+ "checkpoint": {
+  "name": "dist_lr3e5_d003",
+  "checkpoint": "/data/disk2/home/ghe270/p3/quality_metrics/fine_tune/runs/dist_lr3e5_d003/step_000900.pth",
+  "step": 900,
+  "config": {
+   "name": "dist_lr3e5_d003",
+   "iterations": 900,
+   "batch": 8,
+   "crop": 64,
+   "workers": 4,
+   "dataset_length": 4000,
+   "lr": 3e-05,
+   "lr_d": 0.0001,
+   "beta1": 0.9,
+   "lpips_weight": 0.0,
+   "dists_weight": 0.03,
+   "adv_weight": 0.0,
+   "seed": 20261119,
+   "device": "cuda",
+   "log_every": 100,
+   "save_every": 900,
+   "resume": null,
+   "auto_resume": false,
+   "base_weights": "/data/disk1/shared/aiaa3201/checkpoints/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth",
+   "base_weights_sha256": "9f5f50393965194cc180e1313fd162bc85003bb4c2a58c23a434a33fdb3786a2",
+   "data": {
+    "gt": "/data/disk1/shared/aiaa3201/project1_video_sr/train_sample_sharp",
+    "lr": "/data/disk1/shared/aiaa3201/project1_video_sr/train_sample_bicubic",
+    "crop_lr": 64,
+    "crop_gt": 256,
+    "frames": 5,
+    "center": 2,
+    "augment": [
+     "hflip",
+     "transpose"
+    ]
+   }
+  },
+  "weights_sha256": "1bcd8e92c7c0d3403cc7afaf5c133d53b4fc0cc8d5d747dffc71318785fadbc4"
+ },
+ "box": [
+  400,
+  240,
+  480,
+  320
+ ],
+ "clips": {
+  "000": {
+   "frames": [
+    10,
+    40,
+    70,
+    95
+   ],
+   "mean": {
+    "cos_r_hp_baseline": -0.02967865779675191,
+    "cos_r_hp_gt": -0.05454375079758244,
+    "cos_r_direction_gt_minus_base": 0.06295382037882412,
+    "sharpening_fit_k": -0.0018896870169555768,
+    "sharpening_fit_r2": 0.0042100995779037476,
+    "residual_energy_ratio": 0.24418410658836365
+   },
+   "per_frame": [
+    {
+     "cos_r_hp_baseline": 0.05191400878293539,
+     "cos_r_hp_gt": 0.030307632616686026,
+     "cos_r_direction_gt_minus_base": -0.010536327287623576,
+     "sharpening_fit_k": 0.002467317506670952,
+     "sharpening_fit_r2": 0.0026952028274536133,
+     "residual_energy_ratio": 0.21325108408927917
+    },
+    {
+     "cos_r_hp_baseline": -0.0518987028433844,
+     "cos_r_hp_gt": -0.10911684161193272,
+     "cos_r_direction_gt_minus_base": 0.1410215463872581,
+     "sharpening_fit_k": -0.0032188177574425936,
+     "sharpening_fit_r2": 0.0026934146881103516,
+     "residual_energy_ratio": 0.2713688910007477
+    },
+    {
+     "cos_r_hp_baseline": -0.10628737251316758,
+     "cos_r_hp_gt": -0.09668000160024276,
+     "cos_r_direction_gt_minus_base": 0.0667888437308482,
+     "sharpening_fit_k": -0.006242148112505674,
+     "sharpening_fit_r2": 0.011296987533569336,
+     "residual_energy_ratio": 0.26223063468933105
+    },
+    {
+     "cos_r_hp_baseline": -0.012442564613391048,
+     "cos_r_hp_gt": -0.04268579259484031,
+     "cos_r_direction_gt_minus_base": 0.05454121868481373,
+     "sharpening_fit_k": -0.0005650997045449913,
+     "sharpening_fit_r2": 0.00015479326248168945,
+     "residual_energy_ratio": 0.22988581657409668
+    }
+   ]
+  },
+  "002": {
+   "frames": [
+    10,
+    40,
+    70,
+    95
+   ],
+   "mean": {
+    "cos_r_hp_baseline": -0.1113424423618631,
+    "cos_r_hp_gt": -0.08808509784753867,
+    "cos_r_direction_gt_minus_base": 0.03739264507330702,
+    "sharpening_fit_k": -0.005991794867441058,
+    "sharpening_fit_r2": 0.017963111400604248,
+    "residual_energy_ratio": 0.2512366361916065
+   },
+   "per_frame": [
+    {
+     "cos_r_hp_baseline": -0.013590390694783192,
+     "cos_r_hp_gt": 0.006299757325705418,
+     "cos_r_direction_gt_minus_base": -0.021168216990830033,
+     "sharpening_fit_k": -0.000601696316152811,
+     "sharpening_fit_r2": 0.00018453598022460938,
+     "residual_energy_ratio": 0.2212001234292984
+    },
+    {
+     "cos_r_hp_baseline": -0.17643462647463332,
+     "cos_r_hp_gt": -0.1484654825279137,
+     "cos_r_direction_gt_minus_base": 0.06413728472661387,
+     "sharpening_fit_k": -0.010273327119648457,
+     "sharpening_fit_r2": 0.03112894296646118,
+     "residual_energy_ratio": 0.27871352434158325
+    },
+    {
+     "cos_r_hp_baseline": -0.19067425488542256,
+     "cos_r_hp_gt": -0.17685942429930057,
+     "cos_r_direction_gt_minus_base": 0.104238469753572,
+     "sharpening_fit_k": -0.01078119408339262,
+     "sharpening_fit_r2": 0.03635650873184204,
+     "residual_energy_ratio": 0.2932658791542053
+    },
+    {
+     "cos_r_hp_baseline": -0.06467049739261334,
+     "cos_r_hp_gt": -0.03331524188864581,
+     "cos_r_direction_gt_minus_base": 0.002363042803872243,
+     "sharpening_fit_k": -0.002310961950570345,
+     "sharpening_fit_r2": 0.00418245792388916,
+     "residual_energy_ratio": 0.2117670178413391
+    }
+   ]
+  }
+ }
+}

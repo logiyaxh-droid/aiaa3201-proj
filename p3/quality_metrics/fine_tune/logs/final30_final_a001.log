@@ -1,0 +1,38 @@
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+/tmp/srenv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/tmp/srenv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Loading model from: /tmp/srenv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Loading pretrained model DISTS from /data/disk1/home/ghe270/p3/quality_metrics/weights/DISTS_weights-f5e65c96.pth
+final_a001 clip 000 PSNR 30.1014 LPIPS 0.14765 DISTS 0.03871 tLP 0.01226 (140.9s)
+final_a001 clip 001 PSNR 31.2561 LPIPS 0.11965 DISTS 0.03446 tLP 0.00508 (171.9s)
+final_a001 clip 002 PSNR 32.6310 LPIPS 0.06134 DISTS 0.02730 tLP 0.00225 (107.7s)
+final_a001 clip 003 PSNR 34.6937 LPIPS 0.05664 DISTS 0.03186 tLP 0.00267 (142.4s)
+final_a001 clip 004 PSNR 32.7741 LPIPS 0.07668 DISTS 0.03221 tLP 0.00376 (153.0s)
+final_a001 clip 005 PSNR 31.5225 LPIPS 0.15315 DISTS 0.03616 tLP 0.00770 (179.6s)
+final_a001 clip 006 PSNR 31.7947 LPIPS 0.11755 DISTS 0.03939 tLP 0.00808 (113.1s)
+final_a001 clip 007 PSNR 30.6731 LPIPS 0.10744 DISTS 0.03815 tLP 0.00531 (64.1s)
+final_a001 clip 008 PSNR 30.5849 LPIPS 0.10761 DISTS 0.03673 tLP 0.00334 (59.9s)
+final_a001 clip 009 PSNR 32.5204 LPIPS 0.10348 DISTS 0.03701 tLP 0.00469 (54.1s)
+final_a001 clip 010 PSNR 33.5396 LPIPS 0.09135 DISTS 0.04129 tLP 0.00340 (69.3s)
+final_a001 clip 011 PSNR 25.6311 LPIPS 0.20082 DISTS 0.04563 tLP 0.02345 (64.9s)
+final_a001 clip 012 PSNR 30.8110 LPIPS 0.11798 DISTS 0.03657 tLP 0.00387 (59.9s)
+final_a001 clip 013 PSNR 28.8326 LPIPS 0.11283 DISTS 0.03469 tLP 0.00327 (60.9s)
+final_a001 clip 014 PSNR 28.8394 LPIPS 0.14945 DISTS 0.04073 tLP 0.00477 (63.8s)
+final_a001 clip 015 PSNR 27.1835 LPIPS 0.17731 DISTS 0.03068 tLP 0.01634 (67.4s)
+final_a001 clip 016 PSNR 26.0401 LPIPS 0.21919 DISTS 0.06797 tLP 0.00534 (65.0s)
+final_a001 clip 017 PSNR 26.2361 LPIPS 0.21433 DISTS 0.06420 tLP 0.00278 (61.7s)
+final_a001 clip 018 PSNR 26.1514 LPIPS 0.23846 DISTS 0.07695 tLP 0.01203 (53.6s)
+final_a001 clip 019 PSNR 29.0288 LPIPS 0.21282 DISTS 0.05353 tLP 0.01243 (63.6s)
+final_a001 clip 020 PSNR 29.5593 LPIPS 0.15512 DISTS 0.05362 tLP 0.01612 (61.0s)
+final_a001 clip 021 PSNR 30.6723 LPIPS 0.18195 DISTS 0.04763 tLP 0.01182 (51.5s)
+final_a001 clip 022 PSNR 28.6751 LPIPS 0.20928 DISTS 0.04186 tLP 0.01467 (59.3s)
+final_a001 clip 023 PSNR 28.5722 LPIPS 0.17869 DISTS 0.04534 tLP 0.01154 (51.3s)
+final_a001 clip 024 PSNR 29.9314 LPIPS 0.13287 DISTS 0.04255 tLP 0.00584 (60.2s)
+final_a001 clip 025 PSNR 30.4226 LPIPS 0.15038 DISTS 0.05271 tLP 0.00820 (54.9s)
+final_a001 clip 026 PSNR 34.6898 LPIPS 0.11004 DISTS 0.04624 tLP 0.00721 (56.6s)
+final_a001 clip 027 PSNR 28.1075 LPIPS 0.17160 DISTS 0.05573 tLP 0.00478 (60.6s)
+final_a001 clip 028 PSNR 36.3559 LPIPS 0.07099 DISTS 0.03809 tLP 0.00564 (52.1s)
+final_a001 clip 029 PSNR 37.8606 LPIPS 0.05926 DISTS 0.03244 tLP 0.00299 (53.8s)
+mean: {"psnr": 30.523066068353717, "lpips": 0.14019700358808043, "dists": 0.0433476239045461, "tlp": 0.007720700910421533}
