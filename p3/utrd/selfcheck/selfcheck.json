@@ -1,0 +1,86 @@
+{
+ "checks": [
+  {
+   "name": "frame ids identical",
+   "pass": true,
+   "detail": "100 ids, sample [40, 41, 42, 43, 44]"
+  },
+  {
+   "name": "LR is exactly GT/4",
+   "pass": true,
+   "detail": "GT (720, 1280, 3) LR (180, 320, 3)"
+  },
+  {
+   "name": "EDVR PSNR plausible vs clip mean",
+   "pass": true,
+   "detail": "frame 42 30.8403, stored clip mean 30.486469268798828"
+  },
+  {
+   "name": "feature shape",
+   "pass": true,
+   "detail": [
+    1,
+    128,
+    180,
+    320
+   ]
+  },
+  {
+   "name": "uncertainty range",
+   "pass": true,
+   "detail": "min 0.000 max 1.000 mean 0.229"
+  },
+  {
+   "name": "uniform noise RMS matches",
+   "pass": true,
+   "detail": "uncertain 0.392688 uniform 0.392688"
+  },
+  {
+   "name": "uncertain map varies spatially",
+   "pass": true,
+   "detail": "std 0.2462"
+  },
+  {
+   "name": "fixed-seed sampling reproducible",
+   "pass": true,
+   "detail": "max diff 0"
+  },
+  {
+   "name": "det forward/backward finite",
+   "pass": true,
+   "detail": "loss 0.15219"
+  },
+  {
+   "name": "det updates weights",
+   "pass": true,
+   "detail": "max delta 0.0001"
+  },
+  {
+   "name": "uniform forward/backward finite",
+   "pass": true,
+   "detail": "loss 0.97799"
+  },
+  {
+   "name": "uniform updates weights",
+   "pass": true,
+   "detail": "max delta 0.0001"
+  },
+  {
+   "name": "uncertain forward/backward finite",
+   "pass": true,
+   "detail": "loss 1.16994"
+  },
+  {
+   "name": "uncertain updates weights",
+   "pass": true,
+   "detail": "max delta 0.0001"
+  },
+  {
+   "name": "overfit 10 steps reduces loss",
+   "pass": true,
+   "detail": "0.19647 -> 0.04024"
+  }
+ ],
+ "n_pass": 15,
+ "n_total": 15
+}

@@ -3,6 +3,21 @@
 > Direction C（Uncertainty-Aware）。PDF 要求"计算像素级不确定性，
 > 确定区域交给回归模型、不确定纹理交给生成模型"。
 
+## 后续扩展：新模型尝试与最终结论
+
+本目录的早期内容是"不确定性诊断 + 路由"的第一次探索。后续又完成了两组新模型实验，
+**均未通过预设门槛**，最终结论与停止理由见
+[`docs/P3_direction_c_final_conclusions.md`](docs/P3_direction_c_final_conclusions.md)。
+
+| 实验 | 内容 | 结论 |
+|---|---|---|
+| `utrd/` | 冻结 EDVR + 少步残差扩散三原型（确定性 / 均匀噪声 / 不确定性噪声） | 均未超过同容量确定性对照，扩散主线停止 |
+| `prior_qualification/` | OSEDiff、SUPIR、DOVE 外部强生成先验的区域资格测试 | 纹理块 LPIPS 全部劣于现有感知微调 EDVR 1.5～2 倍，全部不通过 |
+
+当前在 REDS bicubic 上真正有效的改进仍是 EDVR 感知微调
+（LPIPS −31.2%，PSNR −0.381 dB），见
+[`quality_metrics/fine_tune/RESULTS.md`](quality_metrics/fine_tune/RESULTS.md)。
+
 ## 为什么选这个方向
 
 Part 2 暴露的是**取舍**而非矛盾：EDVR 在 PSNR/SSIM/LPIPS 上全面领先

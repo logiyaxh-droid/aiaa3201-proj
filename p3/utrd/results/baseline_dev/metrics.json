@@ -1,0 +1,59 @@
+{
+ "name": "baseline_dev",
+ "mode": "baseline",
+ "checkpoint": null,
+ "clips": {
+  "000": {
+   "psnr": 30.590699714630343,
+   "ssim": 0.8783559068309283,
+   "lpips": 0.20507582823435466,
+   "tlp": 0.016461204865883136,
+   "n_frames": 30,
+   "n_pairs": 29
+  },
+  "002": {
+   "psnr": 33.50006738621437,
+   "ssim": 0.9518675675125693,
+   "lpips": 0.08089185282588005,
+   "tlp": 0.0026729250776356666,
+   "n_frames": 30,
+   "n_pairs": 29
+  },
+  "009": {
+   "psnr": 33.137732160149554,
+   "ssim": 0.9115108166407667,
+   "lpips": 0.16818503042062125,
+   "tlp": 0.008894985284784744,
+   "n_frames": 30,
+   "n_pairs": 29
+  }
+ },
+ "frames": [
+  40,
+  70
+ ],
+ "protocol": {
+  "psnr": {
+   "color": "Y of cv2.COLOR_RGB2YCrCb",
+   "data_range": 255.0,
+   "prediction_precision": "uint8 (clipped + rounded)",
+   "reduction": "per-frame PSNR, then mean over frames",
+   "border_crop": "none"
+  },
+  "lpips": "LPIPS Alex v0.1, RGB uint8, full frame",
+  "tlp": {
+   "formula": "tLP(t) = |LPIPS(SR[t-1],SR[t]) - LPIPS(GT[t-1],GT[t])|, mean over pairs",
+   "source": "TecoGAN metrics.py (thunil/TecoGAN), re-implemented",
+   "requires_gt": true,
+   "no_gt_value": "N/A (null), never 0",
+   "pairs": "consecutive frames inside one clip only; never across clips or gaps"
+  }
+ },
+ "mean": {
+  "psnr": 32.409499753664754,
+  "ssim": 0.9139114303280881,
+  "lpips": 0.15138423716028535,
+  "tlp": 0.009343038409434517,
+  "n_clips": 3
+ }
+}

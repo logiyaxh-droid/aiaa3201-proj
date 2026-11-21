@@ -1,0 +1,59 @@
+{
+ "name": "uniform_proto1",
+ "mode": "uniform",
+ "checkpoint": "/data/disk2/home/ghe270/p3/utrd/runs/uniform_proto1/step_001500.pth",
+ "clips": {
+  "000": {
+   "psnr": 26.549453526709673,
+   "ssim": 0.6670193500677478,
+   "lpips": 0.2992947846651077,
+   "tlp": 0.007599469916573886,
+   "n_frames": 30,
+   "n_pairs": 29
+  },
+  "002": {
+   "psnr": 29.5202623798875,
+   "ssim": 0.824109108994719,
+   "lpips": 0.20851267327864964,
+   "tlp": 0.009440912254925432,
+   "n_frames": 30,
+   "n_pairs": 29
+  },
+  "009": {
+   "psnr": 28.033387011906335,
+   "ssim": 0.6910023454286907,
+   "lpips": 0.2855774541695913,
+   "tlp": 0.004299542256470384,
+   "n_frames": 30,
+   "n_pairs": 29
+  }
+ },
+ "frames": [
+  40,
+  70
+ ],
+ "protocol": {
+  "psnr": {
+   "color": "Y of cv2.COLOR_RGB2YCrCb",
+   "data_range": 255.0,
+   "prediction_precision": "uint8 (clipped + rounded)",
+   "reduction": "per-frame PSNR, then mean over frames",
+   "border_crop": "none"
+  },
+  "lpips": "LPIPS Alex v0.1, RGB uint8, full frame",
+  "tlp": {
+   "formula": "tLP(t) = |LPIPS(SR[t-1],SR[t]) - LPIPS(GT[t-1],GT[t])|, mean over pairs",
+   "source": "TecoGAN metrics.py (thunil/TecoGAN), re-implemented",
+   "requires_gt": true,
+   "no_gt_value": "N/A (null), never 0",
+   "pairs": "consecutive frames inside one clip only; never across clips or gaps"
+  }
+ },
+ "mean": {
+  "psnr": 28.03436763950117,
+  "ssim": 0.7273769348303859,
+  "lpips": 0.2644616373711162,
+  "tlp": 0.007113308142656567,
+  "n_clips": 3
+ }
+}

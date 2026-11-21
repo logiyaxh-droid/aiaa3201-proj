@@ -1,0 +1,34 @@
+{
+ "created": "2026-11-21T21:04:53+0800",
+ "python": "3.10.12",
+ "torch": "2.6.0+cu124",
+ "cuda": "12.4",
+ "gpu": "NVIDIA RTX A6000",
+ "platform": "Linux-5.15.0-186-generic-x86_64-with-glibc2.35",
+ "edvr_weights": {
+  "path": "/data/disk1/shared/aiaa3201/checkpoints/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth",
+  "sha256": "9f5f50393965194cc180e1313fd162bc85003bb4c2a58c23a434a33fdb3786a2"
+ },
+ "finetune_weights": {
+  "path": "/data/disk1/home/ghe270/p3/quality_metrics/fine_tune/runs/adv_lr3e5_d003_a001/step_000900.pth",
+  "sha256": "cf1786f3fce67c1d99a48d765bd8fedfc58f14bf535f3a6592b9a357682e93bb"
+ },
+ "protocol": {
+  "clips": [
+   "000",
+   "002",
+   "009"
+  ],
+  "frames": [
+   40,
+   49
+  ],
+  "block": 64,
+  "block_canvas": [
+   704,
+   1280
+  ]
+ },
+ "stage": "A",
+ "elapsed_s": 63.16862607002258
+}
