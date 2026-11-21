@@ -1,0 +1,34 @@
+{
+ "name": "adv_lr3e5_d003_a001",
+ "iterations": 900,
+ "batch": 8,
+ "crop": 64,
+ "workers": 4,
+ "dataset_length": 4000,
+ "lr": 3e-05,
+ "lr_d": 0.0001,
+ "beta1": 0.9,
+ "lpips_weight": 0.0,
+ "dists_weight": 0.03,
+ "adv_weight": 0.001,
+ "seed": 20261119,
+ "device": "cuda",
+ "log_every": 50,
+ "save_every": 900,
+ "resume": null,
+ "auto_resume": false,
+ "base_weights": "/data/disk1/shared/aiaa3201/checkpoints/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth",
+ "base_weights_sha256": "9f5f50393965194cc180e1313fd162bc85003bb4c2a58c23a434a33fdb3786a2",
+ "data": {
+  "gt": "/data/disk1/shared/aiaa3201/project1_video_sr/train_sample_sharp",
+  "lr": "/data/disk1/shared/aiaa3201/project1_video_sr/train_sample_bicubic",
+  "crop_lr": 64,
+  "crop_gt": 256,
+  "frames": 5,
+  "center": 2,
+  "augment": [
+   "hflip",
+   "transpose"
+  ]
+ }
+}

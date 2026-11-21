@@ -5,7 +5,7 @@
 
 ## 后续扩展：新模型尝试与最终结论
 
-本目录的早期内容是"不确定性诊断 + 路由"的第一次探索。后续又完成了两组新模型实验，
+本目录的早期内容是"不确定性诊断 + 路由"的第一次探索。后续又完成了三组新模型实验，
 **均未通过预设门槛**，最终结论与停止理由见
 [`docs/P3_direction_c_final_conclusions.md`](docs/P3_direction_c_final_conclusions.md)。
 
@@ -13,6 +13,7 @@
 |---|---|---|
 | `utrd/` | 冻结 EDVR + 少步残差扩散三原型（确定性 / 均匀噪声 / 不确定性噪声） | 均未超过同容量确定性对照，扩散主线停止 |
 | `prior_qualification/` | OSEDiff、SUPIR、DOVE 外部强生成先验的区域资格测试 | 纹理块 LPIPS 全部劣于现有感知微调 EDVR 1.5～2 倍，全部不通过 |
+| `stablesr_fusion/` | 冻结 StableSR 单帧生成结果与 EDVR 做输出级融合 | 最优固定混合仅 +0.00045 dB，oracle 上限 +0.020 dB，停止该路线（见 `stablesr_fusion/PROBE_CONCLUSION.md`） |
 
 当前在 REDS bicubic 上真正有效的改进仍是 EDVR 感知微调
 （LPIPS −31.2%，PSNR −0.381 dB），见
@@ -38,6 +39,20 @@ scripts/
   make_figures.py        5 张报告图的生成脚本
   make_region_profile.py 区域（纹理/平坦）不确定性剖面
   compat_shim.py         让老脚本能跑在新依赖上的兼容层
+p3_attn_dump.py          导出 EDVR 时间/空间注意力图，供离线分析
+p3_bvsrpp_frames.py      跑 BasicVSR++ 逐帧输出（bvsrpp_frame/）
+p3_route_lean.py         精简路由实验
+p3_route_lpips.py        以 LPIPS 为目标的路由实验
+p3_route_probe.py        路由探针（分歧是否可当误差代理）
+p3_soft_fuse.py          软融合（soft mask）
+p3_tta.py                翻转 TTA 集成与 U1 spread
+p3_uncertainty.py        四个不确定性估计量的指标汇总
+diag_attn.py             注意力图诊断
+probe_realesrgan.py      Real-ESRGAN 探针
+verify2.py               早期输出自检
+verify_bvsrpp.py         校验 BasicVSR++ 帧输出
+ms_files.py              共享盘文件清单小工具
+ms_probe.py / ms_search.py / ms_search2.py  共享盘检索小工具
 metrics/
   uncertainty.json       四个不确定性估计量的 Spearman / 分位误差 / 选择性 PSNR
   attn_diag.json         注意力图诊断
@@ -81,8 +96,8 @@ frames/                         实验用帧（不入库，见「数据」一节
 cp -r /data/disk1/shared/aiaa3201/project1_video_sr/val_sharp p3/frames/val_sharp
 
 # 三个分支的输出各自用对应推理脚本生成
-p3/scripts/p3_bvsrpp_frames.py     # bvsrpp_frame/
-p3/scripts/p3_attn_dump.py         # attn/（含 000_attn.npz + 000_heat.png）
+p3/p3_bvsrpp_frames.py             # bvsrpp_frame/
+p3/p3_attn_dump.py                 # attn/（含 000_attn.npz + 000_heat.png）
 # edvr_frame/ 与 gen/ 的推理脚本在 Part 2 / Part 3 的服务器 scratch 里
 ```
 
