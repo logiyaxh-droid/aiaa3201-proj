@@ -1,0 +1,37 @@
+{
+ "clip": "004",
+ "frame_id": 40,
+ "rois": {
+  "text": [
+   904,
+   288
+  ],
+  "texture": [
+   176,
+   56
+  ],
+  "motion": [
+   0,
+   608
+  ]
+ },
+ "roi_size": [
+  160,
+  90
+ ],
+ "zoom": 4,
+ "fps": 24,
+ "consecutive": 4,
+ "methods_part1": [
+  "GT",
+  "Bicubic",
+  "EDSR",
+  "tavg5",
+  "flowtavg5",
+  "flowtavg5+USM"
+ ],
+ "methods_part2": [
+  "tecogan"
+ ],
+ "roi_rule": "text = max mean|Laplacian| on the GT frame; texture = max local variance avoiding the text window; motion = max smoothed |flow| avoiding the text window"
+}

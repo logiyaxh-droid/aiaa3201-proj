@@ -18,6 +18,9 @@
 | `vimeo/vimeo_part2.json` | Vimeo-90K 全 7824 clip 中心帧，两套 EDVR 权重分行 | 14 |
 | `qual/*.png` | clip 013 的三类 ROI：六联、连续 4 帧、Part 2 五联 | 7 / 16 |
 | `qual/qual_013.json` | ROI 坐标与选取规则（最终图用的是手工固定窗口） | 7 / 16 |
+| `qual/qual_004.json`、`qual_011/qual_011.json` | clip 004 / 011 的 ROI 坐标与选取规则（启发式选窗，clip 无招牌时标签只是窗口规则） | 7 / 16 |
+| `tecogan_ab/000_shift0_manifest.json` | TecoGAN 预平移 A/B 的 shift=0 侧：权重哈希、帧号、逐帧输出哈希 | 10 |
+| `tecogan_ab/000_shift0375_manifest.json` | 同上，另一侧。**注意**：manifest 内记录的 `shift` 是 **0.25**，与目录名和 `REPORT.md` 中的 `0.375` 不符，见下方说明 | 10 |
 
 视频在 `p2/videos/013_6up_part1_flow_f24fps.mp4`（24 fps，任务 16 要求源帧率）。
 
@@ -34,6 +37,13 @@
    带宽，影响很小。
 3. **`edvr_neighbor` 的条件 B 改变了输入分布**（对齐没有东西可对齐），
    它测的是"邻帧信息对该权重的价值"，**不是** PCD 或 TSA 的单独贡献。
+4. **`tecogan_ab` 的 shift 值有一处未解决的矛盾。** 目录名与 `REPORT.md` 都写
+   `0.375`，但 `000_shift0375/manifest.json` 里记录的是 `shift: 0.25`，且该值与
+   manifest 的哈希自洽（用 0.25 复算得到同一哈希，用 0.375 则对不上）。另外用
+   相位相关量了两个目录输出的实际相对位移，中位数约 `0.36` HR px，与两者都不吻合。
+   在查清之前，`REPORT.md`「`--shift 0.375` 已补偿，补回 2.664 dB」里的 `0.375`
+   当作**待核实**，不要直接引用为已确认的补偿量。这件事不影响「网格错位已处理」
+   这个结论方向，只影响那个具体数值的标注。
 
 ## 复算
 

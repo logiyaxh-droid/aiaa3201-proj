@@ -1,0 +1,62 @@
+{
+  "weights": {
+    "TecoGAN.index": "c100584c2ec416c2daa4175ce43c5d0ebb87f13db5c340441b8e75cee0da70d3",
+    "TecoGAN.data-00000-of-00001": "e009bc08ec84c17bd8525252933ceafb164a743727285360259160e81a8e6961",
+    "TecoGAN.meta": "b5e126d40aced8c952b84c63a3cbe9258848a7f9a866e7e225c44ac29c979259"
+  },
+  "shift": 0.0,
+  "frame_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "lr_hw": [
+    180,
+    320
+  ],
+  "num_resblock": 16,
+  "mode": "cpu",
+  "tecogan_code": {
+    "main.py": "925aecb5599b97f5ce5a7ed71abb9022c70ca6b24182e27f8289b17862ba7b96",
+    "lib/ops.py": "4b205e6f928cde434c7b0c824014f66699c43fb9f6c4599d19fd4e71b1cc9807",
+    "lib/frvsr.py": "7846880c4a568bbffd70ce87ee1b44dea95a5729633e3e0d6194fd4e73824a0e",
+    "lib/dataloader.py": "84eade8a758849f6b418ce6d167dc00edcfeb16dd7ac65fceef564478861a6b3"
+  },
+  "driver_sha256": "9a5730da5f41557a380172cfc30f03ea180d935568ae9bdf6eb99e35c14d670c",
+  "manifest_hash": "a61b84143c1781faf5fbde088b09458c84fd31cef1065d98b382b7fc37f939e2",
+  "validation": {
+    "n_frames": 12,
+    "sizes": {
+      "(720, 1280)": 12
+    },
+    "id_range": [
+      0,
+      11
+    ],
+    "content_verified": false,
+    "problems": []
+  },
+  "output_sha256": {
+    "0": "d79c313725302b7febbcd31ff4d981321942089356675cf9db5bcdd36083299a",
+    "1": "3219dde211a42b57fcaf4b9c794e4b4dd0819eb55978dbbb52840e15bbeb72e7",
+    "2": "13405769590e3ea94c1f04605250176fad10ab3ed25113dc8b4f4b29c207de73",
+    "3": "5fc8a5b5bc4e299cb2b683064e2e7f399c12a0f67b45328a267db9976ed9aa27",
+    "4": "40d326178de64093d833439539a147a71116b74d0eeec8791e15214838846edd",
+    "5": "f6d574e032115e80431a3d65b2b9dff55080e646e649fb09c8151e64976272ec",
+    "6": "d43bd3020a69a7e8f0c7f7935686219be8e760288adf5694e1ee18af7999b874",
+    "7": "b479a3874ba602ffead79de668c15f269933a56b4fc345878f97e63cd96249d3",
+    "8": "727668d6abb5857e801a4ca1ba3aa9c54dca03af5cac71d5dbe27e0837255e14",
+    "9": "f9ddd14b0548560b162ffa90f391c9e3bae73656f5c102ae8b389e98665bb102",
+    "10": "23ecec1e8929e9608530e80da469658a7d47d12f3e3968bc08567568633aee5d",
+    "11": "e28de594191fa42fffed7b434e976714f9114ddaccbd9d5c685a073509d9108c"
+  }
+}

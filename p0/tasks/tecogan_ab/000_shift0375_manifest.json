@@ -1,0 +1,62 @@
+{
+  "weights": {
+    "TecoGAN.index": "c100584c2ec416c2daa4175ce43c5d0ebb87f13db5c340441b8e75cee0da70d3",
+    "TecoGAN.data-00000-of-00001": "e009bc08ec84c17bd8525252933ceafb164a743727285360259160e81a8e6961",
+    "TecoGAN.meta": "b5e126d40aced8c952b84c63a3cbe9258848a7f9a866e7e225c44ac29c979259"
+  },
+  "shift": 0.25,
+  "frame_ids": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "lr_hw": [
+    180,
+    320
+  ],
+  "num_resblock": 16,
+  "mode": "cpu",
+  "tecogan_code": {
+    "main.py": "925aecb5599b97f5ce5a7ed71abb9022c70ca6b24182e27f8289b17862ba7b96",
+    "lib/ops.py": "4b205e6f928cde434c7b0c824014f66699c43fb9f6c4599d19fd4e71b1cc9807",
+    "lib/frvsr.py": "7846880c4a568bbffd70ce87ee1b44dea95a5729633e3e0d6194fd4e73824a0e",
+    "lib/dataloader.py": "84eade8a758849f6b418ce6d167dc00edcfeb16dd7ac65fceef564478861a6b3"
+  },
+  "driver_sha256": "9a5730da5f41557a380172cfc30f03ea180d935568ae9bdf6eb99e35c14d670c",
+  "manifest_hash": "0295f09f530ba0d65d79e86f3b332a6b53e4f541cd9287f966f63c4fc7cbb943",
+  "validation": {
+    "n_frames": 12,
+    "sizes": {
+      "(720, 1280)": 12
+    },
+    "id_range": [
+      0,
+      11
+    ],
+    "content_verified": false,
+    "problems": []
+  },
+  "output_sha256": {
+    "0": "8c2da6df259cd948b60cd317da223c51494d8a9ea4c438ab7fd56508521d581d",
+    "1": "fc3722c68fec61955163c3b86efd4ba03f169271791d107edb91be5a77e002f2",
+    "2": "0e7eee2386bf58b6e343cb09f6fab69739e5ea0588a8afe39d1e21bc0c8b7a78",
+    "3": "d39af4327b9c85d06ab7a2bba4a2a301f4b71f062c56e30e686619b93f5839d4",
+    "4": "0e61d9761e1926a93266933284b2e84e4c12312d19e227da53745c60a035e692",
+    "5": "39b6494d2b550002e8c32fe10b3e1872a799e3386844a891763f666e2e52995c",
+    "6": "baa7b0ce4befcd230ca1377ad7d5858d7103dd7a4c81cd1c4a4a9760679c8628",
+    "7": "b91756e08410a59d1a5fabb158a6550ea2a75ae49103530850fef9d532a68e6c",
+    "8": "728eab3f5345711be0b01a18f96164de0dba104a765637223d5542659111316c",
+    "9": "3421bec6c9f4b7590fd0df796789164163e97fe1cba4b053b2d6a826bd089236",
+    "10": "1eb223b4da8e131af32fc1b4e562bc42d63d4ddaf153a6fc9249978df7bb71eb",
+    "11": "181ed34a33b8ca830b9f42e0c34bb2c3a6eb17c1c086c275ae2e9fcd131702b7"
+  }
+}
