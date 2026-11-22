@@ -2,11 +2,11 @@
 
 日期：2026-11-22  
 状态：已完成  
-范围：REDS bicubic（有 GT）与手机实拍真实退化（无 GT）两条线
+范围：REDS bicubic（有 GT）与真实退化（手机实拍 + 官方 VideoLQ，均无 GT）两条线
 
 ## 一句话结论
 
-**方向 C 在 REDS bicubic 上失败，但在真实退化上不失败。** 之前的负结论只对合成 bicubic 域成立，不能外推为“生成先验普遍无用”。
+**方向 C 在 REDS bicubic 上失败，但在真实退化上不失败，且已在官方 VideoLQ 上复现。** 之前的负结论只对合成 bicubic 域成立，不能外推为“生成先验普遍无用”。
 
 ## 1. 现有唯一正向结果（REDS bicubic，有 GT）
 
@@ -44,31 +44,49 @@ EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调：
 
 三者全部不通过门槛。原因一致：真实退化生成先验在干净 bicubic 上会重绘纹理而非恢复 GT 纹理。原始结果：`prior_qualification/results/summary/`。
 
-## 4. 真实退化评测（手机实拍，无 GT）
+## 4. 真实退化评测（无 GT）
 
-**这是本轮最重要的新结果。** 官方 VideoLQ 的所有公开渠道在该服务器均不可达（Google Drive/Dropbox 不通、OneDrive 失效、HF 同名镜像实为 RealISVSR 配对数据、ModelScope 只有元数据），因此改用 `p2/wild_source` 手机实拍视频：1080×1920、30 帧中心裁切 720×1280、统一 ×4 下采样后恢复。
+真实退化分两批做：手机实拍视频，以及最终取得的官方 VideoLQ。两者结论方向一致。
 
-| 方法 | NIQE ↓ | MUSIQ ↑ | 显存 | 30 帧耗时 |
-|---|---:|---:|---:|---:|
-| **SUPIR** | **2.364** | 61.99 | 12.43 GiB | 3.6 min |
-| **OSEDiff** | 2.948 | 73.61 | 4.55 GiB | 35 s |
-| 原始 EDVR | 4.167 | 63.44 | ~8 GiB | 25 s |
-| 感知微调 EDVR | 4.195 | 63.24 | ~8 GiB | 23 s |
-| **DOVE** | 4.468 | **74.93** | 分块 | 27 s |
-| bicubic ×4 | 7.035 | 40.26 | — | 秒级 |
+### 4.1 手机实拍（30 帧，720×1280）
 
-### 四个关键观察
+| 方法 | NIQE ↓ | MUSIQ ↑ |
+|---|---:|---:|
+| **SUPIR** | **2.364** | 61.99 |
+| **OSEDiff** | 2.948 | 73.61 |
+| 原始 EDVR | 4.167 | 63.44 |
+| 感知微调 EDVR | 4.195 | 63.24 |
+| **DOVE** | 4.468 | **74.93** |
+| bicubic ×4 | 7.035 | 40.26 |
 
-1. **生成模型在真实退化上不再明显更差**：三者 NIQE 全部优于 EDVR，两个 MUSIQ 也优于 EDVR。与 bicubic 上的结论方向相反。
-2. **NIQE 与 MUSIQ 排序不一致**：SUPIR 的 NIQE 最好但 MUSIQ 最低；DOVE 的 MUSIQ 最高但 NIQE 最差。不能合并成单一排名。
-3. **感知微调 EDVR 在真实退化上不占优**：与原始 EDVR 基本持平（NIQE 4.195 vs 4.167）。它在 bicubic 上的 LPIPS 优势没有迁移。
-4. **DOVE 的时序优势未能确认**：因 30 帧被拆成 4 段 9 帧推理，存在段间不连续，不能宣称时序最好。
+### 4.2 官方 VideoLQ（50 段 × 5 帧，250 帧，原生分辨率）
 
-### 边界
+| 方法 | NIQE ↓ | MUSIQ ↑ | selfPSNR |
+|---|---:|---:|---:|
+| **OSEDiff** | **4.109** | **66.85** | 21.54 |
+| **DOVE** | 5.003 | 61.51 | 21.76 |
+| 感知微调 EDVR | 5.190 | 56.21 | 20.33 |
+| SUPIR | 5.629 | 46.53 | **24.29** |
+| 原始 EDVR | 5.673 | 55.81 | 20.49 |
+| bicubic ×4 | 7.563 | 31.38 | 23.74 |
+
+VideoLQ 已核实为官方数据：50 段、编号 000–049、分辨率 320×240 至 720×576，与 ICCV/CVPR 描述一致。
+
+### 4.3 六个关键观察
+
+1. **生成模型在真实退化上不再明显更差**：两组数据的 NIQE 都优于 EDVR。与 bicubic 上的结论方向相反。
+2. **OSEDiff 在 VideoLQ 上全面最好**：NIQE 比 EDVR 低 27.6%，MUSIQ 高 19.8%，速度也最快（37 秒/250 帧）。而它在 bicubic 上纹理块 LPIPS 差 151.8%。
+3. **感知微调 EDVR 在 VideoLQ 上优于原始 EDVR**（5.190 vs 5.673），但在手机视频上略差（4.195 vs 4.167）。微调收益不稳定。
+4. **NIQE 与 MUSIQ 排序不一致**：手机视频上 SUPIR 的 NIQE 最好但 MUSIQ 最低；VideoLQ 上 SUPIR 是 MUSIQ 最差。
+5. **selfPSNR 不能当质量指标**：bicubic 的 selfPSNR（23.74）高于 EDVR（20.49），但观感最差。它奖励“不动”，不奖励“变好”。
+6. **DOVE 的时序优势未能确认**：VideoLQ 上 NIQE/MUSIQ 均不如 OSEDiff。
+
+### 4.4 边界
 
 - 无 GT，**不能**计算 PSNR/SSIM/LPIPS，也**不能**与 REDS 表格横向比较；
-- 数据不是 VideoLQ，不能写成交叉验证 VideoLQ 的结论；
-- 不能证明这些模型更接近真值。
+- selfPSNR 不等于准确度，bicubic 就是反例；
+- 不能证明这些模型更接近真值，只能说明在无参考指标下观感更好；
+- 无法排除“生成模型只是更符合 IQA 模型偏好”这一解释。
 
 ## 5. 工程教训
 
@@ -77,14 +95,15 @@ EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调：
 3. SUPIR 在 720p 需约 15 GiB，显存被他人占用时可用 `min_size 768` 降内存。
 4. DOVE 在 24 GiB 卡上必须 `tile_size_hw 256`，否则 VAE 编码 OOM。
 5. 借用服务器：无 `python3-venv`（用 anaconda Python 建 venv）、PyPI 官方 CDN 不通（用阿里云镜像）、`huggingface.co` 可直连但 hf-mirror 小文件 resolve 会 503。
+6. **官方 VideoLQ 的 GD/Dropbox/OneDrive 均不可达，OpenDataLab 可用**（`openxlab` CLI，需补一行 import 修复其 `ls` 的 bug）；归档是嵌套两层。
 
 ## 6. 最终判断
 
-**方向 C 的价值取决于域。** 在合成 bicubic 上，回归模型（EDVR）已经接近最优，生成先验只会引入偏离；在真实退化上，生成先验的相对价值显著上升。
+**方向 C 的价值取决于域。** 在合成 bicubic 上，回归模型（EDVR）已经接近最优，生成先验只会引入偏离；在真实退化上（手机实拍与官方 VideoLQ 两组独立数据），生成先验的相对价值显著上升，OSEDiff 在两项无参考指标上都最好。
 
 因此之前的“停止外部生成先验”结论需要修正为：**停止在 REDS bicubic 上使用外部生成先验**，而不是停止这条技术路线本身。
 
-若要继续，必须先取得带 GT 的真实退化配对数据（RealVSR / MVSR4x 目前下载不到），否则只能停留在无参考观感层面，无法证明“更接近真值”。
+剩余缺口是配对 GT：RealVSR / MVSR4x 目前仍下载不到（仅 Google Drive / 百度网盘），因此无法证明“更接近真值”，只能停留在无参考观感层面。
 
 ## 7. 原始结果索引
 
@@ -94,6 +113,8 @@ EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调：
 | U-TRD 路线与结果 | `docs/P3_direction_c_residual_diffusion_roadmap.md`、`utrd/RESULTS_PROTO1.md` |
 | 外部先验路线 | `docs/P3_generative_prior_qualification_roadmap.md` |
 | 外部先验汇总 | `prior_qualification/results/summary/qualification.md` |
-| 真实退化评测 | `prior_qualification/results/summary/real_world.md` |
-| 真实退化指标 | `prior_qualification/results/real/*.json` |
+| 手机实拍评测 | `prior_qualification/results/summary/real_world.md` |
+| VideoLQ 评测 | `prior_qualification/results/summary/videolq.md` |
+| VideoLQ 指标 | `prior_qualification/results/videolq/*.json` |
+| 手机实拍指标 | `prior_qualification/results/real/*.json` |
 | 各候选分项 | `prior_qualification/results/summary/{osediff,supir,dove}.md` |
