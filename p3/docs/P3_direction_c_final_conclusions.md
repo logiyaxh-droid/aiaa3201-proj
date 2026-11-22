@@ -1,162 +1,99 @@
-# Direction C 探索最终结论：残差扩散与外部生成先验
+# Direction C 探索最终结论：残差扩散、外部生成先验与真实退化
 
 日期：2026-11-22  
-状态：已完成原型与候选资格测试  
-结论：**现有两条生成式探索路线均未产生值得继续训练的新模型。保留 EDVR 感知微调作为当前有效改进，停止输出路由、少步残差扩散和真实退化生成先验接入。**
+状态：已完成  
+范围：REDS bicubic（有 GT）与手机实拍真实退化（无 GT）两条线
 
-## 1. 执行范围
+## 一句话结论
 
-本文合并两组已完成实验：
+**方向 C 在 REDS bicubic 上失败，但在真实退化上不失败。** 之前的负结论只对合成 bicubic 域成立，不能外推为“生成先验普遍无用”。
 
-1. `U-TRD` 三原型：同容量确定性残差网络、均匀噪声残差扩散、不确定性噪声残差扩散。
-2. 外部生成先验资格测试：OSEDiff → SUPIR → DOVE。
+## 1. 现有唯一正向结果（REDS bicubic，有 GT）
 
-所有结果均基于 REDS bicubic ×4 开发片段；不同实验使用的帧集合不完全相同，本文分别标注，不把不同子集的数字直接混成一张排行榜。
+EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调：
 
-## 2. 当前有效的唯一正向结果
+- LPIPS 0.2039 → 0.1402（−31.2%，30/30 片段）
+- DISTS 0.0870 → 0.0433（−50.2%，但参与训练，不能单独作证据）
+- tLP 0.0123 → 0.0077（−36.6%，29/30）
+- PSNR 30.9042 → 30.5231（−0.381 dB）
 
-已有 **EDVR-L + DISTS 0.03 + relativistic GAN 0.001** 微调模型：
+这是感知—保真权衡，不是全面提高。原始结果：`quality_metrics/fine_tune/RESULTS.md`。
 
-- 30/30 片段 LPIPS 和 DISTS 改善；
-- PSNR 30.9042 → 30.5231（−0.381 dB）；
-- LPIPS 0.2039 → 0.1402（−31.2%）；
-- DISTS 0.0870 → 0.0433（−50.2%，但它参与训练，不能单独作为独立证据）；
-- tLP 0.0123 → 0.0077（−36.6%，29/30 片段改善）。
+## 2. U-TRD 三原型（REDS bicubic，有 GT）
 
-这是当前 REDS bicubic 上真实、稳定且可复现的改进，但它是感知—保真权衡，不是像素保真全面提升。后续新生成模型若不能超过它，就没有实质进展。
+同一 U-Net、1500 步、batch 8、DISTS 0.01、无 GAN。
 
-原始结果：`p3/quality_metrics/fine_tune/RESULTS.md`。
+| 模型 | PSNR | LPIPS | 相对冻结 EDVR |
+|---|---:|---:|---:|
+| 冻结 EDVR | 32.4095 | 0.15138 | — |
+| 确定性残差 | 32.3892 | 0.14957 | LPIPS −1.2% |
+| 均匀噪声扩散 | 28.0344 | 0.26446 | PSNR −4.38 dB |
+| 不确定性扩散 | 26.7161 | 0.22065 | PSNR −5.69 dB |
 
-## 3. U-TRD 三原型：按门槛停止
+结论：小预算、像素空间、四步残差扩散没有超过同容量确定性对照，且不确定性噪声没有优于均匀噪声。**该结论限定在这一设置内。**原始结果：`utrd/RESULTS_PROTO1.md`。
 
-统一设置：同一 U-Net、1500 步、batch 8、DISTS 权重 0.01、无 GAN；冻结官方 EDVR 提供基线和特征。
+## 3. 外部生成先验（REDS bicubic，有 GT）
 
-开发片段 `000/002/009`，frame 40–69，每片段 30 帧，共 90 帧。
+三个候选在 EDVR 高分歧区域与纹理区域都未提供增益：
 
-| 模型 | PSNR | SSIM | LPIPS | tLP | 相对冻结 EDVR |
-|---|---:|---:|---:|---:|---:|
-| 冻结 EDVR | 32.4095 | 0.91391 | 0.15138 | 0.00934 | — |
-| 确定性残差 | 32.3892 | 0.91344 | 0.14957 | 0.00890 | LPIPS −1.2% |
-| 均匀噪声扩散 | 28.0344 | 0.72738 | 0.26446 | 0.00711 | PSNR −4.38 dB |
-| 不确定性噪声扩散 | 26.7161 | 0.76990 | 0.22065 | 0.02821 | PSNR −5.69 dB |
+| 候选 | 纹理块 LPIPS（微调 EDVR = 0.0659） | 相对变化 | PSNR |
+|---|---:|---:|---:|
+| OSEDiff | 0.1660 | +151.8% | 22.93 |
+| SUPIR v0F | 0.1955 | +196.6% | 26.15 |
+| DOVE 5B | 0.1963 | +197.2% | 25.34 |
 
-判定：
+三者全部不通过门槛。原因一致：真实退化生成先验在干净 bicubic 上会重绘纹理而非恢复 GT 纹理。原始结果：`prior_qualification/results/summary/`。
 
-- 确定性残差网络仅带来 1.2% LPIPS 改善，不构成新模型成果。
-- 均匀扩散和不确定性扩散都严重落后；不确定性版本比均匀版本更差。
-- 空间不确定性噪声没有优于同容量均匀扩散，未达到继续训练门槛。
+## 4. 真实退化评测（手机实拍，无 GT）
 
-补充诊断排除了简单的采样标定问题：将起始噪声降到零后，两个扩散模型仍只有约 28～29 dB，低于同输入 EDVR 基线约 30.79 dB。两个模型在各自训练的噪声类型下工作，互换噪声类型会崩溃，说明它们确实学到了各自的噪声分布；但四步生成结果没有超过同容量确定性对照。
+**这是本轮最重要的新结果。** 官方 VideoLQ 的所有公开渠道在该服务器均不可达（Google Drive/Dropbox 不通、OneDrive 失效、HF 同名镜像实为 RealISVSR 配对数据、ModelScope 只有元数据），因此改用 `p2/wild_source` 手机实拍视频：1080×1920、30 帧中心裁切 720×1280、统一 ×4 下采样后恢复。
 
-**结论边界：** 这否定的是“小预算、像素空间、四步、64×64 训练裁剪”的原型设置，不是对所有扩散模型的普遍否定。
+| 方法 | NIQE ↓ | MUSIQ ↑ | 显存 | 30 帧耗时 |
+|---|---:|---:|---:|---:|
+| **SUPIR** | **2.364** | 61.99 | 12.43 GiB | 3.6 min |
+| **OSEDiff** | 2.948 | 73.61 | 4.55 GiB | 35 s |
+| 原始 EDVR | 4.167 | 63.44 | ~8 GiB | 25 s |
+| 感知微调 EDVR | 4.195 | 63.24 | ~8 GiB | 23 s |
+| **DOVE** | 4.468 | **74.93** | 分块 | 27 s |
+| bicubic ×4 | 7.035 | 40.26 | — | 秒级 |
 
-原始结果：`p3/utrd/RESULTS_PROTO1.md`、`p3/utrd/results/`。
+### 四个关键观察
 
-## 4. 外部生成先验：三个候选均未通过
+1. **生成模型在真实退化上不再明显更差**：三者 NIQE 全部优于 EDVR，两个 MUSIQ 也优于 EDVR。与 bicubic 上的结论方向相反。
+2. **NIQE 与 MUSIQ 排序不一致**：SUPIR 的 NIQE 最好但 MUSIQ 最低；DOVE 的 MUSIQ 最高但 NIQE 最差。不能合并成单一排名。
+3. **感知微调 EDVR 在真实退化上不占优**：与原始 EDVR 基本持平（NIQE 4.195 vs 4.167）。它在 bicubic 上的 LPIPS 优势没有迁移。
+4. **DOVE 的时序优势未能确认**：因 30 帧被拆成 4 段 9 帧推理，存在段间不连续，不能宣称时序最好。
 
-资格测试要求候选在 EDVR 高分歧区域与纹理区域提供可测量的感知增益，而不是只追求全图锐度或自然观感。
+### 边界
 
-统一主要门槛：纹理块 LPIPS 相对现有感知微调 EDVR 至少改善 10%，同时检查 EDVR 高分歧块、平坦块和局部视觉错误。未使用输出融合、筛选随机种子或 GT mask 干预推理来补救分数。
+- 无 GT，**不能**计算 PSNR/SSIM/LPIPS，也**不能**与 REDS 表格横向比较；
+- 数据不是 VideoLQ，不能写成交叉验证 VideoLQ 的结论；
+- 不能证明这些模型更接近真值。
 
-### 4.1 数值汇总
+## 5. 工程教训
 
-| 候选 | 测试帧集合 | 感知微调 EDVR PSNR | 候选 PSNR | 微调纹理块 LPIPS | 候选纹理块 LPIPS | 相对变化 | tLP |
-|---|---|---:|---:|---:|---:|---:|---:|
-| OSEDiff | 3 clip × frame 40–49 | 31.9032 | 22.9259 | 0.0659 | 0.1660 | +151.8% | 0.0232 |
-| SUPIR v0F | 3 clip × frame 40–49 | 31.9032 | 26.1450 | 0.0659 | 0.1955 | +196.6% | 0.0336 |
-| DOVE 5B | 3 clip × frame 40–48 | 31.8832 | 25.3416 | 0.0660 | 0.1963 | +197.2% | 0.0083 |
+1. **文件大小正确不代表内容正确。** DOVE 的 `text_encoder/model-00002-of-00004` 与 CogVideoX VAE 都出现过“大小精确匹配但张量损坏”，必须用 `safetensors.safe_open` 逐文件校验。
+2. **`huggingface_hub` 新版默认在 `~/.cache` 留符号链接**，`local_dir` 里只有链接。借用机器上必须实体化到指定目录，否则占用落在别人 home 下。
+3. SUPIR 在 720p 需约 15 GiB，显存被他人占用时可用 `min_size 768` 降内存。
+4. DOVE 在 24 GiB 卡上必须 `tile_size_hw 256`，否则 VAE 编码 OOM。
+5. 借用服务器：无 `python3-venv`（用 anaconda Python 建 venv）、PyPI 官方 CDN 不通（用阿里云镜像）、`huggingface.co` 可直连但 hf-mirror 小文件 resolve 会 503。
 
-DOVE 因视频模型要求 `(F−1) % 8 == 0`，使用 9 帧输入；评分时重新计算相同 9 帧上的 EDVR 与感知微调 EDVR 参照，保持严格配对。
+## 6. 最终判断
 
-三个候选的纹理块 LPIPS 都是**恶化而非改善**，方向 C 所要求的区域互补前提不成立，因此均不进入条件化或轻量微调阶段。
+**方向 C 的价值取决于域。** 在合成 bicubic 上，回归模型（EDVR）已经接近最优，生成先验只会引入偏离；在真实退化上，生成先验的相对价值显著上升。
 
-### 4.2 各候选的有效信息
+因此之前的“停止外部生成先验”结论需要修正为：**停止在 REDS bicubic 上使用外部生成先验**，而不是停止这条技术路线本身。
 
-**OSEDiff：速度可用，质量不可用。**
+若要继续，必须先取得带 GT 的真实退化配对数据（RealVSR / MVSR4x 目前下载不到），否则只能停留在无参考观感层面，无法证明“更接近真值”。
 
-- 单帧 2.4～3.4 秒，显存峰值 4.55 GiB。
-- 一步图像扩散的效率优势没有转化为本数据集上的质量收益。
-- 空提示、固定 seed、官方 LANCZOS ×4 输入链路和 wavelet 颜色修复。
-
-**SUPIR：显存不是关键障碍，空间域失配才是。**
-
-- 在 RTX 4090 24GB 上实际可运行，显存峰值 15.28 GiB；此前对 24GB 显存的担心被实测否定。
-- 单帧约 9.2 秒，30 帧约 4.6 分钟。
-- 使用 v0F fp16、20 EDM steps、固定提示词；未加载 LLaVA，因此这是明确记录的工程缩减路径，不是官方完整文本理解链路。
-- 空间质量比 OSEDiff 更偏离 GT，说明更大生成能力并不自动更接近 GT。
-
-**DOVE：时序优势真实，但无法弥补空间质量失败。**
-
-- 24GB 显存下需要空间 tile 256 和时间 chunk；单段 9 帧约 8 秒。
-- tLP 0.0083，明显优于 OSEDiff/SUPIR，接近同子集原始 EDVR 的 0.0089，说明视频时序机制确实有效。
-- 但 PSNR 比感知微调 EDVR 低 6.54 dB，纹理块 LPIPS 恶化 197.2%，高分歧块恶化 220.3%。
-
-## 5. 为什么“强先验”没有带来收益
-
-三个模型架构、规模和训练目标不同，却在同一数据集上表现出一致方向：
-
-- 它们主要面向真实退化，例如模糊、噪声、压缩和复杂降质；
-- 本项目的 LR 来自确定的 bicubic 下采样，GT 纹理具有明确对应关系；
-- 生成先验倾向于重绘“合理纹理”，而不是恢复该视频中的真实纹理；
-- 因此模型越大、生成能力越强，可能偏离 GT 越远。SUPIR/DOVE 的纹理块 LPIPS 均比 OSEDiff 更差。
-
-这解释了此前 StableSR、Real-ESRGAN 路由失败，也解释了本轮 OSEDiff、SUPIR、DOVE 的结果。**继续增加外部模型规模不是解决方案。**
-
-但不能把这组结果外推为“真实退化视频上这些模型都无效”；本实验没有测试真实退化输入，也没有训练这些外部模型。
-
-## 6. 工程教训：权重大小一致也可能损坏
-
-DOVE 的 CogVideoX VAE 第一次下载文件大小为 862,388,596 字节，与远端声明一致，但内容损坏：
-
-- 436 个张量中 259 个全零；
-- `encoder.conv_in.conv.weight` 绝对值和为 0；
-- VAE 编码输出恒为零；
-- DOVE 输出退化为接近纯色，std 约 8.9。
-
-重新下载后：
-
-- `encoder.conv_in.conv.weight` 绝对值和为 590.04；
-- 全零张量为 0；
-- 输出 std 恢复到约 74.1。
-
-所有基于第一次 VAE 的 DOVE 输出均已作废，最终数字来自修复后的 VAE。
-
-**以后大权重下载后必须检查实际张量统计，不能只核对文件大小；只与远端 MD5 对比也不够，因为可能稳定复现同一份损坏下载。**
-
-## 7. 最终决策与适用范围
-
-### 已决定停止
-
-- Real-ESRGAN/StableSR/OSEDiff/SUPIR/DOVE 的输出级路由或融合；
-- 当前小预算、四步像素空间残差扩散原型；
-- 在现有候选上继续调提示词、筛随机种子、增加模型规模或简单增加训练步数。
-
-### 保留
-
-- EDVR 感知微调作为当前最佳 REDS bicubic 感知配置；
-- 原始 EDVR 作为像素保真基线；
-- 不确定性图作为误差/难度诊断信号，但不再把它当成天然有效的生成控制器。
-
-### 若要继续研究，只剩两类真正改变前提的工作
-
-1. 在同域数据上设计并充分训练生成分支，且必须先超过同容量确定性对照和现有感知微调 EDVR；
-2. 改到真实退化视频，并建立新的数据、无参考/配对评价协议，再重新检验方向 C。
-
-二者都不是“再换一个模型”可以替代的工作。
-
-## 8. 原始结果索引
+## 7. 原始结果索引
 
 | 内容 | 路径 |
 |---|---|
-| 当前感知微调结论 | `p3/quality_metrics/fine_tune/RESULTS.md` |
-| U-TRD 路线与停止门槛 | `p3/docs/P3_direction_c_residual_diffusion_roadmap.md` |
-| U-TRD 三原型结果 | `p3/utrd/RESULTS_PROTO1.md` |
-| 外部先验测试路线 | `p3/docs/P3_generative_prior_qualification_roadmap.md` |
-| 外部先验最终汇总 | `p3/prior_qualification/results/summary/qualification.md` |
-| OSEDiff 逐片段指标 | `p3/prior_qualification/results/osediff/metrics.json` |
-| SUPIR 逐片段指标 | `p3/prior_qualification/results/supir/metrics.json` |
-| DOVE 严格同帧指标 | `p3/prior_qualification/results/dove9/metrics_subset.json` |
-| 公共 EDVR 参照与区域 | `p3/prior_qualification/results/reference/` |
-| 外部先验评分脚本 | `p3/prior_qualification/scripts/score_candidate.py`、`score_subset.py` |
-
-本文只记录已执行实验及其边界；未做的迁移、真实退化测试和完整大模型训练均不视为已验证结论。
+| 感知微调结论 | `quality_metrics/fine_tune/RESULTS.md` |
+| U-TRD 路线与结果 | `docs/P3_direction_c_residual_diffusion_roadmap.md`、`utrd/RESULTS_PROTO1.md` |
+| 外部先验路线 | `docs/P3_generative_prior_qualification_roadmap.md` |
+| 外部先验汇总 | `prior_qualification/results/summary/qualification.md` |
+| 真实退化评测 | `prior_qualification/results/summary/real_world.md` |
+| 真实退化指标 | `prior_qualification/results/real/*.json` |
+| 各候选分项 | `prior_qualification/results/summary/{osediff,supir,dove}.md` |
