@@ -1,0 +1,39 @@
+{
+ "method": "osediff",
+ "n_clips": 6,
+ "technical": -0.07751493031779925,
+ "aesthetic": 0.14796739568312964,
+ "per_clip": {
+  "000": {
+   "technical": -0.12045604735612869,
+   "aesthetic": 0.09828894585371017,
+   "fused": -0.011083550751209259
+  },
+  "001": {
+   "technical": -0.06598895788192749,
+   "aesthetic": 0.19231542944908142,
+   "fused": 0.06316323578357697
+  },
+  "004": {
+   "technical": -0.06508784741163254,
+   "aesthetic": 0.1551981419324875,
+   "fused": 0.045055147260427475
+  },
+  "006": {
+   "technical": -0.03822888433933258,
+   "aesthetic": 0.20763897895812988,
+   "fused": 0.08470504730939865
+  },
+  "012": {
+   "technical": -0.07249733805656433,
+   "aesthetic": 0.1233336552977562,
+   "fused": 0.025418158620595932
+  },
+  "014": {
+   "technical": -0.10283050686120987,
+   "aesthetic": 0.11102922260761261,
+   "fused": 0.00409935787320137
+  }
+ },
+ "note": "DOVER raw scores are negative and not comparable to paper tables without MOS z-score."
+}
