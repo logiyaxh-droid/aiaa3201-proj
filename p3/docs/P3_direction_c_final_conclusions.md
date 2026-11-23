@@ -1,12 +1,12 @@
 # Direction C 探索最终结论：残差扩散、外部生成先验与真实退化
 
 日期：2026-11-22  
-状态：已完成  
-范围：REDS bicubic（有 GT）与真实退化（手机实拍 + 官方 VideoLQ，均无 GT）两条线
+状态：已完成（RealVSR 部分仅含 OSEDiff，SUPIR/DOVE 受下载带宽限制未完成）  
+范围：REDS bicubic（有 GT）、真实退化无 GT（手机实拍 + 官方 VideoLQ）、真实退化有 GT（RealVSR）三条线
 
 ## 一句话结论
 
-**方向 C 在 REDS bicubic 上失败，但在真实退化上不失败，且已在官方 VideoLQ 上复现。** 之前的负结论只对合成 bicubic 域成立，不能外推为“生成先验普遍无用”。
+**方向 C 在 REDS bicubic 上失败；在无参考的真实退化评测中领先；但一旦在真实退化上引入配对真值（RealVSR），领先消失。** 因此“生成先验在真实退化上更好”这个说法只在无参考指标下成立，不能等同于“更接近真值”。
 
 ## 1. 现有唯一正向结果（REDS bicubic，有 GT）
 
@@ -120,7 +120,7 @@ DOVER 是视频级指标，需要连续帧，与 5 帧筛选协议不兼容，�
 
 因此之前的“停止外部生成先验”结论需要修正为：**停止在 REDS bicubic 上使用外部生成先验**，而不是停止这条技术路线本身。
 
-剩余缺口是配对 GT：RealVSR / MVSR4x 目前仍下载不到（仅 Google Drive / 百度网盘），因此无法证明“更接近真值”，只能停留在无参考观感层面。
+剩余缺口是配对 GT。这一缺口后来部分补上了：RealVSR 的测试集已取得（见第 8 节），在有 GT 的真实退化上，**生成先验的领先不再出现**。MVSR4x 仍受下载带宽限制未完成。
 
 ## 7. 原始结果索引
 
@@ -135,3 +135,65 @@ DOVER 是视频级指标，需要连续帧，与 5 帧筛选协议不兼容，�
 | VideoLQ 指标 | `prior_qualification/results/videolq/*.json` |
 | 手机实拍指标 | `prior_qualification/results/real/*.json` |
 | 各候选分项 | `prior_qualification/results/summary/{osediff,supir,dove}.md` |
+| RealVSR 配对评测 | `prior_qualification/results/realvsr/*/metrics.json`、`results/summary/realvsr.md` |
+
+## 8. RealVSR 配对评测（有 GT，2026-11-23 补）
+
+这是本研究里**唯一**能在真实退化上同时报告 PSNR/SSIM/LPIPS/DISTS 的实验。
+
+### 8.1 数据的实际形态
+
+RealVSR 测试集 50 段 × 50 帧，LQ 与 GT **同为 512×1024**，不是 4 倍超分配对。官方 `test_RealVSR_wi_GT.py` 因此构造 `EDVR_NoUp`（`upscale=1`）直接吃 LQ。
+
+实测带宽（clip 016 第 22 帧，0.25 归一化频率以上能量占比）：
+
+| 图 | 高频占比 |
+|---|---:|
+| LQ（实拍） | 0.316% |
+| GT 降 2 倍再上采样 | 0.298% |
+| GT 降 4 倍再上采样 | 0.065% |
+
+LQ 的有效分辨率约是 GT 的 1/2，不是 1/4。为让所有 x4 模型（EDVR/OSEDiff/SUPIR/DOVE）共用一条协议，本实验把 LQ 再降 4 倍喂给模型，输出对齐 GT 原生网格。
+
+可达上限核对：用 GT 自身降 4 倍再上采样，只比我们这条路径高 0.5–2.7 dB（clip 016/108/364 分别 26.49/21.27/23.93 dB），说明输入路径没有额外损失信息。
+
+对齐核对：±6 px 平移搜索只带来 ≤0.29 dB 收益，说明 LQ–GT 已对齐，掉点不是错位造成的。
+
+### 8.2 结果（50 段 × 5 帧 = 250 帧）
+
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
+|---|---:|---:|---:|---:|---:|
+| 原始 EDVR | **23.036** | **0.7590** | 0.2404 | 0.1315 | 0.0128 |
+| 感知微调 EDVR | 22.871 | 0.7452 | **0.1979** | **0.0944** | **0.0094** |
+| bicubic ×4 | 22.147 | 0.6480 | 0.4997 | 0.2118 | 0.0287 |
+| OSEDiff | 20.049 | 0.5875 | 0.2710 | 0.1397 | 0.0143 |
+
+相对感知微调 EDVR 的变化：
+
+| 方法 | ΔPSNR | ΔLPIPS |
+|---|---:|---:|
+| 原始 EDVR | +0.165 | +21.5% |
+| bicubic | −0.724 | +152.5% |
+| OSEDiff | **−2.822** | +36.9% |
+
+### 8.3 结论
+
+1. **在有 GT 的真实退化上，OSEDiff 不占优**：PSNR 比 bicubic 还低 2.1 dB，且 50/50 段全部更差；LPIPS/DISTS 也不如感知微调 EDVR。
+2. **这直接修正了第 4 节的无参考结论**。VideoLQ 上 OSEDiff 的 NIQE/MUSIQ 全面领先，但那是“看起来更清晰”，不是“更像真值”。一旦能对照真值，生成模型偏离真值的幅度反而更大。
+3. **感知微调的权衡在真实退化上同样成立**：用 0.165 dB 的 PSNR 换来 LPIPS −17.7%、DISTS −28.2%，方向与 REDS 一致。
+4. **不能把 RealVSR 的绝对值和 REDS 表格比较**：两者退化核、分辨率、场景都不同，只在本表内部做方法间比较。
+
+### 8.4 边界（必须一并说明）
+
+- SUPIR 与 DOVE **未完成**：SUPIR 缺 CLIP2（10.16 GB），DOVE 缺 CogVideoX 分片（约 20 GB）。两者在当前网络下（HF 大文件单连接 8 B/s–1.6 KB/s）无法取得，因此本表只有 OSEDiff 一个生成模型。
+- 因此“生成模型在真实退化上更远离真值”目前**只有一个生成模型样本**，不能外推为所有生成先验的普遍结论。
+- 采用 LQ 再降 4 倍的适配协议，与官方 `EDVR_NoUp` 的 1 倍协议不同，绝对值不可与 RealVSR 论文表格直接对照。
+
+## 9. 工程教训（本轮新增）
+
+1. **单连接限速是这批大文件下不动的真正原因**：hf-mirror 单连接约 64 KB/s，改成 HTTP Range 多线程分段（16 路）后同一文件达 37 MB/s，2.5 GB 从"11 小时"变成 2 分钟。脚本 `scripts/pdl.py`。
+2. **`content-length` 会骗人**：CLIP2 先前记录的 4.1 GB 其实是旧的不完整文件大小，真实为 10.16 GB（`x-linked-size`）。下载前先读 `x-linked-size`。
+3. **按大小判断完整性不够**：SUPIR 的 SDXL 与 CLIP2 都曾"大小接近"但 `safe_open` 报 `incomplete metadata`。必须逐文件用 `safe_open` 打开验证。
+4. **共享主机 OOM 的隐蔽来源是 fp32 骨架**：`instantiate_from_config` 默认 fp32，SDXL UNet 单独就约 10 GB；31 GB 内存机器上直接被 OOM reaper 杀掉。改用 `torch.set_default_dtype(torch.float16)` 构建骨架可绕开（`scripts/supir_lean.py`）。
+5. **`SDXL_CLIP1_PATH` 必须指向目录而非单文件**，`CLIPTokenizer.from_pretrained` 不接受单文件；需要把 open_clip 的 `text_model.*` 张量另存为 `pytorch_model.bin` 并配套 tokenizer 文件。
+6. **项目服务器 `/data/disk1/home` 是 `/data/disk2/home` 的软链接**，`df` 显示的 442 GB 可用属于不可写的 `/data/disk1/shared`，实际家目录在已满的 disk2 上。
