@@ -1,12 +1,12 @@
 # Direction C 探索最终结论：残差扩散、外部生成先验与真实退化
 
 日期：2026-11-22  
-状态：已完成（RealVSR 含全部四个模型：bicubic / EDVR / 感知微调 / OSEDiff / SUPIR / DOVE）  
-范围：REDS bicubic（有 GT）、真实退化无 GT（手机实拍 + 官方 VideoLQ）、真实退化有 GT（RealVSR）三条线
+状态：已完成（RealVSR 六个方法全齐；MVSR4x 五个方法，DOVE 12/15 段）  
+范围：REDS bicubic（有 GT）、真实退化无 GT（手机实拍 + 官方 VideoLQ）、真实退化有 GT（RealVSR + MVSR4x）四条线
 
 ## 一句话结论
 
-**方向 C 在 REDS bicubic 上失败；在无参考的真实退化评测中领先；但引入配对真值（RealVSR）后，领先只在感知轴上部分保留（DOVE 的 LPIPS 接近回归模型），PSNR 轴上三个生成模型全部落后。** 因此“生成先验在真实退化上更好”只在无参考指标下成立，不能等同于“更接近真值”。
+**方向 C 的价值取决于退化强度，不是"真实 vs 合成"这么简单。** REDS bicubic 上生成先验失败；RealVSR（约 2 倍真实退化）上生成模型的 PSNR 落后、感知轴接近但未超越；MVSR4x（真 x4 真实退化）上生成模型的感知轴全面领先、PSNR 仍落后。**"生成先验在真实退化上更好"只在退化足够重、且只看感知指标时成立。**
 
 ## 1. 现有唯一正向结果（REDS bicubic，有 GT）
 
@@ -195,7 +195,32 @@ LQ 的有效分辨率约是 GT 的 1/2，不是 1/4。为让所有 x4 模型（E
 - DOVE 使用 `--is_cpu_offload` 之外的 `pipe.to("cuda")` 路径；`enable_sequential_cpu_offload` 在 bfloat16 下触发 `Cannot copy out of meta tensor`（diffusers 0.32.2 已知限制）。
 - 采用 LQ 再降 4 倍的适配协议，与官方 `EDVR_NoUp` 的 1 倍协议不同，绝对值不可与 RealVSR 论文表格直接对照。
 
-## 9. 工程教训（本轮新增）
+## 9. MVSR4x 配对评测（第二个真实退化数据集，2026-11-24）
+
+MVSR4x 用手机双摄同时采集：超广角（13mm）给低清、长焦（90mm）给高清，两路已对齐到同一像素网格（都是 1024×1024）。缩放倍数实测确定：wide 的高频能量（0.033%/0.004%）与 tele 降 4 倍（0.029%/0.009%）最接近，**是真正的 x4 配对**（RealVSR 只有约 2 倍）。
+
+15 段 × 5 帧：
+
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
+|---|---:|---:|---:|---:|---:|
+| bicubic ×4 | **23.649** | **0.7400** | 0.4789 | 0.3128 | 0.0250 |
+| 感知微调 EDVR | 23.548 | 0.7368 | **0.4598** | **0.2889** | 0.0258 |
+| 原始 EDVR | 23.282 | 0.7294 | 0.4832 | 0.3004 | 0.0323 |
+| DOVE 5B（12 段） | 21.758 | 0.6905 | **0.3670** | **0.2193** | **0.0158** |
+| OSEDiff | 21.159 | 0.6863 | 0.4114 | 0.2551 | 0.0290 |
+
+**结论与 RealVSR 相反：**
+
+1. **回归模型连 bicubic 都没超过**：原始 EDVR 的 PSNR 比 bicubic 低 0.37 dB、LPIPS 高 0.9%。而在 RealVSR 上 EDVR 高出 bicubic 0.89 dB。
+2. **生成模型在感知轴上明显领先**：DOVE 的 LPIPS 比 bicubic 低 23.4%、DISTS 低 29.9%；OSEDiff 分别低 14.1% / 18.4%。PSNR 上两者仍落后 1.89 / 2.49 dB。
+3. **关键差别是退化强度**：MVSR4x 是真 x4（wide 对 tele 降 4 倍），RealVSR 只有约 2 倍。退化更重时回归模型天花板更低，生成模型的相对位置更好。
+4. **DOVE 的时序指标最好**（tLP 0.0158，比 bicubic 低 36.7%），是唯一在时序上明显优于回归模型的方法。
+
+**边界**：DOVE 只有 12/15 段（缺失的 115/139/158 在运行时遇上其他用户占用 29.8 GB 显存，DOVE 需约 47 GB，直接 OOM），因此该行与其余方法不同批，严格不可直接比较；但它与 bicubic 在同一 12 段上的差值 −1.89 dB，方向上不会因缺 3 段而反转。
+
+原始结果：`prior_qualification/results/mvsr4x/*/metrics.json`、`results/summary/mvsr4x.md`。
+
+## 10. 工程教训（本轮新增）
 
 1. **单连接限速是这批大文件下不动的真正原因**：hf-mirror 单连接约 64 KB/s，改成 HTTP Range 多线程分段（16 路）后同一文件达 37 MB/s，2.5 GB 从"11 小时"变成 2 分钟。脚本 `scripts/pdl.py`。
 2. **`content-length` 会骗人**：CLIP2 先前记录的 4.1 GB 其实是旧的不完整文件大小，真实为 10.16 GB（`x-linked-size`）。下载前先读 `x-linked-size`。
