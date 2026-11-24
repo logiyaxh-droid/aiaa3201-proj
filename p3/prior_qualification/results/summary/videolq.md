@@ -1,75 +1,44 @@
-# VideoLQ 真实退化评测结果
+# VideoLQ 评测（修正协议后）
 
-日期：2026-11-22  
-状态：已完成  
-数据：官方 VideoLQ（OpenDataLab 镜像），50 段真实低质视频，5 帧/段，共 250 帧
+日期：2026-11-24（修正版；原版 2026-11-22 有输入 bug，结论作废）  
+数据：VideoLQ 50 段 × 5 帧，原生分辨率  
+脚本：`prior_qualification/scripts/run_edvr_vlq.py`、`score_vlq_local.py`  
+原始指标：`prior_qualification/results/vlq/{edvr_v2,ft_v2}.json`
 
-## 1. 数据核实
+## 为什么要重跑
 
-通过 OpenXLab CLI 从 `OpenDataLab/VideoLQ` 下载，1.71 GB 分卷归档，解压后：
+原脚本有两处输入错误，都会让结果偏低：
 
-- 50 个片段，编号 000–049；
-- 多数片段 100 帧，030（41 帧）、031（34 帧）、033（47 帧）不足 100 帧；
-- 分辨率各异：320×240、640×480、720×576、492×360 等；
-- 与官方描述（Flickr/YouTube 采集、无场景切换、纹理丰富）一致。
+1. **单帧重复 5 次**：注释写"传入真实邻帧"，但代码是 `x[None].repeat(5,1,1,1)`。
+   P0 的 `tasks/edvr_neighbor` 已在 REDS 上测过这个改动会让 EDVR 掉 **2.76 dB**。
+2. **无抗锯齿的重采样**：`cv2.resize(..., INTER_CUBIC)` 缩小时不展宽核，
+   会混叠。同一批帧上 PIL BICUBIC 比 cv2 INTER_CUBIC 高约 **1.5 dB**。
 
-这是真正的 VideoLQ，不是之前 HuggingFace 上误认的 RealISVSR 配对数据。
+另外原脚本用 `pyiqa.create_metric("niqe")`，该调用会联网取权重，本机无外网时
+直接 `URLError: Network is unreachable`。修正版改用本地 checkpoint 的 MUSIQ。
 
-## 2. 协议
+## 修正后结果
 
-- 每段按 `linspace` 均匀取 5 帧，共 250 帧；
-- **保持原生分辨率**，不缩放、不裁剪，因为 VideoLQ 的退化与分辨率绑定；
-- 有 GT 不存在，因此只算无参考指标：**NIQE**（越低越好）、**MUSIQ**（越高越好）；
-- 另记 **selfPSNR**：原图作为目标的自我一致性，衡量模型是否破坏已有信息，**不是**对真值的准确度；
-- 按片段平均后再对 50 段等权平均，避免 640×480 片段压过 320×240 片段。
+| 方法 | MUSIQ ↑ | selfPSNR ↑ |
+|---|---:|---:|
+| 感知微调 EDVR | **52.51** | 27.44 |
+| 原始 EDVR | 51.26 | **27.78** |
+| 原始 EDVR（旧，有 bug） | 55.81 | 20.49 |
 
-x4 模型（EDVR/OSEDiff/SUPIR/DOVE）统一：原图 → 1/4 → 模型 ×4 → 与原图比较。
-DOVE 需要 `(F-1)%8==0`，输入 9 帧，只评前 5 帧（与评测集同位置）。
+selfPSNR 从 20.49 升到 27.78，说明旧结果的主要成分是"输入被破坏"
+（单帧重复 + 重采样混叠），而不是模型表现。
 
-## 3. 结果
+## 结论
 
-| 方法 | NIQE ↓ | MUSIQ ↑ | selfPSNR | 显存 | 250 帧耗时 |
-|---|---:|---:|---:|---:|---:|
-| **OSEDiff** | **4.109** | **66.85** | 21.54 | 4.55 GiB | 37 s |
-| **DOVE 5B** | 5.003 | 61.51 | 21.76 | tile 256 | 91 s |
-| 感知微调 EDVR | 5.190 | 56.21 | 20.33 | ~8 GiB | 36 s |
-| SUPIR v0F | 5.629 | 46.53 | **24.29** | 12.4 GiB | 16.3 min |
-| 原始 EDVR | 5.673 | 55.81 | 20.49 | ~8 GiB | 36 s |
-| bicubic ×4 | 7.563 | 31.38 | 23.74 | — | 秒级 |
+1. **旧 VideoLQ 表（EDVR 55.81 / 微调 55.81 那一版）不可引用**，
+   它的 selfPSNR 只有 20.49，低于 bicubic 的 23.74，本质是在测"输入破坏程度"。
+2. **修正后两个 EDVR 变体差距很小**：MUSIQ 52.51 vs 51.26（+2.4%），
+   selfPSNR 27.44 vs 27.78（微调略低 1.2%）。感知微调的收益在
+   VideoLQ 这种无 GT 数据上不明显。
+3. **仍然没有 GT**，所以只能报 MUSIQ 与 selfPSNR，不能与 RealVSR / MVSR4x
+   的 PSNR/LPIPS 表格比较。
 
-## 4. 关键观察
+## 未完成
 
-**1. OSEDiff 在 VideoLQ 上全面最好。** NIQE 4.11（比原始 EDVR 低 27.6%），MUSIQ 66.85（比 EDVR 高 19.8%），速度也最快。这与它在 REDS bicubic 上"纹理块 LPIPS 差 151.8%"的结论完全相反。
-
-**2. 感知微调 EDVR 在 VideoLQ 上优于原始 EDVR。** NIQE 5.190 vs 5.673，MUSIQ 56.21 vs 55.81。这与手机实拍视频上"两者基本持平"不同，说明微调收益在 VideoLQ 这种真实退化上部分成立。
-
-**3. SUPIR 出现指标分裂。** selfPSNR 24.29 最高（最忠实保留原图信息），但 MUSIQ 46.53 最低（比 bicubic 的 31.38 好，但远低于其他方法）。它倾向于保守复原，牺牲观感。
-
-**4. bicubic 的 selfPSNR 很高（23.74）但 NIQE/MUSIQ 最差。** 这印证了 selfPSNR 的局限：它奖励"不动"，不奖励"变好"。三个指标必须并列，不能选一个当结论。
-
-**5. DOVE 居中。** NIQE 5.003 略优于感知微调 EDVR，MUSIQ 61.51 明显更高。它的视频时序能力在这里没有带来压倒性优势。
-
-## 5. 与前两组实验的关系
-
-| 数据集 | 有 GT | 生成模型 vs EDVR | 结论方向 |
-|---|---|---|---|
-| REDS bicubic | 有 | 纹理块 LPIPS 差 151–197% | 生成先验明显更差 |
-| 手机实拍 | 无 | NIQE 全部更优，MUSIQ 部分更优 | 生成先验占优 |
-| VideoLQ | 无 | NIQE/MUSIQ 全部更优 | 生成先验占优 |
-
-三组结果一致地指向：**域匹配是关键变量**。合成 bicubic 上回归模型接近最优，真实退化上生成先验价值上升。
-
-## 6. 不能说明什么
-
-- VideoLQ 没有 GT，**不能**证明生成模型更接近真实；
-- NIQE/MUSIQ 与 REDS 的 PSNR/LPIPS 不可比；
-- selfPSNR 高不代表质量好（bicubic 就是反例）；
-- 没有配对数据，无法排除"生成模型只是让图像更符合 IQA 模型偏好"这一解释。
-
-## 7. 工程记录
-
-- 官方 VideoLQ 的 GD/Dropbox/OneDrive 均不可达；**OpenDataLab 可用**，需 `openxlab` CLI；
-- `openxlab dataset ls` 有 bug（缺 `rprint` 导入），补一行 import 即可；
-- 归档是嵌套的 `VideoLQ.tar.gz.00` → `VideoLQ.tar`，需两次解压；
-- VideoLQ 尺寸不整除 8，OSEDiff 的小波颜色修复会崩，需 pad→计算→crop；
-- DOVE 需 `--upscale 1`，否则会把小图放大 4 倍。
+NIQE 需要联网取权重，本机无法获取，本表只报 MUSIQ。补 NIQE 的方法：
+在有外网的机器上下载 `niqe` 权重到 `p3/quality_metrics/weights/` 后重跑。

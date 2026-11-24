@@ -20,6 +20,7 @@ import sys
 import time
 
 import cv2
+import numpy as np
 import torch
 
 ROOT = "/data/disk1/home/ghe270/p3/prior_qualification"
@@ -43,6 +44,18 @@ def build(finetuned):
     return net
 
 
+def aa_down(im, w4, h4):
+    """Anti-aliased x4 downsample.
+
+    cv2.INTER_CUBIC does NOT widen its kernel when shrinking, so it aliases and
+    costs about 1.5 dB versus an anti-aliased resampler (measured on the REDS
+    val set: 25.784 dB with PIL BICUBIC vs 24.253 dB with cv2.INTER_CUBIC).
+    PIL's BICUBIC applies the prefilter when shrinking, so use that here.
+    """
+    from PIL import Image
+    return np.asarray(Image.fromarray(im).resize((w4, h4), Image.BICUBIC))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--name", default="edvr")
@@ -58,19 +71,32 @@ def main():
         files = sorted(glob.glob(os.path.join(SRC, clip, "*.png")))
         od = os.path.join(out_root, clip)
         os.makedirs(od, exist_ok=True)
-        # EDVR uses five consecutive frames; these are 10-frame samples, so pass
-        # the real neighbouring samples rather than repeating one frame.
-        for i, p in enumerate(files):
+        # EDVR consumes five consecutive frames.  These clips are 10-frame
+        # samples, so build every LR frame first and then hand EDVR the real
+        # neighbours, replicating only at the sequence edges.  The previous
+        # version repeated a single frame five times, which p0/tasks/edvr_neighbor
+        # measured to cost 2.76 dB.
+        lrs = []
+        for p in files:
             im = cv2.cvtColor(cv2.imread(p), cv2.COLOR_BGR2RGB)
             h, w = im.shape[:2]
-            # keep /4 integer and >= 8 px for the deformable pyramid
-            w4, h4 = max(8, (w // 4) - (w // 4) % 2), max(8, (h // 4) - (h // 4) % 2)
-            lr = cv2.resize(im, (w4, h4), interpolation=cv2.INTER_CUBIC)
-            x = torch.from_numpy(lr).permute(2, 0, 1).float().div(255)
-            x = x[None].repeat(5, 1, 1, 1)[None].cuda()
+            # EDVR's deformable pyramid requires the *input* to be a multiple of
+            # 4, and the output is 4x that.  Round the LR size down to a multiple
+            # of 4 instead of only to an even number (the old rule left sizes like
+            # 82x60 that trip `assert h % 4 == 0`).
+            w4 = max(8, (w // 4) // 4 * 4)
+            h4 = max(8, (h // 4) // 4 * 4)
+            lrs.append((aa_down(im, w4, h4), (w, h)))
+        n = len(lrs)
+        for i, p in enumerate(files):
+            idx = [max(0, min(n - 1, i + d - 2)) for d in range(5)]
+            stack = torch.stack([
+                torch.from_numpy(lrs[k][0]).permute(2, 0, 1).float().div(255)
+                for k in idx])
             with torch.no_grad():
-                y, _ = net(x)
+                y, _ = net(stack[None].cuda())
             out = y[0].clamp(0, 1).mul(255).round().byte().permute(1, 2, 0).cpu().numpy()
+            w, h = lrs[i][1]
             out = cv2.resize(out, (w, h), interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(os.path.join(od, os.path.basename(p)),
                         cv2.cvtColor(out, cv2.COLOR_RGB2BGR))

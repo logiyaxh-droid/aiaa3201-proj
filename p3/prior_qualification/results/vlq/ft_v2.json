@@ -1,0 +1,11 @@
+{
+ "method": "ft_v2",
+ "dir": "/data/disk2/home/ghe270/p3/prior_qualification/outputs/vlq/ft_v2",
+ "n_clips": 50,
+ "n_frames": 250,
+ "missing": [],
+ "musiq": 52.512076171874995,
+ "self_psnr": 27.44042059712782,
+ "niqe": null,
+ "note": "NIQE skipped: pyiqa.create_metric('niqe') fetches weights over the network and this host has no egress. MUSIQ uses the local checkpoint. self_psnr is agreement with the native frame, not accuracy against truth (VideoLQ has no GT)."
+}
