@@ -1,12 +1,13 @@
 # Direction C 探索最终结论：残差扩散、外部生成先验与真实退化
 
 日期：2026-11-22  
-状态：已完成（RealVSR 六个方法全齐；MVSR4x 五个方法，DOVE 12/15 段）  
-范围：REDS bicubic（有 GT）、真实退化无 GT（手机实拍 + 官方 VideoLQ）、真实退化有 GT（RealVSR + MVSR4x）四条线
+状态：已完成（RealVSR 六方法；MVSR4x 五方法，DOVE 12/15 段；REDS-Real 四方法 × 300 帧）  
+范围：REDS bicubic、真实退化无 GT（手机实拍 + VideoLQ）、
+真实退化有 GT（RealVSR + MVSR4x + REDS-Real）五条线
 
 ## 一句话结论
 
-**方向 C 的价值取决于退化强度，不是"真实 vs 合成"这么简单。** REDS bicubic 上生成先验失败；RealVSR（约 2 倍真实退化）上生成模型的 PSNR 落后、感知轴接近但未超越；MVSR4x（真 x4 真实退化）上生成模型的感知轴全面领先、PSNR 仍落后。**"生成先验在真实退化上更好"只在退化足够重、且只看感知指标时成立。**
+**方向 C 的价值取决于退化是否真实，而"真实"要看退化强度而非数据来源标签。** REDS bicubic 上生成先验失败（PSNR −2.8 dB）；RealVSR（约 2 倍退化、且被本仓库二次降采样）上回归模型占优；MVSR4x（真 ×4）上生成模型感知轴领先；**REDS-Real（模拟真实压缩+噪声+模糊，有 GT）上 OSEDiff 的 LPIPS 低 29.6% 而 PSNR 只低 1.07 dB**。同时干净域 EDVR 在真实退化下连 bicubic 都打不过。
 
 ## 1. 现有唯一正向结果（REDS bicubic，有 GT）
 
@@ -220,7 +221,42 @@ MVSR4x 用手机双摄同时采集：超广角（13mm）给低清、长焦（90m
 
 原始结果：`prior_qualification/results/mvsr4x/*/metrics.json`、`results/summary/mvsr4x.md`。
 
-## 10. 工程教训（本轮新增）
+## 10. REDS-Real：补齐"有 GT 且退化真实"的基准（2026-11-24）
+
+前三节的三套数据各有缺陷（干净 bicubic、无 GT、RealVSR 被二次降采样），
+无法干净地回答"真实退化下生成先验是否有用"。本节用一个新基准直接对照。
+
+做法：取**干净的** REDS val GT，施加 RealBasicVSR 二阶真实退化（模糊 → 随机缩放 →
+高斯/泊松噪声 → JPEG → 视频压缩，整条链两遍），再降到 GT/4，保留 GT。
+退化强度已标定：REDS-Real LR 的拉普拉斯能量 15.11，低于 REDS 官方 bicubic LR 的 25.64，
+即确实更平滑（退化更重）。数据清单 sha256 `8ab95add…` 已冻结。
+
+30 段 × 10 帧（300 帧）：
+
+| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ |
+|---|---:|---:|---:|---:|
+| bicubic ×4 | **20.547** | **0.4934** | 0.7397 | 0.3702 |
+| 原始 EDVR | 20.500 | 0.4848 | 0.6605 | 0.3747 |
+| 感知微调 EDVR | 20.450 | 0.4790 | 0.6373 | 0.3642 |
+| OSEDiff | 19.477 | 0.4330 | **0.5204** | **0.2703** |
+
+相对 bicubic：EDVR 的 PSNR −0.047、LPIPS −10.7%；感知微调 −0.097 / −13.8%；
+OSEDiff **−1.070 / −29.6%**。
+
+**结论：**
+
+1. **干净域训练的 EDVR 在真实退化下连 bicubic 都打不过**（20.500 vs 20.547），
+   而它在干净 REDS 上高出 bicubic 4.5 dB。之前的强基线是"退化域匹配"的产物。
+2. **生成先验首次在感知轴上大幅领先**：OSEDiff 的 LPIPS 比 bicubic 低 29.6%、
+   比感知微调 EDVR 低 18.3%，DISTS 低 26.9%，代价只是 PSNR −1.07 dB。
+   这与第 3 节 REDS clean bicubic 上"PSNR −2.8 dB、LPIPS +36.9%"方向完全相反。
+3. **第 8 节 RealVSR 上回归模型占优的原因得到解释**：RealVSR 的 LQ 被再降 4 倍后，
+   输入已接近干净 bicubic 域；一旦退化是真正的压缩+噪声+模糊（REDS-Real），
+   生成先验的价值立刻显现。
+
+原始结果：`prior_qualification/results/reds_real/*_s10/metrics.json`、`results/summary/reds_real.md`。
+
+## 11. 工程教训（本轮新增）
 
 1. **单连接限速是这批大文件下不动的真正原因**：hf-mirror 单连接约 64 KB/s，改成 HTTP Range 多线程分段（16 路）后同一文件达 37 MB/s，2.5 GB 从"11 小时"变成 2 分钟。脚本 `scripts/pdl.py`。
 2. **`content-length` 会骗人**：CLIP2 先前记录的 4.1 GB 其实是旧的不完整文件大小，真实为 10.16 GB（`x-linked-size`）。下载前先读 `x-linked-size`。
