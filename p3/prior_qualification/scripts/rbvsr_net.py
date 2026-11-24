@@ -133,17 +133,17 @@ class SPyNet(nn.Module):
             supp.insert(0, F.avg_pool2d(supp[0], 2, 2, count_include_pad=False))
 
         flow = ref[0].new_zeros(ref[0].size(0), 2,
-                                int(math.floor(ref[0].size(2) / 2.0)),
-                                int(math.floor(ref[0].size(3) / 2.0)))
+                                ref[0].size(2), ref[0].size(3))
         for level in range(len(ref)):
-            up = F.interpolate(flow, scale_factor=2, mode="bilinear",
-                               align_corners=True) * 2.0
-            if up.size(2) != ref[level].size(2):
-                up = F.pad(up, [0, 0, 0, 1], mode="replicate")
-            if up.size(3) != ref[level].size(3):
-                up = F.pad(up, [0, 1, 0, 0], mode="replicate")
+            if level == 0:
+                up = flow
+            else:
+                up = F.interpolate(flow, scale_factor=2, mode="bilinear",
+                                   align_corners=True) * 2.0
             flow = self.basic_module[level](torch.cat([
-                ref[level], _warp(supp[level], up), up], 1)) + up
+                ref[level],
+                _warp(supp[level], up, padding_mode="border"), up], 1)
+                ) + up
         return flow
 
     def forward(self, ref, supp):
@@ -168,18 +168,23 @@ def _zero_feat(ref, channels):
                        dtype=ref.dtype, device=ref.device)
 
 
-def _warp(x, flow):
-    """Backward warp: sample x at (grid + flow)."""
+def _warp(x, flow, padding_mode="zeros"):
+    """Backward warp: sample x at (grid + flow).
+
+    `padding_mode` follows mmedit.models.common.flow_warp: the default is
+    "zeros" for the feature-propagation branches, while SPyNet internally
+    warps the supporting *image* with "border".
+    """
     b, _, h, w = x.shape
     gy, gx = torch.meshgrid(torch.arange(h, device=x.device),
                             torch.arange(w, device=x.device), indexing="ij")
     grid = torch.stack((gx, gy), 0).float()
     grid = grid.unsqueeze(0).expand(b, -1, -1, -1)
-    grid = grid + flow.flip(1)
+    grid = grid + flow
     grid[:, 0] = 2 * grid[:, 0] / max(w - 1, 1) - 1
     grid[:, 1] = 2 * grid[:, 1] / max(h - 1, 1) - 1
     return F.grid_sample(x, grid.permute(0, 2, 3, 1), align_corners=True,
-                         mode="bilinear", padding_mode="border")
+                         mode="bilinear", padding_mode=padding_mode)
 
 
 class PixelShufflePack(nn.Module):
@@ -195,7 +200,7 @@ class PixelShufflePack(nn.Module):
 
 class RealBasicVSR(nn.Module):
     def __init__(self, mid_channels=64, n_cleaning=20,
-                 n_forward=20, n_backward=20):
+                 n_forward=20, n_backward=20, dynamic_refine_thres=1.0):
         super().__init__()
         self.image_cleaning = nn.Sequential(
             ResidualBlocksWithInputConv(3, mid_channels, n_cleaning),
@@ -214,6 +219,7 @@ class RealBasicVSR(nn.Module):
         self.basicvsr.upsample2 = PixelShufflePack(mid_channels, mid_channels, 2)
         self.basicvsr.conv_hr = _conv(mid_channels, mid_channels)
         self.basicvsr.conv_last = _conv(mid_channels, 3)
+        self.dynamic_refine_thres = dynamic_refine_thres
 
     def forward(self, lqs):
         """lqs: [N, 3, H, W] in [0,1].  Returns [N, 3, 4H, 4W].
@@ -228,10 +234,20 @@ class RealBasicVSR(nn.Module):
             the network predicts a residual over the upsampled LR.
         """
         n = lqs.shape[0]
-        # `image_cleaning` predicts a *residual*: its raw output has mean ~2/255
-        # on a real frame whose mean is ~144/255.
-        cleaned = [lqs[i:i + 1] + self.image_cleaning(lqs[i:i + 1])
-                   for i in range(n)]
+        # RealBasicVSR applies the cleaning *module* iteratively (at most 3
+        # times) and accumulates the residual into the frames, stopping early
+        # once the mean absolute residual drops below dynamic_refine_thres
+        # (default 255/255 = 1.0).  Running it exactly once was one cause of the
+        # remaining error: the module's own output is a small residual (mean
+        # ~2/255), so one pass leaves most of the compression residue in place.
+        cleaned = [lqs[i:i + 1].clone() for i in range(n)]
+        for it in range(3):
+            res = [self.image_cleaning(cleaned[i]) for i in range(n)]
+            for i in range(n):
+                cleaned[i] = cleaned[i] + res[i]
+            mean_res = torch.stack([r.abs().mean() for r in res]).mean()
+            if float(mean_res) < self.dynamic_refine_thres:
+                break
 
         fw = self.basicvsr.forward_resblocks
         bw = self.basicvsr.backward_resblocks
@@ -264,8 +280,10 @@ class RealBasicVSR(nn.Module):
         for i in range(n):
             x = self.basicvsr.fusion(torch.cat([back[i], feats[i]], 1))
             x = F.leaky_relu(x, negative_slope=0.1, inplace=True)
-            x = self.basicvsr.upsample1(x)
-            x = self.basicvsr.upsample2(x)
+            x = F.leaky_relu(self.basicvsr.upsample1(x),
+                             negative_slope=0.1, inplace=True)
+            x = F.leaky_relu(self.basicvsr.upsample2(x),
+                             negative_slope=0.1, inplace=True)
             x = F.leaky_relu(self.basicvsr.conv_hr(x), negative_slope=0.1,
                              inplace=True)
             x = self.basicvsr.conv_last(x)
