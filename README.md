@@ -29,11 +29,15 @@ p2/                  Part 2 — SOTA 复现：EDVR + TecoGAN
     wild/            自拍素材的演示视频（5 片段 × 普通/inset，同格式）
   wild_source/      5 段手机原始视频（对应 PDF §6.1 Wild Video Mandatory）
   WILD.md           自拍素材的完整评测说明、口径与结论（12 方法 × 20 片段）
-p3/                  Part 3 — 探索：像素级不确定性 + 区域路由
-  scripts/           不确定性估计、区域剖面、出图
-  metrics/           不确定性 / 路由 / 融合 / TTA 的实验结果
-  figures/           5 张报告图
-  docs/              报告草稿
+p3/                  Part 3 — 探索：不确定性 + 外部生成先验 + 真实退化
+  prior_qualification/  外部生成先验评测（OSEDiff / SUPIR / DOVE）
+    scripts/            真实退化数据构建、推理、打分脚本
+    results/            真实退化指标：手机实拍 / VideoLQ / RealVSR / MVSR4x
+      summary/          各数据集结论文档
+  utrd/               U-TRD 三原型（残差扩散）与结果
+  quality_metrics/    REDS 上 30 clip 的感知指标与 EDVR 感知微调
+  docs/               结论文档与本阶段路线图 P3_realworld_vsr_roadmap.md
+  figures/            5 张报告图
 p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重核查 / TecoGAN 完整性
   evalkit/           共用评测包（指标、时域、数据配对、配置、溯源）
   scripts/           核查与推理脚本（tLP 验证、网格测量、带校验的 TecoGAN 推理）
@@ -90,15 +94,91 @@ EDSR 的 d_SR（0.2266）最接近 d_GT（0.2304），所以 tLP 最低；而 ta
 
 面对 Part 2 暴露的取舍——EDVR 在 PSNR/SSIM/**LPIPS**/**FID** 上全面最好
 （FID 6.31 对 TecoGAN 40.65），但按正式 tLP 它比 EDSR 略差（0.0123 对 0.0072），
-即**没有任何方法同时赢下所有轴**——
-做像素级不确定性估计与区域路由融合，方向为 PDF 建议的 *Uncertainty-Aware*。
-产出 5 张报告图（不确定性对比、校准曲线、误差捕获、TTA 增益、区域剖面）。
+即**没有任何方法同时赢下所有轴**——Part 3 沿三条件推进：像素级不确定性、外部生成先验、
+真实退化数据。完整结论文档见 [`p3/docs/P3_direction_c_final_conclusions.md`](p3/docs/P3_direction_c_final_conclusions.md)。
 
 > 早期草稿写的“TecoGAN 赢感知与时域指标”与现有数据不符：LPIPS 上 EDVR（0.2039）与 EDSR（0.3087）
 > 都好于 TecoGAN（0.3337），TecoGAN 只优于 bicubic/lanczos；FID 上 TecoGAN（40.65）
 > 也只比 bicubic（41.41）好一点。全量 tLP 出来后 TecoGAN 排第 2（0.0106），
 > 但那是"输出抖动接近真值抖动"的结果，与感知质量是两件事。
-> Part 3 的动机据此写成“取舍”而非“矛盾”。
+
+### 3.1 REDS 上唯一稳定的正向结果
+
+EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调（900 步，lr 3e-5），30 clip：
+
+| 指标 | 原始 EDVR | 感知微调 | 变化 |
+|---|---:|---:|---:|
+| LPIPS ↓ | 0.2039 | **0.1402** | −31.2%（30/30 片段） |
+| tLP ↓ | 0.0123 | **0.0077** | −36.6%（29/30） |
+| DISTS ↓ | 0.0870 | **0.0433** | −50.2%（参与训练，不作独立证据） |
+| PSNR ↑ | **30.9042** | 30.5231 | −0.381 dB |
+
+这是感知—保真权衡，不是全面提高。
+
+### 3.2 外部生成先验：干净 bicubic 上失败
+
+三个候选在 EDVR 高分歧区与纹理区都没有增益（纹理块 LPIPS，微调 EDVR = 0.0659）：
+
+| 候选 | 纹理块 LPIPS | 相对变化 |
+|---|---:|---:|
+| OSEDiff | 0.1660 | +151.8% |
+| SUPIR v0F | 0.1955 | +196.6% |
+| DOVE 5B | 0.1963 | +197.2% |
+
+原因一致：真实退化生成先验在干净 bicubic 上会重绘纹理而不是恢复 GT 纹理。
+
+自研 U-TRD（冻结 EDVR + 小残差 U-Net，三原型）同样未超过同容量确定性对照，
+且不确定性噪声未优于均匀噪声。
+
+### 3.3 真实退化：先有 GT 的两个数据集给出相反结论
+
+**RealVSR**（约 2 倍真实退化，50 段 × 5 帧，有 GT）：
+
+| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
+|---|---:|---:|---:|---:|
+| 原始 EDVR | **23.036** | 0.2404 | 0.1315 | 0.0128 |
+| 感知微调 EDVR | 22.871 | **0.1979** | **0.0944** | **0.0094** |
+| bicubic ×4 | 22.147 | 0.4997 | 0.2118 | 0.0287 |
+| SUPIR v0F | 22.082 | 0.3347 | 0.1774 | 0.0111 |
+| DOVE 5B | 21.577 | 0.2215 | 0.1118 | 0.0177 |
+| OSEDiff | 20.049 | 0.2710 | 0.1397 | 0.0143 |
+
+**MVSR4x**（真 ×4 真实退化，15 段 × 5 帧，有 GT）：
+
+| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
+|---|---:|---:|---:|---:|
+| bicubic ×4 | **23.649** | 0.4789 | 0.3128 | 0.0250 |
+| 感知微调 EDVR | 23.548 | 0.4598 | 0.2889 | 0.0258 |
+| 原始 EDVR | 23.282 | 0.4832 | 0.3004 | 0.0323 |
+| DOVE 5B（12 段） | 21.758 | **0.3670** | **0.2193** | **0.0158** |
+| OSEDiff | 21.159 | 0.4114 | 0.2551 | 0.0290 |
+
+**两个数据集结论相反，关键变量是退化强度而不是"真实 vs 合成"：**
+
+- RealVSR（约 2 倍退化）上回归模型明显更好：EDVR 高出 bicubic 0.89 dB，
+  生成模型的感知轴也没赢（DOVE 的 LPIPS 仍比感知微调差 11.9%）；
+- MVSR4x（真 ×4 退化）上回归模型连 bicubic 都没超过（EDVR 低 0.37 dB），
+  而生成模型的感知轴全面领先（DOVE 的 LPIPS 比 bicubic 低 23.4%、DISTS 低 29.9%）。
+
+退化越重，回归模型的天花板越低，生成模型的相对位置越好。
+
+### 3.4 无 GT 真实数据的补充（VideoLQ 与手机实拍）
+
+VideoLQ（50 段 × 5 帧，原生分辨率）上 OSEDiff 的 NIQE 4.109 / MUSIQ 66.85 全面领先，
+原始 EDVR 为 5.673 / 55.81。DOVER（6 段 × 97 帧）上 DOVE 技术分最高。
+
+**但这一节的结论不能等同于"更接近真值"**：无 GT 时 NIQE/MUSIQ/DOVER 衡量的是
+"看起来是否清晰"，RealVSR 上引入真值后 OSEDiff 的 PSNR 反而比 bicubic 低 2.1 dB，
+说明高 NIQE/MUSIQ 不保证更像真值。
+
+### 3.5 下一步路线
+
+上述负结果与混杂因素（RealVSR 的额外重采样、VideoLQ 无 GT）促使转向
+**真实退化专用的端到端模型**：`RealBasicVSR` 多帧预清洗 → `OSEDiff` 一步扩散潜空间残差精修
+→ 不确定性门控，配 REDS-Real / 原生 VideoLQ / wild_source 三基准评测。
+
+完整方案、里程碑与 Go/No-Go 门槛见
+[`p3/docs/P3_realworld_vsr_roadmap.md`](p3/docs/P3_realworld_vsr_roadmap.md)。
 
 ## 剩余清单任务（`p0/tasks/`）
 
@@ -220,6 +300,23 @@ cd ~/p0 && export TORCH_HOME=/tmp/torch_home
 | `val_sharp_bicubic/` | 同上的 ×4 bicubic 降质 | 320×180 |
 | `train_sample_sharp/`、`train_sample_bicubic/` | 训练样本 | 20 clip |
 | `vimeo90k_test/` | Vimeo-90K septuplet 测试集 | 94 序列 |
+
+**Part 3 真实退化数据**（自行获取，不入库）：
+
+| 数据集 | 获取方式 | 规模 | 有无 GT |
+|---|---|---|---|
+| **RealVSR**（ICCV 2021） | 官方 `LQ_test.zip` / `GT_test.zip`，50 段 × 50 帧 | LQ 与 GT 同为 512×1024 | 有 |
+| **MVSR4x**（CVPRW 2023） | HF `RuixuanJiang/Video_Deblurring_Datasets` → `MVSR/`，19 个分卷共 40.18 GB | 15 段 × 100 帧，双摄 1024×1024 | 有 |
+| **VideoLQ** | OpenDataLab `openxlab dataset download`（`OpenDataLab/VideoLQ`） | 50 段，320×240 ～ 720×576 | 无 |
+
+> RealVSR 的 LQ 与 GT **同尺寸**（不是 4 倍配对），实测有效分辨率比约 2 倍：
+> 高频能量 LQ 0.316% vs GT 降 2 倍 0.298% vs GT 降 4 倍 0.065%。
+> 官方测试脚本因此用 `EDVR_NoUp`（`upscale=1`）直接吃 LQ。本仓库为让 x4 模型共用一条协议，
+> 把 LQ 再降 4 倍后送入，**这与官方协议不同，绝对值不可与论文表格直接对照**，已在
+> `p3/prior_qualification/results/summary/realvsr.md` 标注。
+>
+> MVSR4x 同样是双摄同尺寸对齐，但实测 wide 对 tele 是**真 ×4**（wide 高频 0.033%/0.004%
+> 对 tele 降 4 倍 0.029%/0.009%），因此 wide 直接降 4 倍作为 LQ。
 
 > `val_sharp/000–029` 的编号与 EDVR 论文的 REDS4（original **train** 的 `000/011/015/020`）
 > **只是编号巧合**，内容完全不同：与上游 `val_sharp.zip` 逐像素一致，与 `train_sharp.zip` 全部不同
