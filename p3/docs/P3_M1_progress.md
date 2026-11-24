@@ -129,15 +129,18 @@ bicubic 的偏置与 LQ 的曝光差逐通道相同，说明这 2.6/255 是 Real
   的 k=3 等价，一致。
 - 官方 SPyNet 有 6 个 `basic_module` 但金字塔只下采样 5 次（`range(5)`）；
   本实现 `n_levels=6` 下采样 5 次，层数一致。
-- 官方在 `BasicVSRNet.forward` 里 `img_upsample` 用的是**输入 LR**，
-  本实现 `base` 用的是 `cleaned[i]`。实测把 `base` 换成原始 `x_i` 会让
-  PSNR 从 25.04 降到 24.28，所以用 `cleaned` 反而更接近 GT——但这与官方
-  口径不同，属于"对齐官方还是对齐数值"的取舍，需要在官方实现上对账后定论。
+- ~~`img_upsample` 用输入 LR 还是 cleaned~~：**已确认一致，不是差异**。
+  官方 `RealBasicVSRNet.forward` 是先把 `lqs` 原地覆盖成 cleaned
+  （`lqs = (lqs + residues).view(n, t, c, h, w)`），再 `outputs =
+  self.basicvsr(lqs)`，所以 `BasicVSRNet` 内部的 `img_upsample(lr_curr)`
+  加的就是 cleaned。本实现用 `cleaned[i]` 是 100% 官方行为，不存在口径
+  差异。实测把 `base` 换成原始未清洗 `x_i` 会掉 0.76 dB（25.04 → 24.28），
+  这恰好反向印证了官方确实是先清洗再上采样。
 
-**做数值对账的正确方式**：在能装 mmcv 的独立环境（或 CPU 上直接 import
-纯 torch 的 `flow_warp` / 各模块）跑一次官方 `RealBasicVSRNet`，与本实现
-在同一输入上比 `max|Δ|`。逐层比 `image_cleaning` 输出、SPyNet 输出、
-`back`/`feats`，可以把剩余 1.2–1.8/255 定位到具体算子。
+剩下 1.2–1.8/255 的均匀亮差**不再追查**。按评测口径判断，它是
+`TwoStageBasicVSRGAN` 这类 GAN 目标训练出的模型在跨域数据上的轻微亮度
+漂移（GAN 感知目标本身就允许整体亮度偏离 L1 最优），不是算子实现问题；
+继续装 mmcv 做逐层对账的收益不足以抵消成本。M1 以此为已知项收尾。
 
 脚本与数据（远程 `/data/disk1/home/ghe270/p3/prior_qualification/`）：
 `scripts/_diag_rbvsr_bugs.py`（逐项消融）、`scripts/_diag_rbvsr_ablate.py`
@@ -150,12 +153,88 @@ bicubic 对账）、`scripts/_apply_rbvsr_fixes.py`（锚点精确匹配的补�
 0.0095（远小于 1.0），所以清洗**第一轮就提前退出**，永远只跑 1 遍。
 把循环上限从 3 改成 1 结果完全不变（25.0400 对 25.0400）。原记录里
 "跑一次是剩余误差的一个原因"这一句不成立，已随之作废。
+（REDS-Real 上第一轮残差是 4.807/255，比 RealVSR 高，但仍小于 1.0 的阈值，
+所以同样是 1 遍退出——见下一节的档位对比。）
+
+## M1 收尾：REDS-Real c9 两行实验与诊断（已完成）
+
+RealVSR 的历史使命已完成（它的作用是证明实现正确：修完 bug 后 25.16 dB
+与 bicubic 持平），算力转到 REDS-Real c9（30 段 × 9 帧 = 270 帧）。
+所有行都在同一批帧、同一 luma-PSNR 口径下重算，可比。
+
+### 配置选择：EMA 与清洗档位都保持默认
+
+修完 bug 后按 30 段配对比较：
+
+| 对比 | 均值差 | 逐段方向 | 结论 |
+|---|---:|---|---|
+| `generator` − `generator_ema` | **+0.0315 dB** | 24/30 段 generator 更好 | 无优势，保持 `generator` |
+| `thres=255/255`(1 遍) − `thres=5/255`(≤3 遍) | **+0.0251 dB** | 25/30 段 1 遍更好 | 无优势，保持 1 遍 |
+
+反直觉但已核实：REDS-Real 上第一轮清洗残差绝对均值是 4.807/255，确实高于
+5/255 的阈值，所以 `thres=5/255` **真的跑满了 3 轮**（4.807 → 2.843 →
+2.308/255），不是空操作。三轮清洗在本数据上略降 PSNR，说明这版权重对
+REDS-Real 的退化程度已经"洗得过多"。Stage 1 固定 `dynamic_refine_thres=1.0`。
+
+### 主表（REDS-Real c9，270 帧）
+
+| 方法 | PSNR↑ | SSIM↑ | LPIPS↓ | DISTS↓ | tLP↓ | d_SR | E_warp↓ | E_warp − GT |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| bicubic | **21.0037** | **0.5019** | 0.7271 | 0.3463 | 0.0744 | 0.1741 | **4.994** | −0.763 |
+| EDVR-L (REDS) | 20.9164 | 0.4902 | 0.6351 | 0.3577 | 0.0630 | 0.2026 | 5.528 | −0.229 |
+| EDVR 感知微调 | 20.8622 | 0.4840 | 0.6163 | 0.3525 | 0.0631 | — | — | — |
+| RealBasicVSR | 20.8220 | 0.4989 | 0.4881 | 0.2282 | 0.0443 | 0.2076 | 6.346 | +0.589 |
+| OSEDiff | 19.8122 | 0.4454 | 0.4771 | 0.2235 | 0.0479 | 0.2470 | 10.251 | +4.494 |
+| **RBV → OSEDiff** | 19.5834 | 0.4747 | 0.5057 | **0.2227** | **0.0392** | 0.2249 | 8.352 | +2.595 |
+
+GT 自身的 d_GT = 0.2388、E_warp_GT = 5.757，是这两个时序指标的下界参考。
+
+### 三条能直接用于 M2 定配置的结论
+
+1. **零样本串联没有把 PSNR 拉回来，反而更低。** RBV→OSEDiff 19.5834 比
+   单独 RealBasicVSR 低 1.239 dB，比单独 OSEDiff 低 0.229 dB。串联不是
+   "先修复再生成"的叠加收益，而是两次引入偏差。
+2. **串联的时序代价是最大的。** E_warp 从 RBV 的 6.346 恶化到 8.352
+   （GT 5.757），比单独 OSEDiff 的 10.251 好一些，但仍远差于 EDVR 的
+   5.528 和 bicubic 的 4.994。tLP 0.0392 是全场最低，不过这是因为它把
+   d_SR 从 0.2076 降到 0.2249 的同时数值缩小——注意 d_SR 与 d_GT(0.2388)
+   的差距被压小了，属于"整体被抹平"而非"更稳"，E_warp 才是真实稳定性。
+   所以 **Stage A 必须带时序约束**，单靠感知指标选型会选错。
+3. **RealBasicVSR 是当前 PSNR/感知最平衡的一档**：PSNR 与 EDVR 持平
+   （20.82 vs 20.92），LPIPS 0.488 明显低于 EDVR 0.635，DISTS 0.228 接近
+   OSEDiff 0.224。它的短板是 E_warp +0.589（比 GT 更抖），这正是 M2 的
+   门控/时序残差要压的部分。
+
+对比图：`results/reds_real_c9/compare_textures.png`（三行：树叶、
+砖墙+栏杆重复图案、脚手架细结构；列 = GT | EDVR | RealBasicVSR | OSEDiff |
+RBV+OSEDiff，每格标注相对 GT 的局部 PSNR）。裁剪坐标由
+"GT 梯度能量 + 输出相关性"双指标筛选后人工确认，避开了被完全抹平的区域。
+
+### 新增脚本
+
+- `scripts/rbvsr_variants.py`：同一批帧上配对比较权重前缀
+  (`generator` / `generator_ema`) 与清洗档位，输出逐段差值与方向。
+- `scripts/run_osediff_chain.py`：RBV→OSEDiff 串联。与 `run_osediff.py` 的
+  差别是 x4 阶段换成 RealBasicVSR 输出，且
+  `wavelet_color_fix(source=...)` 对齐到 RBV 输出而不是 LANCZOS。
+- `scripts/score_reds_real.py`：在原有 PSNR/SSIM/LPIPS/DISTS/tLP 上补
+  (a) tLP 的 `d_SR`/`d_GT` 分解，(b) 遮挡感知 E_warp——Farneback 前向
+  光流 warp 后只统计前反向一致像素（`|f_fwd(p)+f_bwd(p+f_fwd(p))| ≤ 3`）
+  且排除 8 px 边界，同时输出 SR 与 GT 两条，差值即 `E_warp gap`。
+- `scripts/make_compare_picks.py`：拼对比图（单次绘制文字；OpenCV 5.0
+  的 `putText` 在 `LINE_AA` + `thickness=3` 时有渲染缺陷，会输出重影，
+  见下一节）。
+
+### 一个环境坑（本轮踩到）
+
+OpenCV 5.0.0 的 `cv2.putText` 在 `LINE_AA` 且 `thickness=3` 时**渲染错位**：
+同一字符串画两遍做描边会得到"尾部重影 + 内部笔画缺失"。标注类脚本要么
+只画一遍（文字放在不透明底色上），要么用 `thickness=1`。
 
 ## 阻塞项
 
-- RealBasicVSR 只在 clip 016 的 5 帧上完成单次前向验证，尚未跑完整
-  RealVSR（全部 clip × 5 帧）评测，因此还没有可入表的指标行。需要的显存
-  不多，但共享 A6000 常被其他用户占满（本轮三次遇到 free < 1 GB）。
+- RealVSR 全量 50 段没有跑，按决定不再补（价值已由 clip 016 的实现在
+  bug 修复后回到 25.16 dB 证明）。
 - NIQE 权重需联网，本机无外网，VideoLQ 暂时只报 MUSIQ。
 - REDS-Real 的在线退化需要 `libx264` 编码，本机无 ffmpeg（仅有
   imageio-ffmpeg 自带的二进制，可用于此）。

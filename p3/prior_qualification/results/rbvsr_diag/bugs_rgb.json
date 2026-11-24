@@ -1,0 +1,108 @@
+{
+ "clip": "016",
+ "ids": [
+  "00020",
+  "00021",
+  "00022",
+  "00023",
+  "00024"
+ ],
+ "order": "rgb",
+ "variants": {
+  "base": {
+   "psnr_mean": 15.468690257686822,
+   "psnr_per_frame": [
+    16.0732,
+    15.2811,
+    15.1184,
+    15.1424,
+    15.7283
+   ],
+   "rgb_bias": [
+    -21.59,
+    8.03,
+    -12.15
+   ],
+   "missing": 0,
+   "unexpected": 0,
+   "missing_keys": [],
+   "unexpected_keys": []
+  },
+  "lrelu": {
+   "psnr_mean": 24.564355465450667,
+   "psnr_per_frame": [
+    24.5817,
+    24.5444,
+    24.3936,
+    24.583,
+    24.719
+   ],
+   "rgb_bias": [
+    4.01,
+    4.23,
+    4.57
+   ],
+   "missing": 0,
+   "unexpected": 0,
+   "missing_keys": [],
+   "unexpected_keys": []
+  },
+  "warp": {
+   "psnr_mean": 15.406786226405384,
+   "psnr_per_frame": [
+    15.8886,
+    15.2079,
+    15.1713,
+    15.1967,
+    15.5694
+   ],
+   "rgb_bias": [
+    -22.69,
+    8.54,
+    -8.73
+   ],
+   "missing": 0,
+   "unexpected": 0,
+   "missing_keys": [],
+   "unexpected_keys": []
+  },
+  "pad": {
+   "psnr_mean": 15.472607550742335,
+   "psnr_per_frame": [
+    16.0866,
+    15.2795,
+    15.1243,
+    15.1423,
+    15.7304
+   ],
+   "rgb_bias": [
+    -21.58,
+    7.98,
+    -12.19
+   ],
+   "missing": 0,
+   "unexpected": 0,
+   "missing_keys": [],
+   "unexpected_keys": []
+  },
+  "all": {
+   "psnr_mean": 25.04002886402346,
+   "psnr_per_frame": [
+    24.9165,
+    24.9948,
+    24.9732,
+    25.0614,
+    25.2543
+   ],
+   "rgb_bias": [
+    3.79,
+    4.09,
+    4.52
+   ],
+   "missing": 0,
+   "unexpected": 0,
+   "missing_keys": [],
+   "unexpected_keys": []
+  }
+ }
+}

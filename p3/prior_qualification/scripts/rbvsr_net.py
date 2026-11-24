@@ -9,9 +9,9 @@ memory, so `load_state_dict` is the check that the reimplementation is right.
 
 Graph (from the key names in `RealBasicVSR_x4.pth`):
 
-    image_cleaning      5 residual blocks, 64 ch, cleans compression/noise
-    spynet              5-level pyramid, predicts flow between two frames
-    forward_resblocks   30 residual blocks, input is [64 feat | 3 warped]
+    image_cleaning      20 residual blocks, 64 ch, cleans compression/noise
+    spynet              6 basic modules, predicts flow between two frames
+    forward_resblocks   20 residual blocks, input is [64 feat | 3 warped]
     backward_resblocks  same, run in reverse time
     fusion              1x1 conv, 128 -> 64
     upsample1/2         pixel-shuffle x4, 64 -> 256 -> 64
@@ -230,16 +230,19 @@ class RealBasicVSR(nn.Module):
             other way round;
           * `fusion` is followed by leaky ReLU (output of fusion itself is not
             the feature);
-          * the final RGB prediction is added to a bilinear x4 of the input, i.e.
-            the network predicts a residual over the upsampled LR.
+          * the final RGB prediction is added to a bilinear x4 of the *cleaned*
+            frames.  Upstream overwrites `lqs` with the cleaned result before
+            calling `self.basicvsr(lqs)`, so `img_upsample` inside BasicVSRNet
+            also sees the cleaned frames; using `cleaned[i]` here is exact
+            upstream behaviour, not an approximation.
         """
         n = lqs.shape[0]
-        # RealBasicVSR applies the cleaning *module* iteratively (at most 3
-        # times) and accumulates the residual into the frames, stopping early
-        # once the mean absolute residual drops below dynamic_refine_thres
-        # (default 255/255 = 1.0).  Running it exactly once was one cause of the
-        # remaining error: the module's own output is a small residual (mean
-        # ~2/255), so one pass leaves most of the compression residue in place.
+        # Official loop: up to 3 cleaning passes, accumulating the residual into
+        # the frames, stopping early once the mean absolute residual drops below
+        # dynamic_refine_thres (255/255 by default).  Measured on a real frame the
+        # residual abs mean is ~0.0095, far below that threshold, so the loop
+        # always exits after the first pass.  The bound is kept for parity with
+        # upstream so a lower threshold can enable extra passes.
         cleaned = [lqs[i:i + 1].clone() for i in range(n)]
         for it in range(3):
             res = [self.image_cleaning(cleaned[i]) for i in range(n)]
