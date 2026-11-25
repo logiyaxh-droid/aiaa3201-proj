@@ -35,6 +35,8 @@ p3/                  Part 3 — 探索：不确定性 + 外部生成先验 + 真
     results/            真实退化指标：手机实拍 / VideoLQ / RealVSR / MVSR4x
       summary/          各数据集结论文档
   utrd/               U-TRD 三原型（残差扩散）与结果
+  m2_stageA/          M2 Stage A：零初始化潜空间残差 LoRA + 不确定性门控
+    RESULTS_M2.md     四臂 Pilot 全部 No-Go（LPIPS 全线未达 5% 门槛）与根因分析
   quality_metrics/    REDS 上 30 clip 的感知指标与 EDVR 感知微调
   docs/               结论文档与本阶段路线图 P3_realworld_vsr_roadmap.md
   figures/            5 张报告图
