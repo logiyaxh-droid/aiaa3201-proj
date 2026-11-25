@@ -155,10 +155,15 @@ def run_clip(model, clip, out_dir, tile, stride, gate_mode, fixed_w, limit,
         if k > 0:
             lr_t, lr_prev = t_lq[k:k + 1], t_lq[k - 1:k + 1][:1]
             b_prev = full[k - 1:k]
+        elif len(ids) > 1:
+            # First frame: use the NEXT frame as the neighbour instead of
+            # b_t itself.  With b_prev = b_t the difference is identically 0,
+            # u_ref clamps to 1e-6 and u1 saturates to 1.000 across the whole
+            # first frame -- a strong, silent gate error on 1 of every 9 frames.
+            lr_t, lr_prev = t_lq[0:1], t_lq[1:2]
+            b_prev = full[1:2]
         else:
-            lr_t = t_lq[0:1]
-            lr_prev = t_lq[0:1]
-            b_prev = b_t
+            lr_t, lr_prev, b_prev = t_lq[0:1], t_lq[0:1], b_t
         u_ref = (b_t - b_prev).abs().mean(1, keepdim=True).flatten().float()\
             .quantile(0.95).clamp_min(1e-6).to(b_t.dtype)
         u1, uw, _, _ = model._uncertainty(b_t, b_prev, b_tf, lr_t, lr_prev, u_ref)

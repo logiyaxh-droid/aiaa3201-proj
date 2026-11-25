@@ -152,9 +152,13 @@ def build_gate(run, arm_out, specs, out_path, clip_mode="learn"):
             k = min(fid_index, seq.shape[0] - 1)
             b = seq[k:k + 1]
             bf = seqf[k:k + 1]
-            b_prev = seq[max(0, k - 1):max(0, k - 1) + 1]
+            # neighbour index: previous frame, but for k == 0 use the NEXT one
+            # (same fix as eval_stageA.py -- b_prev == b_t gave u_ref = 1e-6
+            # and saturated U_1 to 1.000 on the first frame).
+            kn = k - 1 if k > 0 else min(1, seq.shape[0] - 1)
+            b_prev = seq[kn:kn + 1]
             lr_t = t[k:k + 1]
-            lr_prev = t[max(0, k - 1):max(0, k - 1) + 1]
+            lr_prev = t[kn:kn + 1]
             u_ref = (b - b_prev).abs().mean(1, keepdim=True).flatten().float()\
                 .quantile(0.95).clamp_min(1e-6).to(b.dtype)
             u1, uw, _, _ = model._uncertainty(b, b_prev, bf, lr_t, lr_prev, u_ref)
