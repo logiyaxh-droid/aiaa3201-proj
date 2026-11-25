@@ -1,0 +1,90 @@
+{
+ "created": "2026-11-25T17:00:20+0800",
+ "elapsed_sec": 70.02434182167053,
+ "passed": 8,
+ "total": 8,
+ "all_pass": true,
+ "items": [
+  {
+   "item": "step0_equivalence",
+   "pass": true,
+   "detail": "float max|d| vs original module = 0.000e+00; vs M1 PNG 99.44% pixels identical, max 1 level",
+   "value": 0.0
+  },
+  {
+   "item": "freeze_audit",
+   "pass": true,
+   "detail": "3.37M trainable; cleaning frozen=True spynet frozen=True ref frozen=True",
+   "value": 3373891
+  },
+  {
+   "item": "u1_normalisation",
+   "pass": true,
+   "detail": "000 mean 0.319 max 1.000 q95 1.00; 002 mean 0.273 max 1.000 q95 1.00; 009 mean 0.311 max 1.000 q95 1.00",
+   "value": [
+    [
+     "000",
+     0.31917253136634827,
+     1.0,
+     0.9999933242797852
+    ],
+    [
+     "002",
+     0.2728453576564789,
+     1.0,
+     0.9999454021453857
+    ],
+    [
+     "009",
+     0.31067657470703125,
+     1.0,
+     0.9999811053276062
+    ]
+   ]
+  },
+  {
+   "item": "warp_direction",
+   "pass": true,
+   "detail": "no-warp 0.0806 vs warped 0.0183 (ratio 0.227, need < 1.0)",
+   "value": {
+    "no_warp": 0.0806308314204216,
+    "warped": 0.018289998173713684
+   }
+  },
+  {
+   "item": "mean_alignment",
+   "pass": true,
+   "detail": "|mean diff| pix 0.00e+00 adv 2.98e-08 (< 1e-6)",
+   "value": null
+  },
+  {
+   "item": "grad_and_d_health",
+   "pass": true,
+   "detail": "10 steps, no NaN; adv_d 0.688-0.695 (need 0.50-0.75)",
+   "value": [
+    0.6909822225570679,
+    0.6915212273597717,
+    0.6915476322174072,
+    0.6919613480567932,
+    0.6922343373298645,
+    0.6911223530769348,
+    0.6879770159721375,
+    0.6884968280792236,
+    0.6914736032485962,
+    0.6946642398834229
+   ]
+  },
+  {
+   "item": "peak_vram",
+   "pass": true,
+   "detail": "peak 5.76 GB with micro_batch=2 (need < 6.0)",
+   "value": 5.755049228668213
+  },
+  {
+   "item": "resume_and_overfit",
+   "pass": true,
+   "detail": "ckpt 66.8 MB; params restored bit-exact=True step=7; one batch 0.06257 -> 0.04213 (-32.7%) over 20 steps",
+   "value": 0.3266015068733099
+  }
+ ]
+}

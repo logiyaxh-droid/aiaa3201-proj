@@ -63,3 +63,8 @@ p3/m2_stageA/data/
 p3/m2_stageA/runs/
 p3/m2_stageA/outputs/
 p3/m2_stageA/logs/
+
+# P3 M2-B：checkpoint 与逐帧推理都是可复算产物
+p3/m2b_rbv_ft/runs/
+p3/m2b_rbv_ft/outputs/
+p3/m2b_rbv_ft/logs/
