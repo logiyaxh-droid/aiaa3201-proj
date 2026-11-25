@@ -1,0 +1,91 @@
+{
+ "created": "2026-11-25T01:26:27+0800",
+ "elapsed_sec": 129.82116031646729,
+ "passed": 10,
+ "total": 10,
+ "all_pass": true,
+ "w_pix_mean_at_init": 0.119140625,
+ "items": [
+  {
+   "item": "offline_load",
+   "pass": true,
+   "detail": "RBV+VAE+emb+DISTS all loaded in 20.3s (no network)",
+   "value": 20.269495010375977
+  },
+  {
+   "item": "text_encoder_freed",
+   "pass": true,
+   "detail": "static VRAM after empty-prompt cache = 0.01 GB (< 3.0)",
+   "value": 0.008081436157226562
+  },
+  {
+   "item": "lr_dataset_sanity",
+   "pass": true,
+   "detail": "v0:20clips/100frames | v1:20clips/100frames | v2:20clips/100frames | size=[(320, 180)] | lapvar bicubic 1886, v0 707, v1 431, v2 253",
+   "value": {
+    "bicubic": 1886.3985595703125,
+    "v0": 706.7431518554688,
+    "v1": 431.0608825683594,
+    "v2": 252.73341064453126
+   }
+  },
+  {
+   "item": "step0_identity",
+   "pass": true,
+   "detail": "max|Y_out - B_t| = 0.000e+00 at gamma=0.000 (< 1e-4)",
+   "value": 0.0
+  },
+  {
+   "item": "trainable_params",
+   "pass": true,
+   "detail": "16.24M trainable (LoRA 16.22M + gate 20001.000M + gamma 1); frozen backbones carry no grad; unexpected=none",
+   "value": 16242850
+  },
+  {
+   "item": "backward_grads",
+   "pass": true,
+   "detail": "lora ok 1.227e-10; gate ok 1.325e-04; gamma ok 7.711e-07",
+   "value": {
+    "lora": [
+     "ok",
+     1.2265721943725837e-10
+    ],
+    "gate": [
+     "ok",
+     0.00013250112533569336
+    ],
+    "gamma": [
+     "ok",
+     7.711350917816162e-07
+    ]
+   }
+  },
+  {
+   "item": "peak_vram",
+   "pass": true,
+   "detail": "micro_batch=2 @ 256x256 peak = 3.54 GB (< 11)",
+   "value": 3.535463333129883
+  },
+  {
+   "item": "ckpt_size",
+   "pass": true,
+   "detail": "incremental checkpoint = 31.2 MB (< 80)",
+   "value": 31.174358367919922
+  },
+  {
+   "item": "resume_determinism",
+   "pass": true,
+   "detail": "gate tensors restored bit-exactly=True, gamma restored=True, step=7",
+   "value": true
+  },
+  {
+   "item": "overfit_one_batch",
+   "pass": true,
+   "detail": "80 steps: loss 0.07885 -> 0.06228; identity baseline 0.06582 -> 94.6% of it (need <95%); DISTS 0.2605 -> 0.1779 over 80 steps",
+   "value": {
+    "vs_identity": 0.9461652116912537,
+    "loss_drop": 0.21014476456858835
+   }
+  }
+ ]
+}

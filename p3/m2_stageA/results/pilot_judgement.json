@@ -1,0 +1,145 @@
+{
+ "dev_clips": [
+  "000",
+  "002",
+  "009"
+ ],
+ "baseline": {
+  "psnr": 21.52063020378539,
+  "ssim": 0.5359655753979995,
+  "lpips": 0.4357900387710995,
+  "dists": 0.18152290141140973,
+  "tlp": 0.048516911609719195,
+  "e_warp": 5.153726667165756,
+  "n_frames": 27
+ },
+ "arms": {
+  "pilot_P0_const": {
+   "metrics": {
+    "psnr": 21.599880740276433,
+    "ssim": 0.5350381175677056,
+    "lpips": 0.4573832198425576,
+    "dists": 0.20218574559247052,
+    "tlp": 0.04539217551549276,
+    "e_warp": 5.060249954462051,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_P0_const/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -4.954950584081612,
+    "lpips_pass": false,
+    "psnr_delta_db": 0.07925053649104186,
+    "psnr_pass": true,
+    "e_warp_ratio": 0.9818623068818837,
+    "e_warp_pass": true,
+    "auto_pass": false
+   }
+  },
+  "pilot_P1_fixed_U1": {
+   "metrics": {
+    "psnr": 20.90983880042562,
+    "ssim": 0.5149955592151186,
+    "lpips": 0.4434099903813115,
+    "dists": 0.18667697023462368,
+    "tlp": 0.046519034852584205,
+    "e_warp": 6.747833549976349,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_P1_fixed_U1/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -1.7485373533777389,
+    "lpips_pass": false,
+    "psnr_delta_db": -0.6107914033597694,
+    "psnr_pass": false,
+    "e_warp_ratio": 1.3093114916176292,
+    "e_warp_pass": false,
+    "auto_pass": false
+   }
+  },
+  "pilot_P2_learn_M": {
+   "metrics": {
+    "psnr": 21.62338308314733,
+    "ssim": 0.5363665095288147,
+    "lpips": 0.46566639343897503,
+    "dists": 0.201664165214256,
+    "tlp": 0.045906207679460444,
+    "e_warp": 5.446300645669301,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_P2_learn_M/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -6.855676360140073,
+    "lpips_pass": false,
+    "psnr_delta_db": 0.10275287936194033,
+    "psnr_pass": true,
+    "e_warp_ratio": 1.0567694015221112,
+    "e_warp_pass": true,
+    "auto_pass": false
+   }
+  },
+  "pilot_P3_from_ose": {
+   "metrics": {
+    "psnr": 21.59512194021902,
+    "ssim": 0.5361675105098012,
+    "lpips": 0.46925454559149565,
+    "dists": 0.20277603467305502,
+    "tlp": 0.04733114984507362,
+    "e_warp": 5.516665508349736,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_P3_from_ose/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -7.679043540041426,
+    "lpips_pass": false,
+    "psnr_delta_db": 0.07449173643362883,
+    "psnr_pass": true,
+    "e_warp_ratio": 1.070422601861339,
+    "e_warp_pass": true,
+    "auto_pass": false
+   }
+  },
+  "pilot_p0_s750": {
+   "metrics": {
+    "psnr": 21.585013783076022,
+    "ssim": 0.5315904732314661,
+    "lpips": 0.45695313038649377,
+    "dists": 0.19782748928776495,
+    "tlp": 0.043827079236507416,
+    "e_warp": 5.205531487862269,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_p0_s750/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -4.8562586871129145,
+    "lpips_pass": false,
+    "psnr_delta_db": 0.06438357929063088,
+    "psnr_pass": true,
+    "e_warp_ratio": 1.0100519146710982,
+    "e_warp_pass": true,
+    "auto_pass": false
+   }
+  },
+  "pilot_p2_s250": {
+   "metrics": {
+    "psnr": 21.484394501438956,
+    "ssim": 0.5355057138081244,
+    "lpips": 0.4383344617154863,
+    "dists": 0.18425511872326886,
+    "tlp": 0.04807089315727353,
+    "e_warp": 5.191745559374492,
+    "n_frames": 27,
+    "_path": "/data/disk1/home/ghe270/p3/m2_stageA/results/pilot_p2_s250/metrics.json"
+   },
+   "judge": {
+    "lpips_improve_pct": -0.5838644113027214,
+    "lpips_pass": false,
+    "psnr_delta_db": -0.036235702346434806,
+    "psnr_pass": true,
+    "e_warp_ratio": 1.0073769710083682,
+    "e_warp_pass": true,
+    "auto_pass": false
+   }
+  }
+ },
+ "all_auto_pass": []
+}
