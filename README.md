@@ -37,6 +37,12 @@ p3/                  Part 3 — 探索：不确定性 + 外部生成先验 + 真
   utrd/               U-TRD 三原型（残差扩散）与结果
   m2_stageA/          M2 Stage A：零初始化潜空间残差 LoRA + 不确定性门控
     RESULTS_M2.md     四臂 Pilot 全部 No-Go（LPIPS 全线未达 5% 门槛）与根因分析
+  m2b_rbv_ft/         M2-B：RealBasicVSR 像素空间端到端微调（绕开 8× VAE）
+    RESULTS_M2B.md    B1/B2/B2b 三臂在 REDS-Real 全量 30 clip 上的对照
+    RESULTS_M2B_FULL.md 全量主表与跨域验收（MVSR4x / VideoLQ）
+    RESULTS_M2B_SUPPLEMENT.md  U₁ 融合曲线、常数对照（含推翻原结论的 §2.4）、MVSR4x 感知修正
+    results/          主表 JSON、分区诊断、七组融合 metrics.json、对比图
+  demo/               最终 2×2 演示视频：3 clip × 100 帧 × 四路（普通 / 2× loupe）
   quality_metrics/    REDS 上 30 clip 的感知指标与 EDVR 感知微调
   docs/               结论文档与本阶段路线图 P3_realworld_vsr_roadmap.md
   figures/            5 张报告图
@@ -208,14 +214,42 @@ VideoLQ（50 段 × 5 帧，原生分辨率）上 OSEDiff 的 NIQE 4.109 / MUSIQ
 "看起来是否清晰"，RealVSR 上引入真值后 OSEDiff 的 PSNR 反而比 bicubic 低 2.1 dB，
 说明高 NIQE/MUSIQ 不保证更像真值。
 
-### 3.5 下一步路线
+### 3.5 最终交付：像素空间多帧微调 + 同域软融合
 
-上述负结果与混杂因素（RealVSR 的额外重采样、VideoLQ 无 GT）促使转向
-**真实退化专用的端到端模型**：`RealBasicVSR` 多帧预清洗 → `OSEDiff` 一步扩散潜空间残差精修
-→ 不确定性门控，配 REDS-Real / 原生 VideoLQ / wild_source 三基准评测。
+3.2–3.4 的负结果把方向逼到**真实退化专用的端到端模型**。M2 Stage A 先试了
+「零初始化潜空间残差 LoRA + 不确定性门控」，四臂 Pilot 全部 No-Go：修完 7 处实现缺陷后，
+SD 2.1 的 8× 有损 VAE 往返损耗（`~11.5/255`）仍与 RealBasicVSR 的剩余误差同阶，
+并引入 8×8 青色偏置伪影（`p3/m2_stageA/RESULTS_M2.md`）。
 
-完整方案、里程碑与 Go/No-Go 门槛见
-[`p3/docs/P3_realworld_vsr_roadmap.md`](p3/docs/P3_realworld_vsr_roadmap.md)。
+**M2-B 因此绕开 VAE，回到像素空间**：冻结 `image_cleaning` 与 `spynet`，
+端到端多帧反传 `Charbonnier + DISTS + SN-UNet RaGAN + 遮挡感知 L_temp`。
+主结果在 REDS-Real 连续 9 帧子集（30 段 × 9 帧 = 270 帧）上：
+
+| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | E_warp ↓ | 四项全胜 RBV |
+|---|---:|---:|---:|---:|---|
+| RealBasicVSR | 20.8220 | 0.48810 | 0.22820 | 6.3458 | — |
+| DOVE 5B | 20.8560 | 0.5149 | 0.2392 | 5.866 | 否 |
+| OSEDiff | 19.8122 | 0.4771 | 0.2235 | 10.251 | 否（PSNR / E_warp） |
+| **B1_uniform** | 20.5826 | **0.45727** | **0.16590** | 6.5346 | 否（PSNR / E_warp） |
+| **blend_sqrt** | 20.8352 | 0.46444 | 0.18056 | 5.6627 | 是 |
+
+**但"四项全胜"不是 U₁ 的功劳，必须说清楚。** 补测的 6 档常数对照显示：
+任何 0.3–0.7 的固定混合比例都能四项全胜 RealBasicVSR，`blend_sqrt` 在四项里
+**没有一项最优**（`const_a600` 的 PSNR/LPIPS/DISTS 都更好）。原因是 `sqrt(U₁)` 的
+全局均值 0.5079 与 0.5 几乎重合，空间结构被压得很平。逐区验证进一步显示，
+U₁ 的空间结构在纹理区比同均值常数混合**低 0.29 dB**；它唯一稳定受益的指标是 DISTS
+（30/30 片段优于常数对照）。
+
+所以终稿**并列报告两种交付形态**，不指定唯一主模型：要单点感知最强选 `B1_uniform`，
+要四项均不落后基线选 `blend_sqrt`。完整数据与证据链见
+[`p3/m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md`](p3/m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md) §2.4。
+
+**跨域边界（如实报告）**：MVSR4x 上 B1 的 PSNR 仍为正（`+0.096 dB`），
+但 LPIPS 变差 `+10.7%`——它的真实退化比训练分布更轻，微调学到的高频补偿力度过了。
+准确表述是「保真轴泛化、感知轴同域特化」，不能笼统说成跨域全面正向。
+
+最终 2×2 演示视频在 [`p3/demo/`](p3/demo/)：3 clip × 100 帧 × 四路（EDVR /
+RealBasicVSR / OSEDiff / Ours），每段含普通版与 2× 局部放大版。
 
 ## 剩余清单任务（`p0/tasks/`）
 

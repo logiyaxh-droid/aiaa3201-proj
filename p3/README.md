@@ -5,19 +5,30 @@
 
 ## 后续扩展：新模型尝试与最终结论
 
-本目录的早期内容是"不确定性诊断 + 路由"的第一次探索。后续又完成了三组新模型实验，
-**均未通过预设门槛**，最终结论与停止理由见
+本目录的早期内容是"不确定性诊断 + 路由"的第一次探索。后续又完成了五组新模型实验，
+**最终形成双域正向交付**：干净 bicubic 域（EDVR 感知微调）+ 真实退化域
+（`UA-RealBasicVSR` 像素空间微调及其同域软融合）。完整结论文档见
 [`docs/P3_direction_c_final_conclusions.md`](docs/P3_direction_c_final_conclusions.md)。
 
 | 实验 | 内容 | 结论 |
 |---|---|---|
 | `utrd/` | 冻结 EDVR + 少步残差扩散三原型（确定性 / 均匀噪声 / 不确定性噪声） | 均未超过同容量确定性对照，扩散主线停止 |
-| `prior_qualification/` | OSEDiff、SUPIR、DOVE 外部强生成先验的区域资格测试 | 纹理块 LPIPS 全部劣于现有感知微调 EDVR 1.5～2 倍，全部不通过 |
+| `prior_qualification/` | OSEDiff、SUPIR、DOVE 外部强生成先验的区域资格测试；后续扩到 5 大数据集 × 10+ 模型 | 干净 bicubic 域纹理块 LPIPS 全部劣于感知微调 EDVR 1.5～2 倍；真实退化域反而领先（退化光谱定律） |
 | `stablesr_fusion/` | 冻结 StableSR 单帧生成结果与 EDVR 做输出级融合 | 最优固定混合仅 +0.00045 dB，oracle 上限 +0.020 dB，停止该路线（见 `stablesr_fusion/PROBE_CONCLUSION.md`） |
+| `m2_stageA/` | M2 Stage A：零初始化潜空间残差 LoRA + 不确定性门控（四臂 Pilot） | 全部 No-Go：修完 7 处缺陷后，SD 2.1 的 8× VAE 往返损耗（~11.5/255）仍与剩余误差同阶，并引入 8×8 青色偏置 |
+| **`m2b_rbv_ft/`** | **M2-B：绕开 VAE，在像素空间端到端多帧微调 RealBasicVSR** | **`B1_uniform` 拿下 LPIPS 0.4573 / DISTS 0.1659 全场第一；同域 `sqrt(U₁)` 软融合四项均不落后原版 RealBasicVSR** |
 
-当前在 REDS bicubic 上真正有效的改进仍是 EDVR 感知微调
-（LPIPS −31.2%，PSNR −0.381 dB），见
-[`quality_metrics/fine_tune/RESULTS.md`](quality_metrics/fine_tune/RESULTS.md)。
+干净 bicubic 域真正有效的改进是 EDVR 感知微调（LPIPS −31.2%，PSNR −0.381 dB），
+见 [`quality_metrics/fine_tune/RESULTS.md`](quality_metrics/fine_tune/RESULTS.md)；
+真实退化域见 [`m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md`](m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md)。
+
+> **关于软融合的一个重要更正（2026-11-27）**：先前认为"`blend_sqrt` 是唯一四项全胜的配置"，
+> 常数对照实测推翻了这个说法——任何 0.3–0.7 的固定混合比例都能四项全胜，
+> `blend_sqrt` 在四项里没有一项最优。U₁ 的空间结构在纹理区甚至比同均值常数低 0.29 dB，
+> 它唯一稳定受益的指标是 DISTS。因此终稿并列报告 `B1_uniform` 与 `blend_sqrt` 两种形态，
+> **不指定唯一主模型**。完整证据见该文档 §2.4。
+
+最终演示见 [`demo/`](demo/)：3 clip × 100 帧 × 四路 2×2 对比视频（含 2× 局部放大版）。
 
 ## 为什么选这个方向
 
@@ -68,7 +79,18 @@ figures/
   fig4_tta_gain.png             TTA 集成 vs 单次，逐 clip PSNR / LPIPS
   fig5_region_profile.png       区域剖面
 docs/
-  P3_report_draft.md            报告草稿
+  P3_report_draft.md            报告正文（最终版见下）
+  P3_direction_c_final_conclusions.md  Direction C 全链路结论文档
+demo/
+  000_demo2x2.mp4               砖墙+红管，四路 2×2（EDVR / RealBasicVSR / OSEDiff / Ours）
+  000_demo2x2_inset.mp4         同上 + 2× 局部放大
+  016_demo2x2.mp4               细密树叶（含 inset 版）
+  005_demo2x2.mp4               脚手架网格（含 inset 版）
+  scripts/gen_demo_100f.py      生成四路 100 帧素材（同一帧窗口对齐）
+  scripts/make_blend_100f.py    生成第 4 路 Ours（sqrt(U₁) 融合）
+  scripts/build_demo_video.py   合成 1920×1080 / 24 fps H.264，可选 loupe
+m2b_rbv_ft/                     M2-B 像素空间微调（见该目录 README 与三份 RESULTS）
+m2_stageA/                      M2 Stage A 潜空间探路（已 No-Go）
 frames/                         实验用帧（不入库，见「数据」一节；按需生成）
 ```
 
