@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 """M2-B comparison sheet: 6 columns at M1's exact crop coordinates.
 
-Columns: GT | EDVR | RealBasicVSR | OSEDiff | Ours_uniform | Ours_uncertain
+Columns: GT | EDVR | RealBasicVSR | OSEDiff | <label1> | <label2>
+
+The two right-hand labels used to be hard-coded as Ours_uniform / Ours_uncertain.
+The delivered sheet is `Ours (B1)` + `Ours (blend_sqrt)`, so both labels are now
+CLI parameters (--label1 / --label2); the old names remain the defaults so the
+older b2b sheet still reproduces.
 
 Crop convention is inherited from M1's make_compare_picks.py: (x, y) is the
 TOP-LEFT of a 160px crop, zoomed 2x. Mixing it with a centre-point convention
@@ -82,6 +87,10 @@ def main():
     ap.add_argument("--out", default=os.path.join(M2B, "results",
                                                   "compare_textures_m2b.png"))
     ap.add_argument("--extra-clips", nargs="*", default=["016", "005"])
+    ap.add_argument("--label1", default="Ours_uniform",
+                    help="column 5 title (the delivered sheet uses 'Ours (B1)')")
+    ap.add_argument("--label2", default="Ours_uncertain",
+                    help="column 6 title (delivered sheet: 'Ours (blend_sqrt)')")
     args = ap.parse_args()
 
     rows = []
@@ -96,7 +105,7 @@ def main():
             cells.append(label(crop(img, x, y) if img is not None
                                else np.full((CROP * ZOOM, CROP * ZOOM, 3), 40,
                                             np.uint8), name))
-        for tag, arm in (("Ours_uniform", args.b1), ("Ours_uncertain", args.b2)):
+        for tag, arm in ((args.label1, args.b1), (args.label2, args.b2)):
             # an absolute arm path lets the full-scale /tmp outputs be used
             p = os.path.join(arm if os.path.isabs(arm) else
                              os.path.join(M2B, "outputs", arm), clip, fn)

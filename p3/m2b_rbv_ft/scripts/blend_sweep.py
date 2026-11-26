@@ -18,6 +18,16 @@ in full so a lucky setting cannot be presented as a discovery.
   sqrt     sqrt(u)                             (soften: lift low u)
   norm     (u - p10) / (p90 - p10), clipped    (use the actual dynamic range)
   binary   (u >= 0.5)                          (hard router)
+
+Two constant controls answer the obvious objection "is the spatial structure
+doing anything, or would any global average do?":
+
+  const_sqrt  sqrt(u).mean() per frame  (same mean as `sqrt`, NO spatial structure)
+  const_05    0.5 everywhere            (fixed mid-weight)
+
+If a constant control matches `sqrt`, then U1's *spatial* content is worthless
+and only its mean matters; if `sqrt` beats both, the structure itself carries
+the gain.  That is the only clean way to separate the two effects.
 """
 from __future__ import annotations
 
@@ -46,6 +56,16 @@ def weight(u, mode, p10=None, p90=None):
         return np.clip((u - p10) / max(1e-6, p90 - p10), 0, 1)
     if mode == "binary":
         return (u >= 0.5).astype(np.float32)
+    if mode == "const_sqrt":
+        # per-frame mean of sqrt(u): identical average weight to `sqrt`, but
+        # every pixel gets the same value -- pure spatial-causality control
+        return np.full_like(u, float(np.sqrt(u).mean()), dtype=np.float32)
+    if mode == "const_05":
+        return np.full_like(u, 0.5, dtype=np.float32)
+    # uniform-alpha ladder: keeps only "how hard do we apply B1", no U1 at all
+    if mode.startswith("const_a"):
+        a = int(mode[7:]) / 1000.0
+        return np.full_like(u, a, dtype=np.float32)
     raise ValueError(mode)
 
 
