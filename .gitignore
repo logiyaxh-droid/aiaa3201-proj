@@ -68,3 +68,7 @@ p3/m2_stageA/logs/
 p3/m2b_rbv_ft/runs/
 p3/m2b_rbv_ft/outputs/
 p3/m2b_rbv_ft/logs/
+
+# 临时备份文件（曾有 .bak-20261125 误入仓库；已有的 3 个是被
+# RESULTS_M2.md 引用的修复前存档，共 45 KB，保留不动）
+*.bak-*
