@@ -97,7 +97,9 @@ def main():
                                else np.full((CROP * ZOOM, CROP * ZOOM, 3), 40,
                                             np.uint8), name))
         for tag, arm in (("Ours_uniform", args.b1), ("Ours_uncertain", args.b2)):
-            p = os.path.join(M2B, "outputs", arm, clip, fn)
+            # an absolute arm path lets the full-scale /tmp outputs be used
+            p = os.path.join(arm if os.path.isabs(arm) else
+                             os.path.join(M2B, "outputs", arm), clip, fn)
             img = rd(p)
             if img is None:
                 cells.append(label(np.full((CROP * ZOOM, CROP * ZOOM, 3), 40,
