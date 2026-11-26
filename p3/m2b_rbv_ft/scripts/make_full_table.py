@@ -28,21 +28,32 @@ OURS = [
 ]
 
 
-def load(p):
+# E_warp for these rows was computed in M1 but stored only in the prose table
+# (prior_qualification/results/summary/reds_real.md, "连续 9 帧子集"), not in the
+# per-method metrics.json.  The PSNR/SSIM/LPIPS/DISTS values in that table match
+# the JSONs digit for digit, so the E_warp figures come from the same scorer run.
+KNOWN_E_WARP = {"bicubic": 4.994, "EDVR": 5.528, "FT-EDVR": 5.738,
+                "DOVE 5B": 5.866, "OSEDiff": 10.251}
+
+
+def load(p, name=None):
     if not os.path.exists(p):
         return None
     d = json.load(open(p, encoding="utf-8"))
     m = d["mean"]
+    ew = m.get("e_warp_sr")
+    if ew is None and name in KNOWN_E_WARP:
+        ew = KNOWN_E_WARP[name]
     return {"psnr": m.get("psnr"), "ssim": m.get("ssim"),
             "lpips": m.get("lpips"), "dists": m.get("dists"),
-            "tlp": m.get("tlp"), "e_warp": m.get("e_warp_sr"),
+            "tlp": m.get("tlp"), "e_warp": ew,
             "n_clips": m.get("n_clips"), "n_frames": m.get("n_frames")}
 
 
 def main():
     rows = []
     for name, p in BASE + OURS:
-        r = load(p)
+        r = load(p, name)
         if r is None:
             rows.append((name, None))
             continue

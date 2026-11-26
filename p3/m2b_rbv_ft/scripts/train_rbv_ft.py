@@ -207,6 +207,10 @@ def ckpt_state(model, disc=None):
 def save_ckpt(path, model, opt, step, cfg, disc=None, opt_d=None, best=None):
     tmp = path + ".tmp"
     torch.save({"model": ckpt_state(model, disc), "optimizer": opt.state_dict(),
+                # load_ckpt has always read "optimizer_d"; save_ckpt simply
+                # never wrote it, so a resume silently reset the discriminator's
+                # Adam state (this happened when B2b resumed from step 250).
+                "optimizer_d": (opt_d.state_dict() if opt_d is not None else None),
                 "step": step, "config": cfg, "best": best,
                 "python_rng": random.getstate(),
                 "numpy_rng": np.random.get_state(),

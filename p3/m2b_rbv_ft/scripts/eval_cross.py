@@ -141,6 +141,19 @@ def main():
         if musiq is None:
             print("[warn] no MusiqMetric in common.py; skipping MUSIQ", flush=True)
 
+    # LPIPS/DISTS only make sense where a GT exists (MVSR4x); VideoLQ has none
+    lp = dists = None
+    if gt_root:
+        for _p in ("/data/disk1/home/ghe270/p3/quality_metrics/scripts",
+                   "/data/disk1/home/ghe270/p3/quality_metrics",
+                   "/data/disk1/home/ghe270/p0"):
+            if _p not in sys.path:
+                sys.path.insert(0, _p)
+        from evalkit import metrics as EM
+        import common as C
+        lp = EM.LPIPS(device="cuda", torch_home="/tmp/torch_home")
+        dists = C.DistsMetric(device="cuda")
+
     rows = []
     t0 = __import__("time").time()
     with torch.no_grad():
@@ -175,6 +188,11 @@ def main():
                 gts = [rd(os.path.join(gt_root, clip, f)) for f in gfiles][:len(preds)]
                 if gts and gts[0].shape == preds[0].shape:
                     row["psnr"] = float(np.mean([psnr(p, g) for p, g in zip(preds, gts)]))
+                    if lp is not None:
+                        pp = np.stack(preds)
+                        gg = np.stack(gts)
+                        row["lpips"] = float(lp.pair(pp, gg).mean())
+                        row["dists"] = float(dists.per_frame(preds, gts).mean())
                 else:
                     row["psnr"] = None
                     print("    [shape mismatch] gt %s vs pred %s"
@@ -209,7 +227,8 @@ def main():
 
     summary = {"run": args.run, "step": step, "dataset": args.dataset,
                "n_clips": len(rows), "elapsed_sec": __import__("time").time() - t0,
-               "mean": {k: agg(k) for k in ("psnr", "e_warp", "e_warp_in",
+               "mean": {k: agg(k) for k in ("psnr", "lpips", "dists",
+                                            "e_warp", "e_warp_in",
                                             "musiq", "musiq_in")},
                "clips": rows}
     os.makedirs(os.path.join(M2B, "results", args.name), exist_ok=True)
