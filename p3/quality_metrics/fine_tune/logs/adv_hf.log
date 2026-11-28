@@ -1,9 +1,0 @@
-baseline       000 textured hf_ratio 0.539 corr 0.533 | flat hf_ratio 0.435 corr 0.375 | all mae 5.955
-adv_lr3e5_d003_a001 000 textured hf_ratio 0.611 corr 0.507 | flat hf_ratio 0.538 corr 0.323 | all mae 6.115
-adv_lr3e5_d003_a010 000 textured hf_ratio 0.609 corr 0.490 | flat hf_ratio 0.542 corr 0.318 | all mae 6.262
-adv_lr3e5_d003_a050 000 textured hf_ratio 0.614 corr 0.470 | flat hf_ratio 0.611 corr 0.280 | all mae 6.251
-baseline       002 textured hf_ratio 0.589 corr 0.591 | flat hf_ratio 0.647 corr 0.518 | all mae 4.166
-adv_lr3e5_d003_a001 002 textured hf_ratio 0.669 corr 0.568 | flat hf_ratio 0.765 corr 0.474 | all mae 4.332
-adv_lr3e5_d003_a010 002 textured hf_ratio 0.663 corr 0.549 | flat hf_ratio 0.751 corr 0.466 | all mae 4.475
-adv_lr3e5_d003_a050 002 textured hf_ratio 0.658 corr 0.544 | flat hf_ratio 0.765 corr 0.446 | all mae 4.422
-wrote /data/disk1/home/ghe270/p3/quality_metrics/fine_tune/results/hf_diagnostic.json

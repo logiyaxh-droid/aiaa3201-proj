@@ -1,429 +1,244 @@
-# AIAA3201 · Introduction to Computer Vision — Project 1
+<div align="center">
 
-REDS 官方验证集 ×4 视频超分辨率，30 clip × 100 帧。
+# When Do Generative Priors Help Video Super-Resolution?
 
-> **本仓库只含代码 / 指标 / 图表。** 数据集、模型权重、运行环境均不入库：
-> 数据由课程共享盘提供，权重按下方链接自行下载，环境按文档重建。
+### A Systematic Benchmark, Degradation-Spectrum Study, and Pixel-Space Real-World Fine-Tuning
 
-## 结构
+[![Course](https://img.shields.io/badge/AIAA3201-Computer%20Vision-1f6feb.svg)](docs/BENCHMARKS_AND_DIAGNOSTICS.md)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776ab.svg)](pyproject.toml)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.4%2B-ee4c2c.svg)](requirements.txt)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-一个课程项目，三个 Part，目录直接叫 `p1`/`p2`/`p3`：
+[**English**](README.md) | [**中文**](README_zh.md)
 
+[Key Findings](#key-findings) • [Main Results](#main-results) • [Repository Structure](#repository-structure) • [Documentation](#documentation-map) • [Quickstart](#quickstart--reproducibility) • [Demos](#demo-video-gallery) • [Citation](#citation)
+
+</div>
+
+---
+
+## Abstract
+
+Video Super-Resolution (VSR) benchmarks routinely report single-axis metrics under synthetic bicubic downsampling, obscuring the trade-offs among **pixel fidelity (PSNR/SSIM)**, **perceptual quality (LPIPS/DISTS/FID)**, and **temporal consistency (tLP, Flow-warp LPIPS, $E_{\text{warp}}$)**—and failing to predict model behavior under real-world degradations.
+
+This repository presents a complete, audited $\times 4$ VSR investigation spanning **12 classical/learning-based baselines** on REDS, Vimeo-90K, and handheld Wild Video, **4 pixel-level uncertainty estimators**, **external diffusion/generative priors (OSEDiff, SUPIR, DOVE)** across **5 datasets**, and a **pixel-space multi-frame fine-tuning pipeline (`UA-RealBasicVSR`)** for real-world VSR.
+
+> **Note on Repository Assets:** This repository contains source code, configurations, audited quantitative metrics, publication figures, and curated 2×2 comparison videos. Datasets and pretrained weights are excluded from git; see [`docs/DATASETS_AND_REPRODUCIBILITY.md`](docs/DATASETS_AND_REPRODUCIBILITY.md) for SHA256 manifests and download instructions.
+
+<p align="center">
+  <img src="results/figures/realworld_vsr/compare_textures_m2b_blendsqrt.png" alt="Real-world VSR visual comparison on REDS-Real" width="96%"/>
+  <br/>
+  <em>Visual comparison on REDS-Real (2nd-order real-world degradation): Ground Truth, clean-domain EDVR-L, RealBasicVSR, OSEDiff, and our 6.29M-parameter pixel-space fine-tuned models (<code>B1_uniform</code> and <code>blend_sqrt</code>).</em>
+</p>
+
+---
+
+## Key Findings
+
+1. **No Single Model Wins Every Axis on Clean Bicubic VSR (30 clips × 100 frames × 12 methods):**
+   EDVR-L dominates PSNR (`30.904 dB`), SSIM (`0.8789`), LPIPS (`0.2039`), and FID (`6.31`), but trails EDSR (`0.0072`) and TecoGAN (`0.0106`) on formal reference-based tLP (`0.0123`). Moreover, **formal tLP and Flow-warp LPIPS rank methods in opposite directions** because excessive smoothing minimizes warp error while diverging from ground-truth motion dynamics ($d_{\text{SR}} \ll d_{\text{GT}}$). Both metrics must be reported side by side.
+2. **Several Common Hypotheses Are Refuted by Controlled Audits:**
+   - *Degradation mismatch* does **not** explain TecoGAN's 5.06 dB gap to EDVR (matching Gaussian $\sigma=1.5$ shifts TecoGAN by only `−0.26 dB`; training domain accounts for only `0.55 dB`).
+   - *Motion magnitude* strongly amplifies optical-flow alignment gain ($\rho = +0.738, p < 0.001$), yet **EDVR's gain over EDSR is independent of motion** ($\rho = -0.012, p = 0.951$).
+   - *Internal attention weights* (`U3_attn`) do **not** proxy predictive uncertainty ($\rho = -0.038$), whereas model disagreement (`U2`, $\rho = +0.404$) and flip-TTA spread (`U1`, $\rho = 0.36\text{–}0.46$) calibrate reliably.
+3. **Degradation-Intensity Law Across 5 Datasets:**
+   Whether generative priors help depends on **effective degradation severity**, not dataset provenance. On clean REDS bicubic and ~2× RealVSR, diffusion priors degrade texture LPIPS by `+152%` to `+197%` and lose `1.3–2.8 dB` PSNR. Under severe real-world degradation (**MVSR4x true ×4** and **REDS-Real**), clean-domain EDVR drops **below bicubic** (`20.916` vs `21.004 dB`), while generative priors lead on perceptual axes (`LPIPS −34.4%`).
+4. **8× VAE Round-Trip Bottleneck Blocks Latent Residual Grafting:**
+   Zero-shot chaining `RealBasicVSR → OSEDiff` worsens temporal warping error $E_{\text{warp}}$ by **4.4× relative to GT**. Training a zero-initialized SD 2.1 latent residual LoRA + uncertainty gate (**M2 Stage A**, 5 pilot arms) yields **No-Go** even after fixing 7 implementation defects: SD 2.1's 8× lossy VAE round-trip error (`~11.5/255`) matches RealBasicVSR's residual error floor.
+5. **Pixel-Space Multi-Frame Fine-Tuning Outperforms 5B Diffusion Priors with 6.29M Parameters:**
+   Bypassing the VAE and fine-tuning RealBasicVSR's propagation/upsampling branch (`3.37M` trainable / `6.29M` total) with `Charbonnier + DISTS + SN-UNet RaGAN + Occlusion-Aware L_temp` achieves the best perceptual scores on REDS-Real (**`B1_uniform`**: LPIPS `0.4573`, DISTS `0.1659`), outperforming OSEDiff (`E_warp 10.251`) and 800× larger DOVE 5B (`LPIPS 0.5149`).
+6. **Honest Attribution on Uncertainty Routing & Blending:**
+   - **Training-time $U_1$ weighting (`B2_uncertain`)** underperforms strictly mean-aligned uniform weighting (`B1_uniform`) across PSNR, LPIPS, and $E_{\text{warp}}$.
+   - **Inference-time soft blending (`blend_sqrt`, $W = \sqrt{U_1}$)** beats baseline RealBasicVSR on all 4 metrics simultaneously, **but constant-weight controls ($\alpha \in [0.3, 0.7]$) also win all 4 metrics** and beat `blend_sqrt` on PSNR/LPIPS. Spatial structure in $U_1$ consistently helps **DISTS** (`27/30` clips vs mean-matched constant) while hurting textured-region PSNR (`−0.29 dB`). Accordingly, we report **`B1_uniform`** (perceptual peak) and **`blend_sqrt`** (zero-free-parameter balanced operating point) side by side.
+   - **Cross-domain boundary:** On unseen dual-camera **MVSR4x**, pixel fidelity generalizes positively (`+0.096 dB` for `B1`, `+0.185 dB` for `blend_sqrt`), whereas perceptual LPIPS is in-domain specialized (`+10.7%` degradation for `B1`, reduced to `+0.33%` with `blend_sqrt`).
+
+---
+
+## Main Results
+
+### 1. Clean Bicubic Benchmark — REDS Official Validation (30 clips × 100 frames)
+
+Unified evaluation under `evalkit/` (`cutfr=0`, 99 adjacent pairs/clip for tLP, all 3,000 frames for FID). Full breakdown in [`docs/BENCHMARKS_AND_DIAGNOSTICS.md`](docs/BENCHMARKS_AND_DIAGNOSTICS.md).
+
+| Method | Category | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ | Formal tLP ↓ | FID ↓ |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Bicubic | Interpolation | 26.403 | 0.7384 | 0.4835 | 0.0519 | 0.0270 | 41.41 |
+| Lanczos | Interpolation | 26.546 | 0.7441 | 0.4861 | 0.0507 | 0.0281 | 36.33 |
+| Bicubic + USM | Sharpening | 26.642 | 0.7517 | 0.4398 | 0.0642 | 0.0159 | 35.62 |
+| EDSR ×4 (DIV2K) | Single-frame CNN | 28.284 | 0.8067 | 0.3087 | 0.0811 | **0.0072** | 16.56 |
+| 3-Frame Avg (unaligned) | Naive Multi-frame | 23.203 | 0.6374 | 0.5595 | 0.1017 | 0.0895 | 65.26 |
+| 5-Frame Avg (unaligned) | Naive Multi-frame | 21.852 | 0.5903 | 0.6052 | 0.0893 | 0.1351 | 97.15 |
+| 5-Frame Avg + USM | Naive + Sharpen | 21.960 | 0.5983 | 0.5590 | 0.1006 | 0.1274 | 92.15 |
+| 3-Frame Flow-Aligned | Optical-Flow Fusion | 26.132 | 0.7286 | 0.4993 | 0.0281 | 0.0387 | 46.12 |
+| 5-Frame Flow-Aligned | Optical-Flow Fusion | 25.834 | 0.7195 | 0.5096 | **0.0236** | 0.0437 | 48.67 |
+| 5-Frame Flow-Aligned + USM | Flow + Sharpen | 26.164 | 0.7364 | 0.4692 | 0.0276 | 0.0349 | 43.62 |
+| **EDVR-L ×4 (REDS)** | **Deformable VSR** | **30.904** | **0.8789** | 0.2039 | 0.0647 | 0.0123 | **6.31** |
+| TecoGAN ×4 | Recurrent GAN VSR | 25.843 | 0.7187 | 0.3337 | 0.0800 | 0.0106 | 40.65 |
+| **FT-EDVR (DISTS+RaGAN)** | **Clean-Domain FT (Ours)** | 30.523 | — | **0.1402** | — | 0.0077 | — |
+
+<p align="center">
+  <img src="results/figures/benchmarks/fig_tradeoff_psnr_tlp.png" alt="PSNR vs tLP trade-off" width="48%"/>
+  <img src="results/figures/benchmarks/fig_tradeoff_psnr_fid.png" alt="PSNR vs FID trade-off" width="48%"/>
+</p>
+
+### 2. Real-World VSR Main Results — REDS-Real Continuous 9-Frame Subset (30 clips × 270 frames)
+
+Evaluated on 2nd-order real-world degradation (blur → resize → noise → JPEG → video compression, two passes) with paired GT. $E_{\text{warp}}$ is occlusion-aware flow reprojection error on `[0, 255]` luminance (GT self-warping = `5.757`). Full ablations in [`docs/REALWORLD_VSR_METHOD.md`](docs/REALWORLD_VSR_METHOD.md).
+
+| Method | Params | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ | $E_{\text{warp}}$ ↓ | Beats RBV (All 4) |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| Bicubic ×4 | — | **21.004** | 0.5019 | 0.7271 | 0.3463 | 0.0744 | **4.994** | — |
+| EDVR-L (clean) | 20.7M | 20.916 | 0.4902 | 0.6351 | 0.3577 | 0.0630 | 5.528 | No |
+| FT-EDVR (clean) | 20.7M | 20.862 | 0.4840 | 0.6163 | 0.3525 | 0.0631 | 5.738 | No |
+| RealBasicVSR (baseline) | 6.29M | 20.822 | 0.4989 | 0.4881 | 0.2282 | 0.0443 | 6.346 | Baseline |
+| DOVE (CogVideoX) | ~5B | 20.856 | **0.5023** | 0.5149 | 0.2392 | 0.0526 | 5.866 | No |
+| OSEDiff (SD 2.1) | ~1.3B | 19.812 | 0.4454 | 0.4771 | 0.2235 | 0.0479 | 10.251 | No |
+| RealBasicVSR → OSEDiff (zero-shot) | ~1.3B | 19.583 | 0.4747 | 0.5057 | 0.2227 | **0.0392** | 8.352 | No |
+| **`B1_uniform` (Ours, pixel FT)** | **6.29M** | 20.583 | 0.4489 | **0.4573** | **0.1659** | 0.0564 | 6.535 | No (PSNR / $E_{\text{warp}}$) |
+| `B2_uncertain` (train-time $U_1$ ablation) | 6.29M | 20.546 | 0.4479 | 0.4614 | 0.1660 | 0.0558 | 6.596 | No |
+| **`blend_sqrt` (Ours, $W=\sqrt{U_1}$)** | **6.29M** | 20.835 | — | 0.4644 | 0.1806 | — | 5.663 | **Yes** |
+| *`const_sqrt` (mean-matched control)* | *6.29M* | *20.943* | *—* | *0.4594* | *0.1879* | *—* | *5.641* | *Yes* |
+| *`const_a600` (fixed $\alpha=0.6$ control)* | *6.29M* | *20.912* | *—* | *0.4562* | *0.1805* | *—* | *5.685* | *Yes* |
+
+### 3. Degradation-Spectrum Law & Cross-Domain Boundaries
+
+| Dataset | Effective Degradation | Best Fidelity (PSNR ↑) | Best Perceptual (LPIPS ↓) | Key Takeaway |
+|---|---|---|---|---|
+| **REDS-val** (30 clips) | Clean ×4 bicubic | EDVR (`30.904`) | FT-EDVR (`0.1402`) | Diffusion priors fail (`+152–197%` worse texture LPIPS) |
+| **RealVSR** (50 clips) | Real ~2× (adapted to ×4) | EDVR (`23.036`) | FT-EDVR (`0.1979`) | Mild degradation favors regression; DOVE (`0.2215`) approaches EDVR |
+| **MVSR4x** (15 clips) | True ×4 dual-camera | `const_0.5` (`22.263`) / `blend_sqrt` (`22.259`) vs Bicubic (`23.649`) | DOVE (`0.3670`) vs RBV (`0.3948`) / `blend_sqrt` (`0.3961`) | Severe real ×4: `B1` PSNR generalizes (`+0.096 dB`), LPIPS is in-domain specialized (`+10.7%` → `+0.33%` w/ `blend_sqrt`) |
+| **REDS-Real** (30 clips) | 2nd-order real degradation | Bicubic (`21.004`) / `const_a400` (`20.964`) | **`B1_uniform` (`0.4573`)** | Clean EDVR drops below bicubic; 6.29M pixel-space FT beats 5B diffusion |
+| **VideoLQ** (50 clips, no GT) | Wild internet videos | *(No GT)* | MUSIQ: OSEDiff (`66.85`), **`B1` (`59.35`) vs RBV (`48.13`)** | Fine-tuning recovers `+11.2` MUSIQ over baseline RBV while cutting HR $E_{\text{warp}}$ by `3.2%` |
+
+---
+
+## Repository Structure
+
+```text
+aiaa3201-proj/
+├── README.md                          # English paper-grade overview (this file)
+├── README_zh.md                       # Chinese paper-grade overview
+├── LICENSE                            # MIT License + third-party notices
+├── pyproject.toml                     # Installable package (`evalkit`, `models`)
+├── requirements.txt                   # Core & optional dependency list
+├── configs/                           # Evaluation & training YAML/JSON specs
+│   ├── eval_reds_val.yaml
+│   ├── realworld_rbvsr_ft.yaml
+│   ├── edvr_perceptual_ft.json
+│   └── iqa_protocol.json
+├── evalkit/                           # Unified audited evaluation toolkit (PSNR/SSIM/LPIPS/tLP/Flow-warp)
+├── models/                            # Standalone RealBasicVSR, UA-RealBasicVSR, occlusion-aware warp
+├── experiments/                       # Reproducible experiment suites by research stage
+│   ├── 01_baselines/                  # Part 1: Hand-crafted interpolation, EDSR, flow calibration
+│   ├── 02_sota_benchmarks/            # Part 2 + P0: 12-method REDS-val, Vimeo-90K, diagnostics
+│   ├── 03_wild_video/                 # Handheld real-world video benchmark (5 sources × 20 clips)
+│   ├── 04_uncertainty_and_ft/         # U1–U4 uncertainty calibration, TTA, IQA suite, EDVR FT
+│   ├── 05_generative_priors/          # Cross-domain OSEDiff / SUPIR / DOVE / RBVSR qualification
+│   ├── 06_realworld_pixel_ft/         # Final M2-B pixel-space FT, soft blending, cross-domain eval
+│   └── demo_generation/               # 1080p / 24 fps 2×2 comparison video builders
+├── results/                           # All audited JSON metrics, summary tables, self-checks & figures
+│   ├── figures/                       # Curated figures grouped by study
+│   ├── 01_baselines/ ... 06_realworld_pixel_ft/
+├── demos/                             # Deliverable 2×2 comparison videos (1920×1080, 24 fps H.264)
+│   ├── reds_sota/                     # 6 REDS clips (normal + 2× loupe inset)
+│   ├── wild/                          # 5 handheld Wild clips (normal + inset)
+│   ├── wild_source/                   # 5 original un-transcoded mobile source recordings
+│   └── realworld_vsr/                 # 3 REDS-Real clips (EDVR / RBV / OSEDiff / Ours)
+├── docs/                              # Consolidated academic documentation suite
+└── archive/                           # Terminated explorations preserved for provenance (U-TRD, StableSR, Stage A)
 ```
-p1 手工基线  →  p2 SOTA 复现  →  p3 探索
-证明「逐帧独立」不够   对齐+融合 与 时域感知   解决遗留缺陷
-                       各自的价值
-```
 
-```
-p1/                  Part 1 — 手工基线：插值 / EDSR / 多帧平均
-  scripts/           评测脚本（主评测、Vimeo-90K、光流标定）
-  metrics/           10 方法 × 30 clip 的 PSNR / SSIM / LPIPS / Flow-warp LPIPS
-  figures/           定量对比图与细节放大图
-p2/                  Part 2 — SOTA 复现：EDVR + TecoGAN
-  scripts/           EDVR 推理、TecoGAN 指标、出图、表格生成、2×2 演示视频合成
-  metrics/           两方法的逐 clip 指标、汇总表、选片排序（visibility_rank）
-  figures/           patch 级细节对比（30 clip）
-  videos/            对比视频（4 clip）
-  demo/              演示视频（6 clip × 普通/inset，1920×1080 / 24 fps）与静态预览
-    wild/            自拍素材的演示视频（5 片段 × 普通/inset，同格式）
-  wild_source/      5 段手机原始视频（对应 PDF §6.1 Wild Video Mandatory）
-  WILD.md           自拍素材的完整评测说明、口径与结论（12 方法 × 20 片段）
-p3/                  Part 3 — 探索：不确定性 + 外部生成先验 + 真实退化
-  prior_qualification/  外部生成先验评测（OSEDiff / SUPIR / DOVE）
-    scripts/            真实退化数据构建、推理、打分脚本
-    results/            真实退化指标：手机实拍 / VideoLQ / RealVSR / MVSR4x
-      summary/          各数据集结论文档
-  utrd/               U-TRD 三原型（残差扩散）与结果
-  m2_stageA/          M2 Stage A：零初始化潜空间残差 LoRA + 不确定性门控
-    RESULTS_M2.md     四臂 Pilot 全部 No-Go（LPIPS 全线未达 5% 门槛）与根因分析
-  m2b_rbv_ft/         M2-B：RealBasicVSR 像素空间端到端微调（绕开 8× VAE）
-    RESULTS_M2B.md    B1/B2/B2b 三臂在 REDS-Real 全量 30 clip 上的对照
-    RESULTS_M2B_FULL.md 全量主表与跨域验收（MVSR4x / VideoLQ）
-    RESULTS_M2B_SUPPLEMENT.md  U₁ 融合曲线、常数对照（含推翻原结论的 §2.4）、MVSR4x 感知修正
-    results/          主表 JSON、分区诊断、七组融合 metrics.json、对比图
-  demo/               最终 2×2 演示视频：3 clip × 100 帧 × 四路（普通 / 2× loupe）
-  quality_metrics/    REDS 上 30 clip 的感知指标与 EDVR 感知微调
-  docs/               结论文档与本阶段路线图 P3_realworld_vsr_roadmap.md
-  figures/            5 张报告图
-p0/                  P0 基础层：统一评测 / 正式 tLP / 数据与权重核查 / TecoGAN 完整性
-  evalkit/           共用评测包（指标、时域、数据配对、配置、溯源）
-  scripts/           核查与推理脚本（tLP 验证、网格测量、带校验的 TecoGAN 推理）
-                     以及全量评测：full_eval.py / fid_full.py / aggregate_full.py / figures_full.py
-  audit/             全部审计结果 JSON
-  full/              全量 30 clip × 12 方法的结果（tLP / FID / 空间指标 / 图）
-    metrics/         逐 clip JSON + run_config.json（口径与权重哈希）
-    summary/         汇总表 table.md / table.json / deltas.json / fid.json
-    figures/         4 张报告图
-  data_manifest.md   权重 SHA256、训练数据、REDS 划分重叠核查
-  tasks/             剩余清单任务：Vimeo Part 2 / 运动分组 / 速度基准 / 对齐诊断 / 退化失配 / 邻帧利用
-```
+---
 
-## Part 1 · 手工基线
+## Documentation Map
 
-10 个方法放在同一条评测流水线上跑完，包含一个**光流方向标定**脚本：
-用已知平移的合成样本自证 warp 约定，而不是靠文档相信。
-
-`p0/` 是 P0 基础层的产物：共用评测包 `p0/evalkit/`、核查脚本 `p0/scripts/`、
-审计结果 `p0/audit/`。它统一了 Part 1/2 的空间指标与 tLP、按 `clip+frame_id` 严格配对数据、
-并把 TecoGAN 的预平移从“未验证的说法”换成了可复核的网格测量。
-
-## Part 2 · SOTA 复现
-
-EDVR 与 TecoGAN，与 Part 1 用完全相同的指标代码，因此可以并表
-（PSNR/SSIM/LPIPS 口径已与旧实现逐项对齐，见 `p0/audit/selfcheck_metrics.json`）：
-
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | Flow-warp LPIPS ↓ | 正式 tLP ↓ | FID ↓ |
-|---|---|---|---|---|---|---|
-| Bicubic（Part 1） | 26.403 | 0.7384 | 0.4835 | 0.0519 | 0.0270 | 41.41 |
-| Lanczos（Part 1） | 26.546 | 0.7441 | 0.4861 | 0.0507 | 0.0281 | 36.33 |
-| Bicubic + USM | 26.642 | 0.7517 | 0.4398 | 0.0642 | 0.0159 | 35.62 |
-| EDSR ×4（Part 1） | 28.284 | 0.8067 | 0.3087 | 0.0811 | **0.0072** | 16.56 |
-| 3 帧平均（无对齐） | 23.203 | 0.6374 | 0.5595 | 0.1017 | 0.0895 | 65.26 |
-| 5 帧平均（无对齐） | 21.852 | 0.5903 | 0.6052 | 0.0893 | 0.1351 | 97.15 |
-| 5 帧平均 + USM | 21.960 | 0.5983 | 0.5590 | 0.1006 | 0.1274 | 92.15 |
-| 3 帧光流对齐 | 26.132 | 0.7286 | 0.4993 | 0.0281 | 0.0387 | 46.12 |
-| 5 帧光流对齐 | 25.834 | 0.7195 | 0.5096 | **0.0236** | 0.0437 | 48.67 |
-| 5 帧光流对齐 + USM | 26.164 | 0.7364 | 0.4692 | 0.0276 | 0.0349 | 43.62 |
-| **EDVR-L ×4（Part 2）** | **30.904** | **0.8789** | **0.2039** | 0.0647 | 0.0123 | **6.31** |
-| **TecoGAN（Part 2）** | 25.843 | 0.7187 | 0.3337 | 0.0800 | 0.0106 | 40.65 |
-
-全量实测：**30 clip × 100 帧 × 12 方法**，tLP 覆盖全部 99 个相邻帧对/clip，
-FID 用全部 3000 帧。逐 clip 数字在 `p0/full/metrics/`，汇总与图在 `p0/full/`。
-
-`Flow-warp LPIPS` 列就是旧表里叫 `tLPIPS` 的那个数字，定义与数值都没变，只是改了名。
-
-**两个时域指标排序相反，这不是笔误。** 正式 tLP 比的是"输出抖动 vs 真值抖动"：
-EDSR 的 d_SR（0.2266）最接近 d_GT（0.2304），所以 tLP 最低；而 tavg5 把帧抖没了
-（d_SR 只有 0.0954），离真值的抖动最远，tLP 反而最高。**"输出更平滑"不等于"更接近真值的时域行为"**，
-所以只能两个指标并列报告，不能单凭任一个说"谁最稳"。
-
-## Part 3 · 探索
-
-面对 Part 2 暴露的取舍——EDVR 在 PSNR/SSIM/**LPIPS**/**FID** 上全面最好
-（FID 6.31 对 TecoGAN 40.65），但按正式 tLP 它比 EDSR 略差（0.0123 对 0.0072），
-即**没有任何方法同时赢下所有轴**——Part 3 沿三条件推进：像素级不确定性、外部生成先验、
-真实退化数据。完整结论文档见 [`p3/docs/P3_direction_c_final_conclusions.md`](p3/docs/P3_direction_c_final_conclusions.md)。
-
-> 早期草稿写的“TecoGAN 赢感知与时域指标”与现有数据不符：LPIPS 上 EDVR（0.2039）与 EDSR（0.3087）
-> 都好于 TecoGAN（0.3337），TecoGAN 只优于 bicubic/lanczos；FID 上 TecoGAN（40.65）
-> 也只比 bicubic（41.41）好一点。全量 tLP 出来后 TecoGAN 排第 2（0.0106），
-> 但那是"输出抖动接近真值抖动"的结果，与感知质量是两件事。
-
-### 3.1 REDS 上唯一稳定的正向结果
-
-EDVR-L + DISTS 0.03 + relativistic GAN 0.001 微调（900 步，lr 3e-5），30 clip：
-
-| 指标 | 原始 EDVR | 感知微调 | 变化 |
-|---|---:|---:|---:|
-| LPIPS ↓ | 0.2039 | **0.1402** | −31.2%（30/30 片段） |
-| tLP ↓ | 0.0123 | **0.0077** | −36.6%（29/30） |
-| DISTS ↓ | 0.0870 | **0.0433** | −50.2%（参与训练，不作独立证据） |
-| PSNR ↑ | **30.9042** | 30.5231 | −0.381 dB |
-
-这是感知—保真权衡，不是全面提高。
-
-### 3.2 外部生成先验：干净 bicubic 上失败
-
-三个候选在 EDVR 高分歧区与纹理区都没有增益（纹理块 LPIPS，微调 EDVR = 0.0659）：
-
-| 候选 | 纹理块 LPIPS | 相对变化 |
-|---|---:|---:|
-| OSEDiff | 0.1660 | +151.8% |
-| SUPIR v0F | 0.1955 | +196.6% |
-| DOVE 5B | 0.1963 | +197.2% |
-
-原因一致：真实退化生成先验在干净 bicubic 上会重绘纹理而不是恢复 GT 纹理。
-
-自研 U-TRD（冻结 EDVR + 小残差 U-Net，三原型）同样未超过同容量确定性对照，
-且不确定性噪声未优于均匀噪声。
-
-### 3.3 真实退化：三个有 GT 的数据集
-
-前两套数据各有缺陷（VideoLQ 无 GT；RealVSR 的 LQ 与 GT 同网格、又被二次降采样）。
-为此新建 **REDS-Real**：干净的 REDS val GT 施加 RealBasicVSR 二阶真实退化
-（模糊 → 随机缩放 → 噪声 → JPEG → 视频压缩，两遍）后降到 GT/4，保留 GT。
-清单 sha256 已冻结。
-
-**REDS-Real**（30 段 × 10 帧 = 300 帧）：
-
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ |
-|---|---:|---:|---:|---:|
-| bicubic ×4 | **20.547** | **0.4934** | 0.7397 | 0.3702 |
-| 原始 EDVR | 20.500 | 0.4848 | 0.6605 | 0.3747 |
-| 感知微调 EDVR | 20.450 | 0.4790 | 0.6373 | 0.3642 |
-| OSEDiff | 19.477 | 0.4330 | **0.5204** | **0.2703** |
-
-**REDS-Real 连续 9 帧子集**（30 段 × 9 帧 = 270 帧，可算 tLP 与 E_warp）：
-
-| 方法 | PSNR ↑ | SSIM ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ | E_warp ↓ | E_warp − GT |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| bicubic ×4 | **21.004** | **0.5019** | 0.7271 | 0.3463 | 0.0744 | **4.994** | **−0.763** |
-| 原始 EDVR | 20.916 | 0.4902 | 0.6351 | 0.3577 | 0.0630 | 5.528 | −0.229 |
-| 感知微调 EDVR | 20.862 | 0.4840 | 0.6163 | 0.3525 | 0.0631 | 5.738 | −0.019 |
-| **RealBasicVSR** | 20.822 | 0.4989 | 0.4881 | 0.2282 | 0.0443 | 6.346 | +0.589 |
-| DOVE 5B | 20.856 | 0.5023 | 0.5149 | 0.2392 | 0.0526 | 5.866 | +0.109 |
-| OSEDiff | 19.812 | 0.4454 | **0.4771** | **0.2235** | 0.0479 | 10.251 | +4.494 |
-| RealBasicVSR→OSEDiff | 19.583 | 0.4747 | 0.5057 | 0.2227 | **0.0392** | 8.352 | +2.595 |
-
-`E_warp` 是遮挡感知光流重投影误差（越低越稳，单位与 PSNR 同为 0–255 灰度差），
-GT 自身为 **5.757**，所以 `E_warp − GT` 才是"比参考更稳还是更抖"的判据：
-负值表示时序上比 GT 还平滑，正值表示引入了 GT 没有的抖动。
-
-**干净域训练的 EDVR 在真实退化下连 bicubic 都打不过**（20.916 vs 21.004），
-而它在干净 REDS 上高出 bicubic 4.5 dB。**RealBasicVSR 的 PSNR 只比 bicubic 低
-0.18 dB，而 LPIPS 低 32.9%、DISTS 低 34.1%、tLP 低 40.5%**——保真轴几乎不付代价。
-OSEDiff 感知更强（LPIPS −34.4%）但要付 1.19 dB 的 PSNR。
-
-**零样本串联 RealBasicVSR→OSEDiff 反而变差**：PSNR 再掉 1.24 dB，`E_warp` 从
-6.346 恶化到 8.352，相对 GT 的偏移由 +0.589 扩大到 +2.595（4.4 倍）。让扩散模型
-在清洗结果上再重绘一次会重新引入时序不稳定，所以下一步必须真的训练 LoRA 与门控，
-而不是直接拼接。
-
-**RealVSR**（约 2 倍退化，50 段 × 5 帧）：
-
-| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
-|---|---:|---:|---:|---:|
-| 原始 EDVR | **23.036** | 0.2404 | 0.1315 | 0.0128 |
-| 感知微调 EDVR | 22.871 | **0.1979** | **0.0944** | **0.0094** |
-| bicubic ×4 | 22.147 | 0.4997 | 0.2118 | 0.0287 |
-| SUPIR v0F | 22.082 | 0.3347 | 0.1774 | 0.0111 |
-| DOVE 5B | 21.577 | 0.2215 | 0.1118 | 0.0177 |
-| OSEDiff | 20.049 | 0.2710 | 0.1397 | 0.0143 |
-
-**MVSR4x**（真 ×4，15 段 × 5 帧）：
-
-| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | tLP ↓ |
-|---|---:|---:|---:|---:|
-| bicubic ×4 | **23.649** | 0.4789 | 0.3128 | 0.0250 |
-| 感知微调 EDVR | 23.548 | 0.4598 | 0.2889 | 0.0258 |
-| 原始 EDVR | 23.282 | 0.4832 | 0.3004 | 0.0323 |
-| DOVE 5B（12 段） | 21.758 | **0.3670** | **0.2193** | **0.0158** |
-| OSEDiff | 21.159 | 0.4114 | 0.2551 | 0.0290 |
-
-**三个数据集指向同一件事：决定生成先验有没有用的是退化强度，不是数据来源标签。**
-REDS-Real 与 MVSR4x 上生成模型在感知轴领先，RealVSR 上不领先——因为它的 LQ 被
-二次降采样后已接近干净 bicubic 域。
-
-### 3.4 无 GT 真实数据的补充（VideoLQ 与手机实拍）
-
-VideoLQ（50 段 × 5 帧，原生分辨率）上 OSEDiff 的 NIQE 4.109 / MUSIQ 66.85 全面领先，
-原始 EDVR 为 5.673 / 55.81。DOVER（6 段 × 97 帧）上 DOVE 技术分最高。
-
-**但这一节的结论不能等同于"更接近真值"**：无 GT 时 NIQE/MUSIQ/DOVER 衡量的是
-"看起来是否清晰"，RealVSR 上引入真值后 OSEDiff 的 PSNR 反而比 bicubic 低 2.1 dB，
-说明高 NIQE/MUSIQ 不保证更像真值。
-
-### 3.5 最终交付：像素空间多帧微调 + 同域软融合
-
-3.2–3.4 的负结果把方向逼到**真实退化专用的端到端模型**。M2 Stage A 先试了
-「零初始化潜空间残差 LoRA + 不确定性门控」，四臂 Pilot 全部 No-Go：修完 7 处实现缺陷后，
-SD 2.1 的 8× 有损 VAE 往返损耗（`~11.5/255`）仍与 RealBasicVSR 的剩余误差同阶，
-并引入 8×8 青色偏置伪影（`p3/m2_stageA/RESULTS_M2.md`）。
-
-**M2-B 因此绕开 VAE，回到像素空间**：冻结 `image_cleaning` 与 `spynet`，
-端到端多帧反传 `Charbonnier + DISTS + SN-UNet RaGAN + 遮挡感知 L_temp`。
-主结果在 REDS-Real 连续 9 帧子集（30 段 × 9 帧 = 270 帧）上：
-
-| 方法 | PSNR ↑ | LPIPS ↓ | DISTS ↓ | E_warp ↓ | 四项全胜 RBV |
-|---|---:|---:|---:|---:|---|
-| RealBasicVSR | 20.8220 | 0.48810 | 0.22820 | 6.3458 | — |
-| DOVE 5B | 20.8560 | 0.5149 | 0.2392 | 5.866 | 否 |
-| OSEDiff | 19.8122 | 0.4771 | 0.2235 | 10.251 | 否（PSNR / E_warp） |
-| **B1_uniform** | 20.5826 | **0.45727** | **0.16590** | 6.5346 | 否（PSNR / E_warp） |
-| **blend_sqrt** | 20.8352 | 0.46444 | 0.18056 | 5.6627 | 是 |
-
-**但"四项全胜"不是 U₁ 的功劳，必须说清楚。** 补测的 6 档常数对照显示：
-任何 0.3–0.7 的固定混合比例都能四项全胜 RealBasicVSR，`blend_sqrt` 在四项里
-**没有一项最优**（`const_a600` 的 PSNR/LPIPS/DISTS 都更好）。原因是 `sqrt(U₁)` 的
-全局均值 0.5079 与 0.5 几乎重合，空间结构被压得很平。逐区验证进一步显示，
-U₁ 的空间结构在纹理区比同均值常数混合**低 0.29 dB**；它唯一稳定受益的指标是 DISTS
-（30/30 片段优于常数对照）。
-
-所以终稿**并列报告两种交付形态**，不指定唯一主模型：要单点感知最强选 `B1_uniform`，
-要四项均不落后基线选 `blend_sqrt`。完整数据与证据链见
-[`p3/m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md`](p3/m2b_rbv_ft/RESULTS_M2B_SUPPLEMENT.md) §2.4。
-
-**跨域边界（如实报告）**：MVSR4x 上 B1 的 PSNR 仍为正（`+0.096 dB`），
-但 LPIPS 变差 `+10.7%`——它的真实退化比训练分布更轻，微调学到的高频补偿力度过了。
-准确表述是「保真轴泛化、感知轴同域特化」，不能笼统说成跨域全面正向。
-
-最终 2×2 演示视频在 [`p3/demo/`](p3/demo/)：3 clip × 100 帧 × 四路（EDVR /
-RealBasicVSR / OSEDiff / Ours），每段含普通版与 2× 局部放大版。
-
-## 剩余清单任务（`p0/tasks/`）
-
-运动分组、速度/显存基准、对齐诊断、TecoGAN 退化失配对照、EDVR 邻帧利用验证、
-Vimeo 上的 Part 2，以及光流变体的局部图与连续帧证据。完整结论见
-[`p0/tasks/`](p0/tasks/)（索引见 README，完整结论见 REPORT.md），这里只列会改变既有说法的四条：
-
-| 结论 | 证据 |
+| Document | Scope |
 |---|---|
-| **运动越大朴素平均越糟**（ρ=−0.756），光流对齐的收益随之增大（ρ=+0.738） | 固定三分位分组，`tasks/motion/` |
-| **但 EDVR 相对 EDSR 的收益与运动强度无关**（ρ=−0.012, p=0.95） | 同上；PCD 是学习式对齐，不靠"纠正大运动"得利 |
-| **EDVR 确实在用邻帧**：中心帧重复五次后 PSNR 掉 2.76 dB（6/6 全负） | `tasks/edvr_neighbor/`；改变了输入分布，不等于 PCD/TSA 的单独贡献 |
-| **前后向一致性 mask 四项指标全改善**（PSNR +0.07、tLP −7.5%） | `tasks/align/`；初版符号写错导致 mask 从不触发，已修 |
+| [`docs/EVALUATION_PROTOCOL.md`](docs/EVALUATION_PROTOCOL.md) | Formal definitions of PSNR, SSIM, LPIPS, DISTS, formal tLP vs Flow-warp LPIPS, occlusion-aware $E_{\text{warp}}$, FID, NIQE/MUSIQ/DOVER; metric audits and known pitfalls. |
+| [`docs/BENCHMARKS_AND_DIAGNOSTICS.md`](docs/BENCHMARKS_AND_DIAGNOSTICS.md) | Full 12-method REDS-val benchmark, Vimeo-90K cross-weight study, motion stratification, alignment diagnostics (FB consistency mask), degradation-mismatch refutation, EDVR neighbor ablation, and speed/VRAM profiling. |
+| [`docs/WILD_VIDEO_STUDY.md`](docs/WILD_VIDEO_STUDY.md) | Handheld Wild Video benchmark (5 sources × 20 clips × 12 methods), inverted-U multi-frame gain, and synthesis protocol caveats. |
+| [`docs/REALWORLD_VSR_METHOD.md`](docs/REALWORLD_VSR_METHOD.md) | Complete Direction C narrative: uncertainty estimators (`U1–U4`), clean-domain EDVR perceptual fine-tuning, 5-dataset degradation spectrum, `UA-RealBasicVSR` pixel-space fine-tuning, soft-blending curve, constant-blend refutation, and cross-domain boundaries. |
+| [`docs/NEGATIVE_RESULTS_AND_ABLATIONS.md`](docs/NEGATIVE_RESULTS_AND_ABLATIONS.md) | Dedicated record of all controlled negative/No-Go results (`U3` attention, bicubic routing, U-TRD, StableSR fusion, M2 Stage A 8× VAE bottleneck & cyan bias, training-time $U_1$ weighting, spatial vs constant blend attribution). |
+| [`docs/DATASETS_AND_REPRODUCIBILITY.md`](docs/DATASETS_AND_REPRODUCIBILITY.md) | Dataset specifications, SHA256 checkpoint manifest, REDS split-overlap audit, environment installation, and end-to-end reproduction commands. |
+| [`archive/README.md`](archive/README.md) | Index of archived superseded explorations (`utrd/`, `stablesr_fusion/`, `m2_stageA_latent_lora/`). |
 
-速度基准在共享 GPU 上跨 run 差到 6 倍，报告引用的是**跨三次运行的最小值**并附
-`run_spread_ratio`；`p0/scripts/bench_merge.py` 负责合并。相对关系稳定：
-bicubic 比 EDSR 快约 38 倍，EDSR 比 EDVR 快约 6.4 倍。
+---
 
-> 局部图用 clip 013（街景，含真实招牌文字）。脚本的自动选窗只找"最密细节"，
-> 不是语义文字；004/011 选出的 "text" 窗其实是树叶，所以最终图改用 `--roi` 手工固定，
-> 坐标记录在 `tasks/qual/qual_013.json`。
+## Quickstart & Reproducibility
 
-## 演示视频（`p2/demo/`）
-
-PDF §6.2 要求提交处理后的视频，成品在 `p2/demo/`（12 个片段约 150 MB，6 个 clip 齐全）：
-
-| 内容 | 位置 |
-|---|---|
-| 成品视频（2×2 网格：GT｜Bicubic｜EDVR｜TecoGAN，1920×1080 / 24 fps） | `p2/demo/00X_demo2x2.mp4` |
-| 带 2× 放大 loupe 的版本 | `p2/demo/00X_demo2x2_inset.mp4` |
-| 静态预览（6 clip 一览） | `p2/demo/picks_sheet.png` |
-| 合成脚本 | `p2/scripts/p2_demo_2x2.py` |
-| 选片依据：按「GT 细节量 × bicubic 破坏程度 × EDVR 复原率」排序 30 clip | `p2/scripts/mk_vis_rank.py` → `p2/metrics/visibility_rank.json` |
-
-入选 clip：`002 / 011 / 013 / 015 / 016 / 018`，每个 clip 都有普通版与带 loupe 版各一份。
-`013` 的普通版当初因裁剪窗口越界崩掉，修好后已重跑补齐。
+### 1. Environment Installation
 
 ```bash
-# 需要 GT + bicubic + EDVR 帧 + TecoGAN 帧都已落盘
-python p2/scripts/p2_demo_2x2.py 002 011 013 015 016 018          # 普通版
-python p2/scripts/p2_demo_2x2.py --inset 002 011 013 015 016 018  # 带放大 loupe
+git clone https://github.com/logiyaxh-droid/aiaa3201-proj.git
+cd aiaa3201-proj
+pip install -e .
+# Optional: perceptual IQA (DISTS, MUSIQ, NIQE) and diffusion priors
+pip install -e ".[iqa,priors]"
 ```
 
-> 2026-11-16 版修掉了 013 的渲染崩溃（`loupe` 裁出空区域）、改成按**解析出的 frame id** 配对帧
-> 而不是按排序位置配对、缺失方法渲染成占位块而不是崩掉，并把 ffmpeg 的 stderr 收上来报错。
+### 2. Configure Data & Checkpoint Paths
 
-## 全量评测（`p0/full/`）
-
-`p0/scripts/full_eval.py` 把 **12 个方法 × 30 clip × 100 帧**在同一条流式流水线上跑完：
-推理 → 空间指标 → 正式 tLP → 旧 Flow-warp 诊断 → InceptionV3 特征，然后立刻丢帧。
-Part 1 的 7 个生成类方法（EDSR、3/5 帧平均、光流对齐）本轮是**重新推理**的，
-因为 2026-11-11 那次是边算边扔，磁盘上只剩 2 个 clip 的样本图。
+All core modules resolve paths from environment variables (no hardcoded user directories):
 
 ```bash
-cd ~/p0 && export TORCH_HOME=/tmp/torch_home
-
-/tmp/srenv/bin/python scripts/full_eval.py --out ~/p0/out/full          # 全量，可断点续跑
-/tmp/srenv/bin/python scripts/full_eval.py --out ~/p0/out/full \
-    --clips 000 --methods bicubic --verify-clip 000                      # 冒烟 + 与 evalkit 对账
-/tmp/srenv/bin/python scripts/fid_full.py ~/p0/out/full                  # FID（复用缓存特征）
-/tmp/srenv/bin/python scripts/aggregate_full.py ~/p0/out/full            # 汇总表 + deltas
-/tmp/srenv/bin/python scripts/figures_full.py  ~/p0/out/full             # 4 张图
+export VSR_DATA_ROOT=/path/to/project1_video_sr
+export VSR_CKPT_ROOT=/path/to/checkpoints
+export RBVSR_CKPT=$VSR_CKPT_ROOT/RealBasicVSR_x4.pth
+export RBVSR_DATA=/path/to/reds_real_c9
+export TORCH_HOME=~/.cache/torch
 ```
 
-产出：
+### 3. Run Unified Benchmarks & Real-World Fine-Tuning
 
-| 文件 | 内容 |
-|---|---|
-| `p0/full/metrics/<clip>.json` | 每个 clip 的 12 个方法逐项指标（含 tLP 的 d_SR / d_GT 分解） |
-| `p0/full/metrics/run_config.json` | 全部指标口径、权重路径、方法清单 |
-| `p0/full/summary/table.md` | 上面那张主表 |
-| `p0/full/summary/deltas.json` | 清单要求的 9 组配对对照 + 逐 clip 胜负计数 |
-| `p0/full/summary/fid.json` | 12 个方法的 FID 与帧数 |
-| `p0/full/figures/` | PSNR–tLP、PSNR–FID 散点，逐 clip tLP，逐 clip 配对增益 |
+```bash
+# Unified 12-method REDS-val evaluation (resumable; smoke-test with --clips 000)
+python experiments/02_sota_benchmarks/full_eval.py --out outputs/full --clips 000 --methods bicubic --verify-clip 000
+python experiments/02_sota_benchmarks/fid_full.py outputs/full
+python experiments/02_sota_benchmarks/aggregate_full.py outputs/full
 
-**逐 clip 胜负**（脚本自动统计，不是只报均值）：
+# Real-world pixel-space multi-frame fine-tuning (B1_uniform: 1,500 steps, ~5.8 GB VRAM)
+python experiments/06_realworld_pixel_ft/selfcheck_rbv.py
+python experiments/06_realworld_pixel_ft/train_rbv_ft.py --name B1_uniform --uniform
 
-- EDSR vs Bicubic 在 PSNR / tLP / LPIPS 上都是 **30/30** 全胜；
-- flowtavg5 vs tavg5 在 PSNR / tLP / LPIPS 上都是 **30/30** 全胜（PSNR 中位 +4.49 dB）；
-- EDVR vs EDSR 在 PSNR / LPIPS 上 **30/30** 全胜，**但 tLP 只有 4/30**，均值反而差 +0.005；
-- TecoGAN vs Bicubic 在 PSNR 上 **0/30**（全部更差），在 tLP / LPIPS 上 **30/30** 全胜。
+# Whole-clip inference & U1 soft blending / constant-weight controls
+python experiments/06_realworld_pixel_ft/eval_rbv_ft.py --run runs/realworld_pixel_ft/B1_uniform/last.pth --name full_b1
+python experiments/06_realworld_pixel_ft/blend_sweep.py
+```
 
-耗时（共享 A6000，机器 load 10–14）：单 clip 全 12 方法 4.3–17.0 min，
-无争用时约 7.5 min ⇒ 30 clip 约 3.7 h，实测 5.8 h；FID 约 100 s/方法。
+Full step-by-step reproduction commands for every table and figure are provided in [`docs/DATASETS_AND_REPRODUCIBILITY.md`](docs/DATASETS_AND_REPRODUCIBILITY.md).
 
-> 两个已定位的性能陷阱（都写进代码注释）：`torch.backends.cudnn.benchmark=True` 会让
-> `evalkit.ssim_gpu` 的首次 float64 7×7 conv 花 **126 s**（cuDNN 算法搜索），关掉后 0.4 s
-> 且结果逐位相同；`naive_avg` 旧的 padding 写法会把 100 帧复制成 **5.5 GB** float32，
-> 改成逐 tap 累加后峰值约 1.5 GB，输出逐位一致（`p0/scripts/check_naive_avg.py`）。
-> FID 的两个协方差都是 PSD，用 eigh 求平方根约 1 s，替代 `scipy.linalg.sqrtm`
-> 在那儿要跑 25 min 以上（差 1.4e-14，`fid_full.py --check` 可复核）。
+---
 
-## 指标口径
+## Demo Video Gallery
 
-指标口径与踩坑记录见 [`p1/scripts/README.md`](p1/scripts/README.md)。
-共用实现与验证记录见 [`p0/evalkit/`](p0/evalkit/) 与 [`p0/audit/`](p0/audit/)。
+All deliverable comparison videos share a unified specification: **1920×1080 / 24 fps / H.264 `yuv420p` / CRF 18 / `+faststart`**, provided in both full-frame and **2× magnified loupe inset** (`_inset`) variants.
 
-> **⚠️ 上表的 `tLPIPS` 列不是 TecoGAN 定义的 tLP。**
-> 它是 `LPIPS(warp(上一帧), 当前帧)` 的 **stride=2** 自一致性指标（无 GT 也能算），
-> 已在 P0 改名为 `Flow-warp LPIPS` 并保留原值不覆盖。
-> 正式 tLP 是 `|LPIPS(SR[t-1],SR[t]) − LPIPS(GT[t-1],GT[t])|` 在所有相邻对上取均值，
-> 需 GT、无连续 GT 时为 N/A。两者排序可以相反：clip 000 上（同片段、100 帧）Bicubic 正式 tLP = 0.0261、旧指标 0.0569。
-> 全量 30 clip 的正式 tLP 已完成（见上表），口径为 `cutfr=0`、`crop32=False`、`x100=False`，
-> 覆盖每个 clip 的全部 99 个相邻帧对；所有方法的 tLP 用同一个 LPIPS 实例。
-> 因此**不要**用旧列做跨方法稳定性比较，也不要用它与论文数字对比。
-
-**FID 的限制**：3000 帧来自 30 个连续片段的 100 帧，视频帧高度相关，
-名义样本量远大于独立场景数；不通过重复帧凑样本，也不与其它实现的 FID 混用。
-
-## 数据集与权重
-
-完整清单（SHA256、字节数、训练数据、重叠核查）见 [`p0/data_manifest.md`](p0/data_manifest.md)。
-
-**数据集** `/data/disk1/shared/aiaa3201/project1_video_sr/`（课程共享盘，只读）：
-
-| 路径 | 内容 | 尺寸 |
-|---|---|---|
-| `val_sharp/` | REDS **官方 validation 划分** GT（original val，BasicSR regroup 后 240–269） | 30 clip × 100 帧，1280×720 |
-| `val_sharp_bicubic/` | 同上的 ×4 bicubic 降质 | 320×180 |
-| `train_sample_sharp/`、`train_sample_bicubic/` | 训练样本 | 20 clip |
-| `vimeo90k_test/` | Vimeo-90K septuplet 测试集 | 94 序列 |
-
-**Part 3 真实退化数据**（自行获取，不入库）：
-
-| 数据集 | 获取方式 | 规模 | 有无 GT |
+| Suite | Layout (2×2) | Clips Included | Location |
 |---|---|---|---|
-| **RealVSR**（ICCV 2021） | 官方 `LQ_test.zip` / `GT_test.zip`，50 段 × 50 帧 | LQ 与 GT 同为 512×1024 | 有 |
-| **MVSR4x**（CVPRW 2023） | HF `RuixuanJiang/Video_Deblurring_Datasets` → `MVSR/`，19 个分卷共 40.18 GB | 15 段 × 100 帧，双摄 1024×1024 | 有 |
-| **VideoLQ** | OpenDataLab `openxlab dataset download`（`OpenDataLab/VideoLQ`） | 50 段，320×240 ～ 720×576 | 无 |
+| **Real-World VSR (Final)** | EDVR \| RealBasicVSR / OSEDiff \| Ours (`blend_sqrt`) | `000` (brick wall), `005` (scaffolding), `016` (foliage) — 100 frames | [`demos/realworld_vsr/`](demos/realworld_vsr/) |
+| **REDS Clean SOTA** | GT \| Bicubic / EDVR-L \| TecoGAN | `002`, `011`, `013`, `015`, `016`, `018` + [`picks_sheet.png`](demos/reds_sota/picks_sheet.png) | [`demos/reds_sota/`](demos/reds_sota/) |
+| **Wild Video (Handheld)** | GT \| Bicubic / EDVR-L \| TecoGAN | `A02`, `B01`, `C03`, `D00`, `E00` (+ raw sources in [`demos/wild_source/`](demos/wild_source/)) | [`demos/wild/`](demos/wild/) |
 
-> RealVSR 的 LQ 与 GT **同尺寸**（不是 4 倍配对），实测有效分辨率比约 2 倍：
-> 高频能量 LQ 0.316% vs GT 降 2 倍 0.298% vs GT 降 4 倍 0.065%。
-> 官方测试脚本因此用 `EDVR_NoUp`（`upscale=1`）直接吃 LQ。本仓库为让 x4 模型共用一条协议，
-> 把 LQ 再降 4 倍后送入，**这与官方协议不同，绝对值不可与论文表格直接对照**，已在
-> `p3/prior_qualification/results/summary/realvsr.md` 标注。
->
-> MVSR4x 同样是双摄同尺寸对齐，但实测 wide 对 tele 是**真 ×4**（wide 高频 0.033%/0.004%
-> 对 tele 降 4 倍 0.029%/0.009%），因此 wide 直接降 4 倍作为 LQ。
+---
 
-> `val_sharp/000–029` 的编号与 EDVR 论文的 REDS4（original **train** 的 `000/011/015/020`）
-> **只是编号巧合**，内容完全不同：与上游 `val_sharp.zip` 逐像素一致，与 `train_sharp.zip` 全部不同
-> （clips 000/011/015/020 的帧 0/49/98 共 12 帧 SHA256 比对）。所以 EDVR-REDS 权重在本数据上是未见数据。
+## Citation
 
-**权重**（均不入库，课程镜像在 `/data/disk1/shared/aiaa3201/checkpoints/`）：
+If you find this benchmark, audited evaluation toolkit, or empirical findings useful in your research or coursework, please cite:
 
-| 文件 | 训练数据 | 字节 | 来源 |
-|---|---|---|---|
-| `EDSR_Mx4_f64b16_DIV2K_official-0c287733.pth` | **DIV2K**（非 REDS） | 6,084,475 | BasicSR 官方 EDSR ×4 |
-| `EDVR_L_x4_SR_REDS_official-9f5f5039.pth` | REDS train，`val_partition=REDS4` | 82,587,950（78.8 MiB） | BasicSR 官方 EDVR-L ×4 |
-| `EDVR_L_x4_SR_Vimeo90K_official-162b54e4.pth` | Vimeo-90K septuplet train | 82,850,094 | BasicSR 官方 EDVR-L ×4 |
-| `TecoGAN.{index,data-00000-of-00001,meta}` | Vimeo-90K septuplets，**Gaussian** 退化 | 12,630,038 | 官方 TF1 release |
+```bibtex
+@misc{aiaa3201_vsr_2026,
+  title  = {When Do Generative Priors Help Video Super-Resolution? A Systematic Benchmark, Degradation-Spectrum Study, and Pixel-Space Real-World Fine-Tuning},
+  author = {AIAA3201 Project Contributors},
+  year   = {2026},
+  howpublished = {\url{https://github.com/logiyaxh-droid/aiaa3201-proj}}
+}
+```
 
-> 两点旧描述已更正：EDSR 用的是 **DIV2K** 权重而不是 REDS 权重；
-> TecoGAN 官方是 **Gaussian 下采样**合成 LR，不是“真实退化训练”。
+## Acknowledgments
 
-> **两套 EDVR 权重的架构不同**（本仓库新增的核查）：REDS 版 `num_frame=5`
-> （`fusion.feat_fusion.weight` 输入 640 = 5×128），Vimeo 版 `num_frame=7`
-> （896 = 7×128，因为 Vimeo septuplet 是 7 帧）。把 Vimeo 权重塞进 5 帧模型会直接
-> size mismatch。两套权重在 Vimeo 测试集上差 **11.7 dB**（24.49 vs 36.20，见
-> [`p0/tasks/REPORT.md`](p0/tasks/REPORT.md)），所以不同权重的结果必须分两行报，
-> 不能混进同一个均值。
+We gratefully acknowledge the authors of the upstream architectures, toolkits, and datasets used in our evaluations:
+[BasicSR](https://github.com/XPixelGroup/BasicSR) (EDSR, EDVR, BasicVSR++), [TecoGAN](https://github.com/thunil/TecoGAN), [RealBasicVSR](https://github.com/ckkelvinchan/RealBasicVSR), OSEDiff, SUPIR, DOVE, REDS (Nah et al., CVPRW 2019), Vimeo-90K (Xue et al., IJCV 2019), RealVSR (Yang et al., ICCV 2021), MVSR4x (CVPRW 2023), and VideoLQ (Chan et al., CVPR 2022).
 
-> **"退化失配"作为 TecoGAN 落后的解释已被实验否定。** 把 LR 换成 TecoGAN 自己的
-> Gaussian σ=1.5 核后，TecoGAN 只涨 3.02 dB，而 EDVR 涨 7.50 dB —— 失配并不是它的
-> 主因（`p0/tasks/degradation/degradation.json`）。瓶颈是 ×4 大倍率下的重建能力。
+## License
 
-## 引用与致谢
-
-本仓库代码为课程项目自写；其中的网络结构与权重来自原作者：
-
-- **EDSR / EDVR / BasicSR** — [XPixelGroup/BasicSR](https://github.com/XPixelGroup/BasicSR)（Apache-2.0）
-- **TecoGAN** — 官方 TF1 实现
-- **REDS 数据集** — Nah et al., *NTIRE 2019 Challenge on Video Deblurring and Super-Resolution*
-- **Vimeo-90K** — Xue et al., *Video Enhancement with Task-Oriented Flow*
-
-论文原文不随仓库分发，请从各自官方渠道获取。
-
+This project is released under the [MIT License](LICENSE). Third-party weights and datasets remain subject to their original licenses.

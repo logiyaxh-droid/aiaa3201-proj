@@ -1,0 +1,147 @@
+{
+ "created": "2026-11-19T14:02:12+0800",
+ "runtime": {
+  "python": "3.10.12",
+  "executable": "${VENV_PYTHON}",
+  "torch": "2.6.0+cu124",
+  "numpy": "2.2.6",
+  "opencv": "5.0.0",
+  "cuda_available": true,
+  "platform": "Linux-5.15.0-186-generic-x86_64-with-glibc2.35",
+  "gpu": "NVIDIA RTX A6000",
+  "cudnn": 90100,
+  "pyiqa": "0.1.13",
+  "timm": "1.0.31",
+  "einops": "0.8.2"
+ },
+ "weights": {
+  "dists": {
+   "path": "${VSR_CKPT_ROOT}/iqa/DISTS_weights-f5e65c96.pth",
+   "bytes": 12288,
+   "sha256": "f5e65c96230b7f6ca995691647d482237e4cab8a50c5c4a5784f219ef0748218"
+  },
+  "dists_official": {
+   "path": "${VSR_CKPT_ROOT}/iqa/official_DISTS_weights.pt",
+   "bytes": 12288,
+   "sha256": "f5e65c96230b7f6ca995691647d482237e4cab8a50c5c4a5784f219ef0748218"
+  },
+  "musiq_koniq10k": {
+   "path": "${VSR_CKPT_ROOT}/iqa/musiq_koniq_ckpt-e95806b9.pth",
+   "bytes": 108610983,
+   "sha256": "e95806b9eae5f3814c410f574ba8e552362bd5bc63d758ed5b97860f5d6185aa"
+  },
+  "musiq_paq2piq": {
+   "path": "${VSR_CKPT_ROOT}/iqa/musiq_paq2piq_ckpt-364c0c84.pth",
+   "bytes": 108610983,
+   "sha256": "364c0c840a24dcdb48e963b1f2084e56e39785cf5f49f01c0a4d0e06ac9b52f7"
+  },
+  "musiq_spaq": {
+   "path": "${VSR_CKPT_ROOT}/iqa/musiq_spaq_ckpt-358bb6af.pth",
+   "bytes": 108610983,
+   "sha256": "358bb6af275e28ea56821d44fb55c6cb83645db11f394d3ad65b2d149965ab50"
+  },
+  "dover": {
+   "path": "${VSR_CKPT_ROOT}/iqa/DOVER.pth",
+   "bytes": 239729097,
+   "sha256": "f4a42c0bbc94c94dd7409e7f40887d44c5c30314d1d09e7edf03cc35813b4838"
+  },
+  "vgg16": {
+   "path": "${TORCH_HOME}/hub/checkpoints/vgg16-397923af.pth",
+   "bytes": 553433881,
+   "sha256": "397923af8e79cdbb6a7127f12361acd7a2f83e06b05044ddf496e83de57a5bf0"
+  },
+  "convnext_tiny_1k": {
+   "path": "${TORCH_HOME}/hub/checkpoints/convnext_tiny_1k_224_ema.pth",
+   "bytes": 114414741,
+   "sha256": "14f3164e3ea6ac32ab3f574f528ce817696c9176fad4221e0a77a905a7360595"
+  },
+  "edsr": {
+   "path": "${VSR_CKPT_ROOT}/EDSR_baseline_x4/EDSR_Mx4_f64b16_DIV2K_official-0c287733.pth",
+   "bytes": 6084475,
+   "sha256": "0c287733e70d1b8b8fc5885613ecbe451e5f3010bcae0307612ef5e4aa08dd5f"
+  },
+  "edvr_reds": {
+   "path": "${VSR_CKPT_ROOT}/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth",
+   "bytes": 82587950,
+   "sha256": "9f5f50393965194cc180e1313fd162bc85003bb4c2a58c23a434a33fdb3786a2"
+  }
+ },
+ "protocol": {
+  "_note": "Perceptual quality-metrics protocol, frozen before measurement.",
+  "data": {
+   "gt_root": "${VSR_DATA_ROOT}/val_sharp",
+   "lr_root": "${VSR_DATA_ROOT}/val_sharp_bicubic",
+   "lr_scale": 4,
+   "frame_pattern": "0000*.png",
+   "clips_main": "all 30 dirs under gt_root",
+   "clips_diagnostic": [
+    "000",
+    "002",
+    "009"
+   ],
+   "frames_per_clip": 100
+  },
+  "methods_main": [
+   "bicubic",
+   "lanczos",
+   "bicubic_unsharp",
+   "edsr",
+   "tavg3",
+   "tavg5",
+   "tavg5_unsharp",
+   "flowtavg3",
+   "flowtavg5",
+   "flowtavg5_unsharp",
+   "edvr",
+   "tecogan"
+  ],
+  "methods_stage_a": [
+   "bicubic",
+   "edsr",
+   "edvr",
+   "tecogan"
+  ],
+  "dists": {
+   "impl": "pyiqa 0.1.13 archs.dists_arch.DISTS, cross-checked vs official DISTS_pytorch",
+   "lower_better": true,
+   "input": "RGB uint8 -> float [0,1], NO resize, full frame, no crop",
+   "per_frame": true,
+   "official_crosscheck": "DISTS_pytorch/weights.pt from dingkeyan93/DISTS (alpha/beta), abs tolerance 1e-5 vs pyiqa DISTS"
+  },
+  "musiq": {
+   "impl": "pyiqa 0.1.13 archs.musiq_arch.MUSIQ",
+   "weights": "koniq10k (primary); paq2piq and spaq are sensitivity-only",
+   "lower_better": false,
+   "input": "RGB uint8 -> float [0,1], library's own multi-scale preprocessing, full frame",
+   "per_frame": true,
+   "gt_reference": "GT frames scored too, reported separately as domain reference"
+  },
+  "dover": {
+   "impl": "official VQAssessment/DOVER master, DOVER (full) not DOVER-Mobile",
+   "weights": "DOVER.pth from the official release / teowu/DOVER HF mirror",
+   "lower_better": false,
+   "input": "the whole 100-frame clip, dover.yml defaults: clip_len 32, frame_interval 2, num_clips 3 (technical) / 1 (aesthetic), fixed sampling seed",
+   "outputs": [
+    "technical",
+    "aesthetic",
+    "fused (kept separately, never substituted)"
+   ],
+   "one_value_per_clip": true
+  },
+  "aggregation": {
+   "per_frame_saved": true,
+   "per_clip_stats": [
+    "mean",
+    "median",
+    "std"
+   ],
+   "main_table": "mean over 30 clip-level values (NOT the 3000-frame pooled mean)",
+   "report_clip_std": true
+  },
+  "runtime": {
+   "device": "cuda",
+   "torch_home": "/tmp/torch_home",
+   "note": "shared A6000; benchmark numbers are the MIN of clean runs, spread reported"
+  }
+ }
+}

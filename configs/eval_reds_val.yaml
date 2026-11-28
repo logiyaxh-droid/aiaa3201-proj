@@ -1,0 +1,38 @@
+# Unified Evaluation Configuration Template (REDS Official Validation Set)
+# Override paths via environment variables:
+#   export VSR_DATA_ROOT=/path/to/reds_dataset
+#   export VSR_CKPT_ROOT=/path/to/checkpoints
+#   export TORCH_HOME=/path/to/torch_cache
+
+data:
+  root: "${VSR_DATA_ROOT}"
+  gt_sub: "val_sharp"
+  lr_sub: "val_sharp_bicubic"
+  frame_pattern: "*.png"
+
+weights:
+  edsr: "${VSR_CKPT_ROOT}/EDSR_baseline_x4/EDSR_Mx4_f64b16_DIV2K_official-0c287733.pth"
+  edvr_reds: "${VSR_CKPT_ROOT}/EDVR_REDS_SR_L/EDVR_L_x4_SR_REDS_official-9f5f5039.pth"
+  edvr_vimeo: "${VSR_CKPT_ROOT}/EDVR_Vimeo90K_SR_L/EDVR_L_x4_SR_Vimeo90K_official-162b54e4.pth"
+  tecogan: "${VSR_CKPT_ROOT}/TecoGAN/TecoGAN"
+
+runtime:
+  device: "cuda"
+  batch: 4
+  cudnn_benchmark: false  # Keep false to avoid 126s cuDNN float64 7x7 conv search stall
+
+metrics:
+  need: ["psnr", "ssim", "lpips"]
+  tlp:
+    enabled: true
+    x100: false
+    cutfr: 0
+    crop32: false
+  flow_warp:
+    enabled: true
+    stride: 2
+    scale: 4
+  fid:
+    model: "pt_inception-2015-12-05"
+    pool_dim: 2048
+    n_frames: 3000

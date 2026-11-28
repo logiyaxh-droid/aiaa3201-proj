@@ -1,0 +1,69 @@
+# Pixel-Space Multi-Frame Fine-Tuning Configuration (M2-B: UA-RealBasicVSR)
+# Backbone: RealBasicVSR x4 (6.29M total params; 3.37M trainable propagation + upsampling)
+# Frozen modules: image_cleaning (1.48M), spynet (1.44M), frozen U_1 reference copy
+
+backbone:
+  name: "RealBasicVSR_x4"
+  checkpoint: "${RBVSR_CKPT}"
+  precision: "fp32"  # Required by spynet grid_sample float32 grid
+  frozen_modules: ["image_cleaning", "basicvsr.spynet"]
+  trainable_prefixes:
+    - "basicvsr.forward_resblocks"
+    - "basicvsr.backward_resblocks"
+    - "basicvsr.fusion"
+    - "basicvsr.upsample1"
+    - "basicvsr.upsample2"
+    - "basicvsr.conv_hr"
+    - "basicvsr.conv_last"
+
+training:
+  dataset: "REDS train_sample_sharp (20 clips) + 3-tier RealBasicVSR 2nd-order degradation"
+  window_frames: 5
+  supervised_indices: [1, 2, 3]
+  temporal_pairs: [[2, 1], [3, 2]]
+  lr_crop: 96
+  hr_crop_supervised: 256
+  steps: 1500
+  micro_batch: 2
+  grad_accum: 4
+  optimizer_g: { type: "Adam", lr: 3.0e-5, betas: [0.9, 0.99] }
+  optimizer_d: { type: "Adam", lr: 1.0e-4, betas: [0.9, 0.99] }
+  discriminator: "SN-UNet Relativistic Average GAN (RaGAN)"
+  occlusion_threshold_px: 3.0
+
+arms:
+  B1_uniform:
+    description: "Primary single-model perceptual point (uniform spatial loss weights, mean-aligned)"
+    spatial_weighting: "uniform_mean_aligned"
+    lambda_pix: 0.50
+    lambda_dists: 0.15
+    lambda_adv: 0.003
+    lambda_temp: 0.30
+
+  B2_uncertain:
+    description: "Direction C ablation (training-time U_1 spatial loss weighting, strictly mean-aligned)"
+    spatial_weighting: "u1_weighted"
+    lambda_pix: 0.50
+    lambda_dists: 0.15
+    lambda_adv: 0.003
+    lambda_temp: 0.30
+
+  B2b_perc_boost:
+    description: "High-perceptual-budget probe (stronger DISTS/RaGAN, lower temporal weight)"
+    spatial_weighting: "u1_weighted"
+    lambda_pix: 0.35
+    lambda_dists: 0.25
+    lambda_adv: 0.005
+    lambda_temp: 0.20
+
+inference_blending:
+  formula: "Y = (1 - W) * Y_RBV + W * Y_B1"
+  uncertainty_map: "U_1 = clip(|Y_RBV(x) - flip(Y_RBV(flip(x)))| / q95, 0, 1)"
+  variants:
+    blend_raw: "W = U_1"
+    blend_sqrt: "W = sqrt(U_1)   # Co-primary balanced operating point (zero free parameters)"
+    blend_sq: "W = U_1^2"
+    blend_norm: "W = clip((U_1 - p10) / (p90 - p10), 0, 1)"
+    blend_binary: "W = 1[U_1 >= 0.5]"
+    const_sqrt: "W = mean(sqrt(U_1))  # Mean-matched spatial ablation control"
+    const_alpha: [0.3, 0.4, 0.5, 0.6, 0.7]
